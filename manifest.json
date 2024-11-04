@@ -11,6 +11,10 @@
     {
       "matches": ["https://animestars.org/cards/*/users/need/"],
       "js": ["need.js"]
+    },
+    {
+      "matches": ["https://animestars.org/*"],
+      "js": ["getCard.js"]
     }
   ]
 }
