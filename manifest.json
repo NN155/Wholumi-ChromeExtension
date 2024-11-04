@@ -1,0 +1,16 @@
+{
+  "manifest_version": 3,
+  "name": "AnimeStars",
+  "version": "1.0",
+  "permissions": [
+    "tabs",
+    "scripting"
+  ],
+
+  "content_scripts": [
+    {
+      "matches": ["https://animestars.org/cards/*/users/need/"],
+      "js": ["need.js"]
+    }
+  ]
+}
