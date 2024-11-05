@@ -44,7 +44,7 @@ async function compareWithMyCards(myCards, cards) {
     data = data.map(cardElement => {
         let { card, rate, UserName, UserUrl } = cardElement;
         card = allModifiedCard({ card, UserUrl, UserName, rate });
-        return {...cardElement, card};
+        return { ...cardElement, card };
     })
     return data;
 }

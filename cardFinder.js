@@ -28,8 +28,6 @@ async function GetAndRateUsersCards({ UserUrl, UserName, rank }) {
     cards = await cardFinder(cardUrl);
     cards.forEach(card => {
         const clonedCard = cloneCard(card);
-        fixCard(clonedCard);
-        addLinkToCard({ card: clonedCard, UserUrl, UserName });
         const { lock, img } = getCardData(card);
         let rate;
         switch (lock) {

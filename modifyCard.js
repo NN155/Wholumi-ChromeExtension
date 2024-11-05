@@ -15,9 +15,10 @@ function fixCard(card) {
     }
 }
 
-function addLinkToCard({ card, UserURL, UserName }) {
+function addLinkToCard({ card, UserUrl, UserName }) 
+{
     const linkElement = document.createElement('a');
-    linkElement.href = UserURL;
+    linkElement.href = UserUrl;
     linkElement.textContent = UserName;
     linkElement.style.display = 'block';
     linkElement.style.textAlign = 'center';
