@@ -13,7 +13,6 @@ async function fetchCard() {
 
 async function getCard() {
     const data = await fetchCard();
-
     if (data.stop_reward === "YES") {
         return true;
     }
@@ -21,6 +20,7 @@ async function getCard() {
         takeCard();
     }
     else if (data?.cards) {
+        takeCard();
         const card = data.cards
         console.log(card);
     }
