@@ -6,15 +6,40 @@
     "tabs",
     "scripting"
   ],
-
   "content_scripts": [
     {
-      "matches": ["https://animestars.org/cards/*/users/need/"],
-      "js": ["need.js"]
+      "matches": [
+        "https://animestars.org/cards/*/users/need/"
+      ],
+      "js": [
+        "util.js",
+        "globalColors.js",
+        "container.js",
+        "modifyCard.js",
+        "cardFinder.js",
+        "need.js"
+      ]
     },
     {
-      "matches": ["https://animestars.org/*"],
-      "js": ["getCard.js"]
+      "matches": [
+        "https://animestars.org/cards/*/users/trade/"
+      ],
+      "js": [
+        "util.js",
+        "globalColors.js",
+        "container.js",
+        "modifyCard.js",
+        "cardFinder.js",
+        "trade.js"
+      ]
+    },
+    {
+      "matches": [
+        "https://animestars.org/*"
+      ],
+      "js": [
+        "getCard.js"
+      ]
     }
   ]
 }

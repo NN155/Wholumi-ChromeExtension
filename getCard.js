@@ -7,22 +7,26 @@ async function fetchCard() {
     const responce = await fetch('/engine/ajax/controller.php?mod=reward_card&action=check_reward');
     const data = await responce.text();
     const parsedData = JSON.parse(data);
-    console.log(parsedData)
+    console.log(parsedData.reason || parsedData)
     return parsedData;
 }
 
 async function getCard() {
+    await takeCard();
     const data = await fetchCard();
-    if (data.stop_reward === "YES") {
-        return true;
-    }
-    else if (data.reason == 'Есть выданная карта, которую пользователь не забрал') {
-        takeCard();
-    }
-    else if (data?.cards) {
-        takeCard();
+
+    if (data?.cards) {
+        await takeCard();
         const card = data.cards
-        console.log(card);
+        console.log("GET CARD: ", card.cards.rank);
+    }
+
+    else if (data.reason == 'Есть выданная карта, которую пользователь не забрал') {
+        await takeCard();
+    }
+
+    if (data.stop_reward === "yes") {
+        return true;
     }
 }
 
@@ -41,6 +45,9 @@ function delay(ms) {
 
 async function takeCard() {
     const cardInfo = await checkTakeCard()
+    if (!cardInfo?.cards) {
+        return;
+    }
     await reportCardViewed(cardInfo.cards?.owner_id)
 }
 
