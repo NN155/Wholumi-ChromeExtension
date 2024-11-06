@@ -18,7 +18,7 @@ async function getCard() {
     if (data?.cards) {
         await takeCard();
         const card = data.cards
-        console.log("GET CARD: ", card.cards.rank);
+        console.log("GET CARD: ", card.cards?.rank);
     }
 
     else if (data.reason == 'Есть выданная карта, которую пользователь не забрал') {

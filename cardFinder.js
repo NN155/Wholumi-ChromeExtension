@@ -1,31 +1,49 @@
 function getCards(dom) {
     const array = dom.querySelector(".anime-cards.anime-cards--full-page");
     const childrens = Array.from(array.children);
-    return childrens
+    const cards = new CardsArray(childrens.map(element => {
+        const card = new Card(element)
+        card.fixImage
+        card.fixLockIcon
+        
+        return card
+    }))
+
+    
+    return cards
 }
 
 async function cardFinder(url) {
-    const cardsList = [];
+    const cardsList = new CardsArray();
     const dom = await parseFetch(url)
     cardsList.push(...getCards(dom));
     const panel = dom.querySelector('.pagination__pages')
     if (panel) {
-        panel.querySelectorAll(':scope > a').forEach(async (element) => {
-            const url = element.href
-            const dom = await parseFetch(url)
-            const cards = getCards(dom)
-            cardsList.push(...cards)
-        })
+        const pageUrls = Array.from(panel.querySelectorAll(':scope > a')).map(element => element.href);
+        
+        const pagePromises = pageUrls.map(async (url) => {
+            const dom = await parseFetch(url);
+            return getCards(dom);
+        });
+
+        const pagesCards = await Promise.all(pagePromises);
+        pagesCards.forEach(cards => cardsList.push(...cards));
     }
     return cardsList;
 }
 
-async function GetAndRateUsersCards({ UserUrl, UserName, rank }) {
-    const data = [];
+async function GetAndRateUsersCards({ userUrl, userName, rank }) {
+    const cards = new CardsArray();
     const cardUrl = UserUrl + '/cards/?rank=' + rank;
     const notNeededCardUrl = UserUrl + '/cards/trade/?rank=' + rank;
 
     cards = await cardFinder(cardUrl);
+    cards.forEach(card => {
+        card.userName = userName
+        card.url = userUrl
+    })
+    cards.setRateByLock()
+
     cards.forEach(card => {
         const clonedCard = cloneCard(card);
         const { lock, img } = getCardData(card);

@@ -1,0 +1,146 @@
+class Card {
+    constructor(card = null) {
+        this.card = card;
+        this.url = null;
+        this.src = null;
+        this.userName = null;
+        this.lock = null;
+        this._img = null;
+        this.rate = 0;
+    }
+
+    setSrc() {
+        this._img = this.card.querySelector('.anime-cards__image').querySelector('img');
+        this.src = img.getAttribute('data-src');
+    }
+
+    fixImage() {
+        if (!this.src) {
+            this.setSrc();
+        }
+        this._img.setAttribute('src', this.src);
+    }
+    fixLockIcon() {
+        const lockIcon = this.card.querySelector('.lock-trade-btn');
+        if (lockIcon) {
+            lockIcon.style.position = 'absolute';
+            lockIcon.style.top = '10px';
+            lockIcon.style.right = '10px';
+        }
+    }
+    fixCard() {
+        this.fixImage();
+        this.fixLockIcon();
+    }
+
+    addLink() {
+        if (!this.userName || !this.url) {
+            return;
+        }
+        const linkElement = document.createElement('a');
+        linkElement.href = this.url;
+        linkElement.textContent = this.userName;
+        linkElement.style.display = 'block';
+        linkElement.style.textAlign = 'center';
+        this.card.querySelector('.anime-cards__item').appendChild(linkElement);
+    }
+
+    setLock() {
+        if (this.card.querySelector('.lock-card-btn')) {
+            this.lock = "unlock";
+            if (this.card.querySelector('.fa-lock')) {
+                this.lock = "lock";
+            } else if (this.card.querySelector('.fa-arrow-right-arrow-left')) {
+                this.lock = "trade";
+            }
+        } else {
+            const lockIcon = this.card.querySelector('.lock-trade-btn');
+            this.lock = lockIcon ? "lock" : "unlock";
+            if (lockIcon && (this.card.querySelector('.fa-exchange') || this.card.querySelector('.fa-arrow-right-arrow-left'))) {
+                this.lock = "trade";
+            }
+        }
+    }
+
+    changetLockIcon() {
+        let lockButton = this.card.querySelector('.lock-card-btn') || this.card.querySelector('.lock-trade-btn')
+        lockButton.classList.toggle("lock-card-btn")
+        lockButton.classList.toggle("lock-trade-btn")
+        lockButton.style.display = lockButton.style.display === 'block' ? "none" : "block";
+    }
+
+    setColor(color) {
+        this.card.querySelector('.anime-cards__item').style.backgroundColor = color;
+    }
+
+
+    setRateByLock() {
+        switch (this.lock) {
+            case "lock":
+                this.rate = 0
+                break;
+            case "unlock":
+                this.rate = 1
+                break;
+            case "trade":
+                this.rate = 0.5
+            default:
+                this.rate = 0;
+        }
+    }
+
+    setColorByRate() {
+        switch (this.rate) {
+            case 0:
+                this.setColor(globalColors.red);
+                break
+            case 0.5:
+                this.setColor(globalColors.darkRed);
+                break;
+            case 1:
+                break;
+            case 1.5:
+                this.setColor(globalColors.darkGreen);
+                break;
+            case 2:
+                this.setColor(globalColors.green);
+                break;
+            default:
+                this.setColor(globalColors.black);
+        }
+    }
+    
+    changeLockIconByRate() {
+        if (this.rate < 0) {
+            this.changetLockIcon();
+        }
+    }
+}
+
+class CardsArray {
+    constructor(cards = []) {
+        this.cards = cards;
+    }
+
+    push(array) {
+        this.cards.push(array)
+    }
+
+    forEach(callBack) {
+        this.cards.forEach(callBack)
+    }
+
+    map(callBack) {
+        this.cards = this.cards.map(callBack)
+    }
+
+    filter(callBack) {
+        this.cards = this.cards.filter(callBack)
+    }
+
+    getCardsArray() {
+        const cardsArray = []
+        this.forEach(element => element.card)
+    }
+
+}

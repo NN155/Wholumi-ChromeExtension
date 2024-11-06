@@ -14,8 +14,8 @@
       "js": [
         "util.js",
         "globalColors.js",
+        "CardClasses.js",
         "container.js",
-        "modifyCard.js",
         "cardFinder.js",
         "need.js"
       ]
@@ -27,8 +27,8 @@
       "js": [
         "util.js",
         "globalColors.js",
+        "CardClasses.js",
         "container.js",
-        "modifyCard.js",
         "cardFinder.js",
         "trade.js"
       ]
