@@ -1,5 +1,5 @@
 function createButton(text, onClick) {
-    const tabsDiv = document.querySelector('.tabs.tabs--center.mb-2');
+    const tabsDiv = document.querySelector('.tabs.tabs--center.mb-2') || document.querySelector('.tabs.tabs--center');
     if (tabsDiv) {
         const buttonContainer = document.createElement('div');
         const button = document.createElement('button');
@@ -27,7 +27,7 @@ class ShowBar {
             showBar.style.display = 'flex';
             showBar.style.flexWrap = 'wrap';
             showBar.style.justifyContent = 'space-around';
-            const container = document.querySelector(".container");
+            const container = document.querySelector(".container") || document.querySelector('.card-show__name-wrapper');
             if (container) {
                 container.appendChild(showBar);
             } else {
@@ -52,11 +52,14 @@ class ShowBar {
     }
 }
 
-async function getCardRank() {
-    let rank = "s";
+async function getDomCardRAnk() {
     const container = document.querySelector(".container");
     const cardUrl = container.querySelector(".secondary-title.text-center").querySelector("a").href;
     const dom = await parseFetch(cardUrl);
+    return dom;
+}
+async function getCardRank(dom) {
+    let rank = "s";
     const cardRank = dom.querySelector(".anime-cards__rank");
 
     const classList = Array.from(cardRank.classList);
@@ -68,17 +71,47 @@ async function getCardRank() {
     return rank;
 }
 
-function getUsersList() {
+function getUsers() {
     const usersList = [];
-    const users = document.querySelector('.profile__friends.profile__friends--full');
+    const users = document.querySelector('.profile__friends.profile__friends--full') || document.querySelector('.card-show__owners');
     const children = users.children;
     Array.from(children).forEach(element => {
-        const UserUrl = element.href
-        const UserName = element.querySelector('.profile__friends-name').textContent;
+        const userUrl = element.href
+        const div = element.querySelector('.profile__friends-name') || element.querySelector('.card-show__owner-name');
+        const userName = div.textContent;
+        const lockIcon = element.querySelector('.fa-lock') || element.querySelector('.fa-exchange') || element.querySelector('.fa-arrow-right-arrow-left');
+        const lock = lockIcon ? "lock" : "unlock";
         usersList.push({
-            UserUrl,
-            UserName
+            userUrl,
+            userName,
+            lock
         });
     });
     return usersList;
+}
+
+async function getUsersList() {
+    let usersList = getUsers();
+    const pageUrls = findPanel(document);
+    if (pageUrls) {
+        const usersLists = await Promise.all(
+            pageUrls.map(async (url) => {
+                const dom = await parseFetch(url);
+                return getUsers(dom);
+            })
+        );
+        usersLists.forEach(users => usersList.push(...users));
+    }
+
+
+    return usersList;
+}
+
+
+function findPanel(dom) {
+    const panel = dom.querySelector('.pagination__pages')
+    if (panel) {
+        const pageUrls = Array.from(panel.querySelectorAll(':scope > a')).map(element => element.href);
+        return pageUrls;
+    }
 }

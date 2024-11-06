@@ -11,7 +11,7 @@ class Card {
 
     setSrc() {
         this._img = this.card.querySelector('.anime-cards__image').querySelector('img');
-        this.src = img.getAttribute('data-src');
+        this.src = this._img.getAttribute('data-src');
     }
 
     fixImage() {
@@ -21,7 +21,7 @@ class Card {
         this._img.setAttribute('src', this.src);
     }
     fixLockIcon() {
-        const lockIcon = this.card.querySelector('.lock-trade-btn');
+        const lockIcon = this.card.querySelector('.lock-trade-btn') || this.card.querySelector('.lock-card-btn');
         if (lockIcon) {
             lockIcon.style.position = 'absolute';
             lockIcon.style.top = '10px';
@@ -84,6 +84,7 @@ class Card {
                 break;
             case "trade":
                 this.rate = 0.5
+                break;
             default:
                 this.rate = 0;
         }
@@ -109,7 +110,7 @@ class Card {
                 this.setColor(globalColors.black);
         }
     }
-    
+
     changeLockIconByRate() {
         if (this.rate < 0) {
             this.changetLockIcon();
@@ -122,8 +123,8 @@ class CardsArray {
         this.cards = cards;
     }
 
-    push(array) {
-        this.cards.push(array)
+    push(...array) {
+        this.cards.push(...array)
     }
 
     forEach(callBack) {
@@ -138,9 +139,34 @@ class CardsArray {
         this.cards = this.cards.filter(callBack)
     }
 
+    find(callBack) {
+        return this.cards.find(callBack)
+    }
+    
     getCardsArray() {
         const cardsArray = []
-        this.forEach(element => element.card)
+        this.forEach(element => cardsArray.push(element.card))
+        return cardsArray;
     }
 
+    sortByRate() {
+        this.cards.sort((a, b) => b.rate - a.rate)
+    }
+    [Symbol.iterator]() {
+        let index = 0;
+        return {
+            next: () => {
+                if (index < this.cards.length) {
+                    return {
+                        value: this.cards[index++],
+                        done: false
+                    }
+                } else {
+                    return {
+                        done: true
+                    }
+                }
+            }
+        }
+    }
 }

@@ -1,33 +1,28 @@
 async function showCards(rank) {
     ShowBar.createShowBar();
-    const usersList = getUsersList();
-    let cards = [];
-    for (let user of usersList) {
-        const data = await checkUserCards(user, rank);
-        cards.push(...data);
-    }
-    cards.sort((a, b) => b.rate - a.rate);
-    cards = cards.map(card => {
-        return card.card;
-    });
-    ShowBar.addElementsToBar(cards);
+    const usersList = await getUsersList();
+    const usersCards = await findUsersCards(usersList, user => checkUserCards(user, rank));
+
+    usersCards.sortByRate();
+    usersCards.forEach(card => {
+        card.fixCard()
+        card.fixLockIcon()
+        card.addLink()
+        card.setColorByRate()
+    })
+    ShowBar.addElementsToBar(usersCards.getCardsArray());
 }
 
 
 async function checkUserCards(user, rank = "s") {
-    const data = [];
-    const { UserUrl, UserName } = user;
-    const cards = await GetAndRateUsersCards({ UserUrl, UserName, rank });
-    cards.forEach(element => {
-        let { card, rate } = element;
-        card = allModifiedCard({ card, rate, UserUrl, UserName });
-        data.push({ card, rate, UserName });
-    });
-    return data;
+    const { userUrl, userName } = user;
+    const cards = await GetAndRateUsersCards({ userUrl, userName, rank });
+    return cards;
 }
 
 async function init() {
-    const rank = await getCardRank();
+    const dom = await getDomCardRAnk();
+    const rank = await getCardRank(dom);
     const text = `Show ${rank} Cards`;
     createButton(text, () => showCards(rank));
 }
