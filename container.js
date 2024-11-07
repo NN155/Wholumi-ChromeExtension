@@ -102,8 +102,6 @@ async function getUsersList() {
         );
         usersLists.forEach(users => usersList.push(...users));
     }
-
-
     return usersList;
 }
 
