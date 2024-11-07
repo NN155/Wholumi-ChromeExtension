@@ -7,6 +7,7 @@ async function showCards(rank) {
     cards.sortByRate();
     cards.forEach(card => {
         card.fixCard()
+        card.addLockIcon()
         card.fixLockIcon()
         card.addLink()
         card.setColorByRate()
@@ -16,13 +17,15 @@ async function showCards(rank) {
 }
 
 async function checkUserCards(user, rank = "s") {
-    const { userUrl, userName } = user;
+    const { userUrl, userName, lock } = user;
     const needUrl = userUrl + '/cards/need/?rank=' + rank;
-
     const cards = await cardFinder(needUrl);
     cards.forEach(card => {
         card.userName = userName;
         card.url = userUrl;
+        if (lock === "lock") {
+            card.rate = -1;
+        }
     });
     return cards;
 }
@@ -30,9 +33,11 @@ async function checkUserCards(user, rank = "s") {
 async function compareWithMyCards(myCards, cards) {
     cards.filter(card => {
         const myCard = myCards.find(myCard => myCard.src === card.src)
-        if (myCard)
-            card.rate = myCard.rate;
-        return myCard
+        if (myCard) {
+            card.rate = card.rate < 0 ? card.rate : myCard.rate;
+            card.lock = myCard.lock;
+            return myCard
+        }
     })
     return cards;
 }

@@ -28,9 +28,14 @@ class Card {
             lockIcon.style.right = '10px';
         }
     }
+    removeBorderds() {
+        const cardItem = this.card.querySelector('.anime-cards__item');
+        cardItem.classList.remove('anime-cards__owned-by-user');
+    }
     fixCard() {
         this.fixImage();
         this.fixLockIcon();
+        this.removeBorderds();
     }
 
     addLink() {
@@ -44,7 +49,7 @@ class Card {
         linkElement.style.textAlign = 'center';
         this.card.querySelector('.anime-cards__item').appendChild(linkElement);
     }
-
+    
     setLock() {
         if (this.card.querySelector('.lock-card-btn')) {
             this.lock = "unlock";
@@ -62,11 +67,38 @@ class Card {
         }
     }
 
-    changetLockIcon() {
-        let lockButton = this.card.querySelector('.lock-card-btn') || this.card.querySelector('.lock-trade-btn')
-        lockButton.classList.toggle("lock-card-btn")
-        lockButton.classList.toggle("lock-trade-btn")
-        lockButton.style.display = lockButton.style.display === 'block' ? "none" : "block";
+    addLockIcon() {
+        if (this.lock === "unlock" && this.card.rate > 0) {
+            return;
+        }
+
+        const div = document.createElement('div');
+        if (this.rate < 0) {
+            div.classList.add('lock-card-btn');
+        }
+        else {
+            div.classList.add('lock-trade-btn');
+        }
+        div.style.display = 'block';
+        const i = document.createElement('i');
+        switch (this.lock) {
+            case "lock":
+                i.classList.add('fal', 'fa-lock');
+                break;
+            case "trade":
+                i.classList.add('fal', 'fa-exchange');
+                break;
+            default:
+                i.classList.add('fal', 'fa-lock');
+        }
+        if (this.rate < 0) {
+            i.style.color = 'red';
+            i.fontSize = '20px';
+        }
+
+        div.appendChild(i);
+        const cardItem = this.card.querySelector('.anime-cards__item');
+        cardItem.appendChild(div);
     }
 
     setColor(color) {
@@ -142,7 +174,7 @@ class CardsArray {
     find(callBack) {
         return this.cards.find(callBack)
     }
-    
+
     getCardsArray() {
         const cardsArray = []
         this.forEach(element => cardsArray.push(element.card))

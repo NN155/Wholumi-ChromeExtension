@@ -102,6 +102,11 @@ async function getUsersList() {
         );
         usersLists.forEach(users => usersList.push(...users));
     }
+
+    if (usersList.length >= 200) {
+        usersList = usersList.filter(user => user.lock !== "lock").slice(0, 200);
+    }
+
     return usersList;
 }
 
