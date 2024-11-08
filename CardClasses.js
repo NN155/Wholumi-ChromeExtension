@@ -7,6 +7,7 @@ class Card {
         this.lock = null;
         this._img = null;
         this.rate = 0;
+        this.id = null;
     }
 
     setSrc() {
@@ -148,6 +149,32 @@ class Card {
             this.changetLockIcon();
         }
     }
+
+    setId() {
+        const card = this.card.querySelector(".anime-cards__item")
+        if (card) {
+        this.id = card.getAttribute('data-owner-id');
+        }
+        else {
+            this.id = this.card.getAttribute('data-id');
+        }
+    }
+    
+    async unlock() {
+        if (this.lock === "lock") {
+            await fetch('/engine/ajax/controller.php?mod=cards_ajax', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: new URLSearchParams({
+                    mod: "cards_ajax",
+                    action: "lock_card",
+                    id: this.id,
+                })
+            })
+        }
+    }
 }
 
 class CardsArray {
@@ -200,5 +227,17 @@ class CardsArray {
                 }
             }
         }
+    }
+    length() {
+        return this.cards.length;
+    }
+    getLockedCards() {
+        const cards = new CardsArray();
+        this.forEach(card => {
+            if (card.lock === "lock") {
+                cards.push(card);
+            }
+        });
+        return cards;
     }
 }

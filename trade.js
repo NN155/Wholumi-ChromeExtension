@@ -47,7 +47,8 @@ async function init() {
     const dom = await getDomCardRAnk();
     const rank = await getCardRank(dom);
     const text = `Show My ${rank} Cards`;
-    createButton(text, () => showCards(rank));
+    const button = createButton(text, ".tabs.tabs--center.mb-2");
+    button.addEventListener('click', () => showCards(rank));
 }
 
 init()

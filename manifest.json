@@ -56,6 +56,20 @@
         "cardFinder.js",
         "users.js"
       ]
+    },
+    {
+      "matches": [
+        "https://animestars.org/cards_remelt/*"
+      ],
+      "js": [
+        "localStorage.js",
+        "util.js",
+        "globalColors.js",
+        "CardClasses.js",
+        "container.js",
+        "cardFinder.js",
+        "remelt.js"
+      ]
     }
   ]
 }

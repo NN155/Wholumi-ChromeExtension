@@ -1,14 +1,15 @@
-function createButton(text, onClick) {
-    const tabsDiv = document.querySelector('.tabs.tabs--center.mb-2') || document.querySelector('.tabs.tabs--center');
+function createButton(text, querySelector) {
+    const tabsDiv = document.querySelector(querySelector)
     if (tabsDiv) {
         const buttonContainer = document.createElement('div');
         const button = document.createElement('button');
         button.textContent = text;
         button.className = 'button--primary';
         button.style = 'margin-left: 10px;';
-        button.addEventListener('click', onClick);
+        button.style.userSelect = "none";
         buttonContainer.appendChild(button);
         tabsDiv.appendChild(buttonContainer);
+        return button;
     }
 }
 class ShowBar {
@@ -58,6 +59,7 @@ async function getDomCardRAnk() {
     const dom = await parseFetch(cardUrl);
     return dom;
 }
+
 async function getCardRank(dom) {
     let rank = "s";
     const cardRank = dom.querySelector(".anime-cards__rank");
