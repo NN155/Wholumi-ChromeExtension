@@ -36,7 +36,6 @@ class Card {
     fixCard() {
         this.fixImage();
         this.fixLockIcon();
-        this.removeBorderds();
     }
 
     addLink() {

@@ -12,6 +12,7 @@ async function showCards(rank) {
         card.fixLockIcon()
         card.addLink()
         card.setColorByRate()
+        card.removeBorderds()
     });
 
     ShowBar.addElementsToBar(cards.getCardsArray());
