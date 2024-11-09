@@ -79,3 +79,20 @@ async function findUsersCards(usersList, callBack) {
     });
     return usersCards;
 }
+
+function getCardBySrc(cards, src) {
+    let card;
+    card = cards.find(card => card.src === src && card.lock === "unlock");
+    if (card) {
+        return card;
+    }
+    card = cards.find(card => card.src === src && card.lock === "lock");
+    return card;
+}
+
+async function trade(card, myCard) {
+    if (myCard.lock === "lock") {
+        await myCard.unlock();
+    }
+    window.location.href = `/cards/${card.id}/trade?mycard=${myCard.id}`;
+}

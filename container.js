@@ -1,17 +1,58 @@
-function createButton(text, querySelector) {
-    const tabsDiv = document.querySelector(querySelector)
-    if (tabsDiv) {
-        const buttonContainer = document.createElement('div');
-        const button = document.createElement('button');
-        button.textContent = text;
-        button.className = 'button--primary';
-        button.style = 'margin-left: 10px;';
-        button.style.userSelect = "none";
-        buttonContainer.appendChild(button);
-        tabsDiv.appendChild(buttonContainer);
-        return button;
+class Button {
+    constructor() {
+        this._buttonContainer = document.createElement('div');
+        this.button = document.createElement('button');
+        this.button.className = 'button--primary';
+        this.button.style = 'margin-left: 10px;';
+        this.button.style.userSelect = "none";
+        this._buttonContainer.appendChild(this.button);
+    }
+
+
+    addEventListener(event, func) {
+        this.button.addEventListener(event, func);
+    }
+    async place(querySelector) {
+        const tabsDiv = await this._waitDiv(querySelector)
+        if (tabsDiv) {
+            tabsDiv.appendChild(this._buttonContainer);
+        }
+    }
+    text(text) {
+        this.button.textContent = text;
+    }
+    disable() {
+        this.button.disabled = true;
+        this.button.style.cursor = 'not-allowed';
+        this.button.style.opacity = '0.5';
+        this.button.style.pointerEvents = 'none';
+    }
+    enable() {
+        this.button.disabled = false;
+        this.button.style.cursor = 'pointer';
+        this.button.style.opacity = '1';
+        this.button.style.pointerEvents = 'auto';
+    }
+    _waitDiv(querySelector, timeout = 5000) {
+        return new Promise((resolve, reject) => {
+            const intervalTime = 100;
+            let elapsed = 0;
+
+            const interval = setInterval(() => {
+                const element = document.querySelector(querySelector);
+                if (element) {
+                    clearInterval(interval);
+                    resolve(element);
+                } else if (elapsed >= timeout) {
+                    clearInterval(interval);
+                    reject(new Error(`Element ${querySelector} did not appear within ${timeout} ms`));
+                }
+                elapsed += intervalTime;
+            }, intervalTime);
+        });
     }
 }
+
 class ShowBar {
     constructor() {
         this.showBar = null;
@@ -60,7 +101,7 @@ async function getDomCardRAnk() {
     return dom;
 }
 
-async function getCardRank(dom) {
+async function getCardInfo(dom) {
     let rank = "s";
     const cardRank = dom.querySelector(".anime-cards__rank");
 
@@ -70,7 +111,9 @@ async function getCardRank(dom) {
 
     const rankLetter = rankClass.split('-')[1];
     rank = rankLetter;
-    return rank;
+    const card = dom.querySelector(".card-show__image")
+    const src = card.getAttribute("src");
+    return {rank, src};
 }
 
 function getUsers() {
