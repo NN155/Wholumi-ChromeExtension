@@ -76,13 +76,12 @@ async function init() {
     const lockedCards = dubles.getLockedCards();
 
     const text = `Unlock ${lockedCards.length()} Cards`;
-    const button = createButton(text, ".remelt__rank-list");
+    const button = new Button();
+    button.text(text);
+    button.place(".remelt__rank-list");
     button.addEventListener('click', async() => await unlockCards(lockedCards));
     if (lockedCards.length() === 0) {
-        button.disabled = true;
-        button.style.cursor = 'not-allowed';
-        button.style.opacity = '0.5';
-        button.style.pointerEvents = 'none';
+        button.disable();
     }
 }
 init()

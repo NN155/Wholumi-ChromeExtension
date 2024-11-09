@@ -44,9 +44,11 @@ async function compareWithMyCards(myCards, cards) {
 }
 
 async function init() {
-    const rank = await getCardRank(document);
+    const {rank, src} = await getCardInfo(dom);
     const text = `Show My ${rank} Cards`;
-    const button = createButton(text, ".tabs.tabs--center");
+    const button = new Button();
+    button.text(text);
+    button.place(".tabs.tabs--center");
     button.addEventListener('click', () => showCards(rank));
 }
 

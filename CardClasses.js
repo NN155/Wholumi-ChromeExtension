@@ -174,6 +174,9 @@ class Card {
             })
         }
     }
+    addEventListener(event, callBack) {
+        this.card.addEventListener(event, callBack)
+    }
 }
 
 class CardsArray {
