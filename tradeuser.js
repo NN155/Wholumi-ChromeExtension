@@ -6,6 +6,15 @@ function init() {
             card.card.click();
         }
     })
+    scroll();
+}
+
+function scroll() {
+    const element = document.querySelector('.trade__main-items');
+    element.scrollIntoView({
+        behavior: 'smooth',
+        block: 'center',
+    });
 }
 
 function getMyCardId() {
