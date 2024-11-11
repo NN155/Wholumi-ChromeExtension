@@ -2,11 +2,15 @@ async function showCards({ rank, src }) {
     ShowBar.createShowBar();
     const usersList = await getUsersList();
     const usersCards = await findUsersCards(usersList, user => checkUserCards(user, rank));
-    const myCards = await getMyCards(rank);
-    myCards.forEach(card => {
+    const myUrl = UrlConstructor.getMyUrl();
+    const my = new GetCards({ userUrl: myUrl, rank });
+    const myInventoryCards = await my.getInventory();
+    const myNeedCards = await my.getNeed();
+    myInventoryCards.forEach(card => {
         card.setId();
         card.setLock();
     });
+    upPriority(usersCards, myNeedCards);
     usersCards.sortByRate();
     usersCards.forEach(card => {
         card.fixCard()
@@ -15,9 +19,18 @@ async function showCards({ rank, src }) {
         card.setColorByRate()
         card.setId()
     })
-    const myCard = getCardBySrc(myCards, src);
+    const myCard = getCardBySrc(myInventoryCards, src);
     changeCards(usersCards, myCard);
     ShowBar.addElementsToBar(usersCards.getCardsArray());
+}
+
+function upPriority(cards, myNeedCards) {
+    cards.forEach(card => {
+        if (myNeedCards.find(myCard => myCard.src === card.src)) {
+            card.sortPriority = 1;
+            card.setBorder(globalColors.purple);
+        }
+    })
 }
 
 function changeCards(usersCards, myCard) {
@@ -50,7 +63,7 @@ function changeCards(usersCards, myCard) {
 
 async function checkUserCards(user, rank = "s") {
     const { userUrl, userName } = user;
-    const cards = await GetAndRateUsersCards({ userUrl, userName, rank });
+    const cards = await getInventoryTrade({ userUrl, userName, rank });
     return cards;
 }
 

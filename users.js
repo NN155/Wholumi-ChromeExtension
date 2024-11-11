@@ -1,7 +1,8 @@
 async function showCards(rank) {
     ShowBar.createShowBar();
     const usersList = await getUsersList();
-    const myCards = await getMyCards(rank);
+    const myUrl = UrlConstructor.getMyUrl();
+    const myCards = await getInventoryTrade({userUrl: myUrl, rank});
     const usersCards = await findUsersCards(usersList, user => checkUserCards(user, rank));
     const cards = await compareWithMyCards(myCards, usersCards);
     cards.sortByRate();
@@ -19,8 +20,8 @@ async function showCards(rank) {
 
 async function checkUserCards(user, rank = "s") {
     const { userUrl, userName, lock } = user;
-    const needUrl = userUrl + '/cards/need/?rank=' + rank;
-    const cards = await cardFinder(needUrl);
+    const getCards = new GetCards({ userUrl, userName, rank });
+    const cards = await getCards.getNeed();
     cards.forEach(card => {
         card.userName = userName;
         card.url = userUrl;

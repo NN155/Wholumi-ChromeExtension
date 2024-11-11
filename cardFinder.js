@@ -1,74 +1,105 @@
-function getCards(dom) {
-    const array = dom.querySelector(".anime-cards.anime-cards--full-page");
-    const childrens = Array.from(array.children);
-    const cards = new CardsArray(childrens.map(element => {
-        const card = new Card(element)
-        card.setLock()
-        card.setRateByLock()
-        card.setSrc()
-        return card
-    }))
-    return cards
-}
-
-async function cardFinder(url) {
-    const cardsList = new CardsArray();
-    const dom = await parseFetch(url)
-    cardsList.push(...getCards(dom));
-    const pageUrls = findPanel(dom);
-    if (pageUrls) {
-        const pagesCards = await Promise.all(
-            pageUrls.map(async (url) => {
-                const dom = await parseFetch(url);
-                return getCards(dom);
-            })
-        );
-        pagesCards.forEach(cards => cardsList.push(...cards));
+class UrlConstructor {
+    constructor({rank, userUrl}) {
+        this.userUrl = userUrl;
+        this.rank = `?rank=${rank}`;
     }
-    return cardsList;
-}
 
-async function GetAndRateUsersCards({ userUrl, userName, rank }) {
-    const cards = new CardsArray();
-    const cardUrl = userUrl + '/cards/?rank=' + rank;
-    const notNeededCardUrl = userUrl + '/cards/trade/?rank=' + rank;
+    inventory() {
+        return this.userUrl + '/cards/' + this.rank;
+    }
 
-    const [userCards, notNeededCards] = await Promise.all([
-        cardFinder(cardUrl),
-        cardFinder(notNeededCardUrl)
-    ]);
+    need() {
+        return this.userUrl + '/cards/need/' + this.rank;
+    }
 
-    userCards.forEach(card => {
-        card.userName = userName;
-        card.url = userUrl;
-    });
-    cards.push(...userCards);
+    trade() {
+        return this.userUrl + '/cards/trade/' + this.rank ;
+    }
 
-    notNeededCards.forEach(cardNotNeeded => {
-        cards.forEach(card => {
-            if (cardNotNeeded.src === card.src) {
-                card.rate += 1;
+    static getMyUrl() {
+        const menu = document.querySelector(".login__content.login__menu")
+        const urls = menu.querySelectorAll("a")
+    
+        const urlsArray = Array.from(urls);
+        for (const element of urlsArray) {
+            if (element.href.endsWith("/cards/")) {
+                return element.href.replace("/cards/", "");
             }
-        });
-    });
-
-    return cards;
-}
-
-
-async function getMyCards(rank) {
-    const menu = document.querySelector(".login__content.login__menu")
-    const urls = menu.querySelectorAll("a")
-
-    const urlsArray = Array.from(urls);
-    for (const element of urlsArray) {
-        if (element.href.endsWith("/cards/")) {
-            const userUrl = element.href.replace("/cards/", "");
-            const cards = await GetAndRateUsersCards({ userUrl, rank });
-            return cards;
         }
     }
 }
+
+class GetCards {
+    constructor({rank, userUrl, userName}) {
+        this.userUrl = userUrl;
+        this.userName = userName;
+        this.rank = rank;
+        this.UrlConstructor = new UrlConstructor({rank: this.rank, userUrl: this.userUrl});
+    }
+    _getCards(dom) {
+        const array = dom.querySelector(".anime-cards.anime-cards--full-page");
+        const childrens = Array.from(array.children);
+        const cards = new CardsArray(childrens.map(element => {
+            const card = new Card(element)
+            card.setLock()
+            card.setRateByLock()
+            card.setSrc()
+            return card
+        }))
+        return cards
+    }
+    async _getAllCards(url) {
+        const cardsList = new CardsArray();
+        const dom = await parseFetch(url)
+        cardsList.push(...this._getCards(dom));
+        const pageUrls = findPanel(dom);
+        if (pageUrls) {
+            const pagesCards = await Promise.all(
+                pageUrls.map(async (url) => {
+                    const dom = await parseFetch(url);
+                    return this._getCards(dom);
+                })
+            );
+            pagesCards.forEach(cards => cardsList.push(...cards));
+        }
+        cardsList.forEach(card => {
+            card.userName = this.userName;
+            card.url = this.userUrl;
+        });
+        return cardsList;
+    }
+    async getInventory() {
+        const cardUrl = this.UrlConstructor.inventory();
+        return await this._getAllCards(cardUrl);
+    }
+
+    async getNeed() {
+        const needCardUrl = this.UrlConstructor.need();
+        return await this._getAllCards(needCardUrl);
+    }
+
+    async getTrade() {
+        const tradeCardUrl = this.UrlConstructor.trade();
+        return await this._getAllCards(tradeCardUrl);
+    }
+}
+
+
+async function getInventoryTrade({ userUrl, userName, rank }) {
+        const getCards = new GetCards({ userUrl, userName, rank });
+        const [inventoryCards, trageCards] = await Promise.all([
+            getCards.getInventory(),
+            getCards.getTrade()
+        ]);
+        trageCards.forEach(tradeCards => {
+            inventoryCards.forEach(inventoryCard => {
+                if (tradeCards.src === inventoryCard.src) {
+                    inventoryCard.rate += 1;
+                }
+            });
+        });
+        return inventoryCards;
+    }
 
 async function findUsersCards(usersList, callBack) {
     const usersCards = new CardsArray();

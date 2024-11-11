@@ -65,7 +65,9 @@ function getDubles(cards) {
 
 async function init() {
     const rank = getRank();
-    const myCards = await getMyCards(rank);
+    const myUrl = UrlConstructor.getMyUrl();
+    const my = new GetCards({userUrl: myUrl, rank});
+    const myCards = await my.getInventory();
     myCards.forEach(card => {
         card.setId();
     });

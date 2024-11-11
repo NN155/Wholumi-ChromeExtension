@@ -71,7 +71,9 @@ class DynimicSemaphore extends Semaphore {
         } else {
             this.setMax(30);
         }
-        console.log(`Request count: ${requestCount}, max: ${this.max}`);
+        if (requestCount % 5 === 0) {
+            console.log(`Request count: ${requestCount}, max: ${this.max}`);
+        }
     }
 
     setMax(max) {

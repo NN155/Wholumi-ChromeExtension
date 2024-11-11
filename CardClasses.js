@@ -8,6 +8,7 @@ class Card {
         this._img = null;
         this.rate = 0;
         this.id = null;
+        this.sortPriority = 0;
     }
 
     setSrc() {
@@ -177,6 +178,10 @@ class Card {
     addEventListener(event, callBack) {
         this.card.addEventListener(event, callBack)
     }
+
+    setBorder(color) {
+        this.card.querySelector('.anime-cards__item').style.border = `2px solid ${color}`;
+    }
 }
 
 class CardsArray {
@@ -211,8 +216,14 @@ class CardsArray {
     }
 
     sortByRate() {
-        this.cards.sort((a, b) => b.rate - a.rate)
+        this.cards.sort((a, b) => {
+            if (b.rate !== a.rate) {
+                return b.rate - a.rate;
+            }
+            return b.sortPriority - a.sortPriority;
+        });
     }
+
     [Symbol.iterator]() {
         let index = 0;
         return {

@@ -5,4 +5,6 @@ const globalColors = {
     lightRed: '#cd1c18',
     darkRed: '#320A18',
     black: '#1b1b1b',
+    blue: '#0047ab',
+    purple: '#cd00cd',
 }
