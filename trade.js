@@ -24,15 +24,15 @@ async function showCards({rank, src}) {
 }
 
 function changeCards(cards, myCards, {rank, src}) {
-    cards.forEach(cardElement => {
-        cardElement.addEventListener('click', async () => {
-            const url = cardElement.url + '/cards/?rank=' + rank;
-            const userCards = await cardFinder(url);
-            userCards.forEach(card => {
+    cards.forEach(tradeCard => {
+        tradeCard.addEventListener('click', async () => {
+            const getCard = new GetCards({ userUrl: tradeCard.url, userName: tradeCard.userName, rank });
+            const userInventory = await getCard.getInventory();
+            userInventory.forEach(card => {
                 card.setId();
             });
-            const card = userCards.find(card => card.src === src);
-            const myCard = myCards.find(card => card.src === cardElement.src);
+            const card = userInventory.find(card => card.src === src);
+            const myCard = myCards.find(card => card.src === tradeCard.src);
             const button = new Button();
             let text;
             if (!card) {
