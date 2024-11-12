@@ -6,10 +6,6 @@ async function showCards({ rank, src }) {
     const my = new GetCards({ userUrl: myUrl, rank });
     const myInventoryCards = await my.getInventory();
     const myNeedCards = await my.getNeed();
-    myInventoryCards.forEach(card => {
-        card.setId();
-        card.setLock();
-    });
     upPriority(usersCards, myNeedCards);
     usersCards.sortByRate();
     usersCards.forEach(card => {
@@ -17,7 +13,6 @@ async function showCards({ rank, src }) {
         card.fixLockIcon()
         card.addLink()
         card.setColorByRate()
-        card.setId()
     })
     const myCard = getCardBySrc(myInventoryCards, src);
     changeCards(usersCards, myCard);

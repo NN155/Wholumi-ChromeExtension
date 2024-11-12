@@ -44,6 +44,7 @@ class GetCards {
             card.setLock()
             card.setRateByLock()
             card.setSrc()
+            card.setId()
             return card
         }))
         return cards
@@ -93,7 +94,7 @@ async function getInventoryTrade({ userUrl, userName, rank }) {
         ]);
         trageCards.forEach(tradeCards => {
             inventoryCards.forEach(inventoryCard => {
-                if (tradeCards.src === inventoryCard.src) {
+                if (tradeCards.src === inventoryCard.src && inventoryCard.lock !== "lock") {
                     inventoryCard.rate += 1;
                 }
             });

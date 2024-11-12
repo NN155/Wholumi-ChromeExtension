@@ -14,10 +14,6 @@ async function showCards({rank, src}) {
         card.setColorByRate();
         card.removeBorderds();
     });
-    myCards.forEach(card => {
-        card.setId();
-        card.setLock();
-    });
     changeCards(cards, myCards, {rank, src});
 
     ShowBar.addElementsToBar(cards.getCardsArray());
@@ -28,9 +24,6 @@ function changeCards(cards, myCards, {rank, src}) {
         tradeCard.addEventListener('click', async () => {
             const getCard = new GetCards({ userUrl: tradeCard.url, userName: tradeCard.userName, rank });
             const userInventory = await getCard.getInventory();
-            userInventory.forEach(card => {
-                card.setId();
-            });
             const card = userInventory.find(card => card.src === src);
             const myCard = myCards.find(card => card.src === tradeCard.src);
             const button = new Button();
