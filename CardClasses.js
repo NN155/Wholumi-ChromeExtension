@@ -140,6 +140,7 @@ class Card {
                 this.setColor(globalColors.green);
                 break;
             default:
+                this.setBorder(globalColors.red);
                 this.setColor(globalColors.black);
         }
     }

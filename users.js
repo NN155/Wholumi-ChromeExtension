@@ -1,4 +1,4 @@
-async function showCards(rank) {
+async function showCards({rank, src}) {
     ShowBar.createShowBar();
     const usersList = await getUsersList();
     const myUrl = UrlConstructor.getMyUrl();
@@ -14,8 +14,44 @@ async function showCards(rank) {
         card.setColorByRate()
         card.removeBorderds()
     });
+    changeCards(cards, myCards, {rank, src});
 
     ShowBar.addElementsToBar(cards.getCardsArray());
+}
+
+function changeCards(cards, myCards, {rank, src}) {
+    cards.forEach(tradeCard => {
+        tradeCard.addEventListener('click', async () => {
+            const getCard = new GetCards({ userUrl: tradeCard.url, userName: tradeCard.userName, rank });
+            const userInventory = await getCard.getInventory();
+            const card = userInventory.find(card => card.src === src);
+            const myCard = myCards.find(card => card.src === tradeCard.src);
+            const button = new Button();
+            let text;
+            if (!card) {
+                text = "In trade or not found";
+                button.disable();
+            }
+            else if (tradeCard.rate < 0) {
+                text = "This card is locked";
+                button.disable();
+            }
+            else if (myCard.lock === "trade") {
+                text = "This card is in trade";
+                button.disable();
+            }
+            else {
+                text = `${myCard.lock === "lock" ? "Unlock and ": ""}Trade`
+            }
+            button.text(text);
+            button.place(".anime-cards__controls")
+            if (myCard) {
+                button.addEventListener('click', async () => {
+                await trade(card, myCard);
+                });
+            }
+        })
+    })
 }
 
 async function checkUserCards(user, rank = "s") {
@@ -50,7 +86,7 @@ async function init() {
     const button = new Button();
     button.text(text);
     button.place(".tabs.tabs--center");
-    button.addEventListener('click', () => showCards(rank));
+    button.addEventListener('click', () => showCards({rank, src}));
 }
 
 init()

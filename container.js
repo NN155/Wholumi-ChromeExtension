@@ -116,9 +116,9 @@ async function getCardInfo(dom) {
     return {rank, src};
 }
 
-function getUsers() {
+function getUsers(dom) {
     const usersList = [];
-    const users = document.querySelector('.profile__friends.profile__friends--full') || document.querySelector('.card-show__owners');
+    const users = dom.querySelector('.profile__friends.profile__friends--full') || dom.querySelector('.card-show__owners');
     const children = users.children;
     Array.from(children).forEach(element => {
         const userUrl = element.href
@@ -136,7 +136,7 @@ function getUsers() {
 }
 
 async function getUsersList() {
-    let usersList = getUsers();
+    let usersList = getUsers(document);
     const pageUrls = findPanel(document);
     if (pageUrls) {
         const usersLists = await Promise.all(
