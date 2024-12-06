@@ -1,10 +1,10 @@
-function init() {
+async function init() {
     getCard();
     setCardInterval();
 }
 
 async function fetchCard() {
-    const responce = await fetch('/engine/ajax/controller.php?mod=reward_card&action=check_reward');
+    const responce = await fetch('/engine/ajax/controller.php?mod=reward_card&action=check_reward&user_hash=' + dle_login_hash);
     const data = await responce.text();
     const parsedData = JSON.parse(data);
     console.log(parsedData.reason || parsedData)
@@ -60,6 +60,7 @@ async function reportCardViewed(owner_id) {
             mod: "cards_ajax",
             action: "take_card",
             owner_id: owner_id,
+            user_hash: dle_login_hash,
         })
     });
     const result = await response.json();
@@ -74,11 +75,13 @@ async function checkTakeCard() {
         },
         body: new URLSearchParams({
             mod: "cards_ajax",
-            action: "check_take_card"
+            action: "check_take_card",
+            user_hash: dle_login_hash,
         })
     });
     const data = await response.json();
     return data;
 }
+
 
 init();
