@@ -9,6 +9,7 @@ class Card {
         this.rate = 0;
         this.id = null;
         this.sortPriority = 0;
+        this.cardId = null;
     }
 
     setSrc() {
@@ -158,22 +159,15 @@ class Card {
         }
         else {
             this.id = this.card.getAttribute('data-id');
-        }
+        }     
     }
-    
+    setCardId() {
+        const card = this.card.querySelector(".anime-cards__item") || this.card;
+        this.cardId = card.getAttribute('data-id');
+    }
     async unlock() {
         if (this.lock === "lock") {
-            await fetch('/engine/ajax/controller.php?mod=cards_ajax', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                },
-                body: new URLSearchParams({
-                    mod: "cards_ajax",
-                    action: "lock_card",
-                    id: this.id,
-                })
-            })
+            await Fetch.unlockCard(this.id);
         }
     }
     addEventListener(event, callBack) {
@@ -216,12 +210,15 @@ class CardsArray {
         return cardsArray;
     }
 
-    sortByRate() {
+    sort() {
         this.cards.sort((a, b) => {
+            if (b.sortPriority !== a.sortPriority) {
+                return b.sortPriority - a.sortPriority;
+            }
             if (b.rate !== a.rate) {
                 return b.rate - a.rate;
             }
-            return b.sortPriority - a.sortPriority;
+            return b.cardId - a.cardId;
         });
     }
 

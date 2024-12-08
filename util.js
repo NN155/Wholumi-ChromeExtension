@@ -61,8 +61,8 @@ class DynimicSemaphore extends Semaphore {
     async controllMax() {
         const requestCount = loadFromLocalStorage().length;
         if (requestCount >= 300) {
-            this.setMax(3);
-        } else if (requestCount >= 200) {
+            this.setMax(1);
+        } else if (requestCount >= 250) {
             this.setMax(4);
         } else if (requestCount >=  50) {
             this.setMax(10);
@@ -95,7 +95,7 @@ class DynimicSemaphore extends Semaphore {
 
 const dynimicSemaphore = new DynimicSemaphore(3);
 
-async function parseFetch(url) {
+async function saveFetch(url, options = {}) {
     await dynimicSemaphore.acquire();
     const requestCount = loadFromLocalStorage().length;
 
@@ -116,30 +116,12 @@ async function parseFetch(url) {
 
 
     try {
-        const response = await fetch(url);
-        const text = await response.text();
-        const parser = new DOMParser();
-        const htmlDocument = parser.parseFromString(text, 'text/html');
-        return htmlDocument;
+        const response = await fetch(url, options);
+        return response;
     } catch (error) {
-        console.error(`Error fetching ${url}:`, error);
+        console.error(`Error fetching:`, error);
         throw error;
     } finally {
         await dynimicSemaphore.release();
     }
 }
-
-
-async function runMultipleFetches(url) {
-    const fetchPromises = Array.from({ length: 500 }, () => parseFetch(url));
-    try {
-        const results = await Promise.all(fetchPromises);
-        console.log('All 500 fetch requests completed successfully');
-        return results;
-    } catch (error) {
-        console.error('One or more fetch requests failed:', error);
-        throw error;
-    }
-}
-
-// runMultipleFetches("")

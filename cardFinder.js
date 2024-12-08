@@ -16,6 +16,10 @@ class UrlConstructor {
         return this.userUrl + '/cards/trade/' + this.rank ;
     }
 
+    unlock(url) {
+        return url += "&locked=0";
+    }
+
     static getMyUrl() {
         const menu = document.querySelector(".login__content.login__menu")
         const urls = menu.querySelectorAll("a")
@@ -45,19 +49,20 @@ class GetCards {
             card.setRateByLock()
             card.setSrc()
             card.setId()
+            card.setCardId()
             return card
         }))
         return cards
     }
     async _getAllCards(url) {
         const cardsList = new CardsArray();
-        const dom = await parseFetch(url)
+        const dom = await Fetch.parseFetch(url)
         cardsList.push(...this._getCards(dom));
         const pageUrls = findPanel(dom);
         if (pageUrls) {
             const pagesCards = await Promise.all(
                 pageUrls.map(async (url) => {
-                    const dom = await parseFetch(url);
+                    const dom = await Fetch.parseFetch(url);
                     return this._getCards(dom);
                 })
             );
@@ -69,8 +74,11 @@ class GetCards {
         });
         return cardsList;
     }
-    async getInventory() {
-        const cardUrl = this.UrlConstructor.inventory();
+    async getInventory(unlock = false) {
+        let cardUrl = this.UrlConstructor.inventory();
+        if (unlock) {
+            cardUrl = this.UrlConstructor.unlock(cardUrl);
+        }
         return await this._getAllCards(cardUrl);
     }
 

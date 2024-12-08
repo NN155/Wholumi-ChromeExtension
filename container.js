@@ -1,13 +1,24 @@
 class Button {
     constructor() {
+        this.onclick = null
         this._buttonContainer = document.createElement('div');
         this.button = document.createElement('button');
         this.button.className = 'button--primary';
         this.button.style = 'margin-left: 10px;';
         this.button.style.userSelect = "none";
         this._buttonContainer.appendChild(this.button);
+        this.button.onclick = this._onclick.bind(this);
     }
-
+    async _onclick() {
+        this.disable()
+        try {
+            this.onclick && await this.onclick();
+        }
+        finally {
+            this.enable();
+        }
+        
+    }
 
     addEventListener(event, func) {
         this.button.addEventListener(event, func);
@@ -21,6 +32,7 @@ class Button {
     text(text) {
         this.button.textContent = text;
     }
+
     disable() {
         this.button.disabled = true;
         this.button.style.cursor = 'not-allowed';
@@ -97,7 +109,7 @@ class ShowBar {
 async function getDomCardRAnk() {
     const container = document.querySelector(".container");
     const cardUrl = container.querySelector(".secondary-title.text-center").querySelector("a").href;
-    const dom = await parseFetch(cardUrl);
+    const dom = await Fetch.parseFetch(cardUrl);
     return dom;
 }
 
@@ -135,21 +147,28 @@ function getUsers(dom) {
     return usersList;
 }
 
-async function getUsersList() {
-    let usersList = getUsers(document);
-    const pageUrls = findPanel(document);
+async function getUsersList(dom, filterLock = false, limit = 200) {
+    let usersList = getUsers(dom);
+    const pageUrls = findPanel(dom);
     if (pageUrls) {
         const usersLists = await Promise.all(
             pageUrls.map(async (url) => {
-                const dom = await parseFetch(url);
+                const dom = await Fetch.parseFetch(url);
                 return getUsers(dom);
             })
         );
         usersLists.forEach(users => usersList.push(...users));
     }
+    if (usersList.length >= limit) {
+        filterLock = true;
+    }
 
-    if (usersList.length >= 200) {
-        usersList = usersList.filter(user => user.lock !== "lock").slice(0, 200);
+    if (filterLock) {
+        usersList = usersList.filter(user => user.lock !== "lock");
+    }
+
+    if (usersList.length >= limit) {
+        usersList = usersList.slice(0, limit);
     }
 
     return usersList;

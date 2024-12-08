@@ -1,11 +1,11 @@
 async function showCards({rank, src}) {
     ShowBar.createShowBar();
-    const usersList = await getUsersList();
+    const usersList = await getUsersList(document);
     const myUrl = UrlConstructor.getMyUrl();
     const myCards = await getInventoryTrade({userUrl: myUrl, rank});
     const usersCards = await findUsersCards(usersList, user => checkUserCards(user, rank));
     const cards = await compareWithMyCards(myCards, usersCards);
-    cards.sortByRate();
+
     cards.forEach(card => {
         card.fixCard()
         card.addLockIcon()
@@ -16,6 +16,10 @@ async function showCards({rank, src}) {
     });
     changeCards(cards, myCards, {rank, src});
 
+    if (cards.length() > 75) {
+        cards.filter(card => card.rate > 0);
+    }
+    cards.sort();
     ShowBar.addElementsToBar(cards.getCardsArray());
 }
 
@@ -86,7 +90,7 @@ async function init() {
     const button = new Button();
     button.text(text);
     button.place(".tabs.tabs--center");
-    button.addEventListener('click', () => showCards({rank, src}));
+    button.onclick = () => showCards({rank, src});
 }
 
 init()

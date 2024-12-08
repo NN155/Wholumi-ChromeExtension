@@ -81,7 +81,7 @@ async function init() {
     const button = new Button();
     button.text(text);
     button.place(".remelt__rank-list");
-    button.addEventListener('click', async() => await unlockCards(lockedCards));
+    button.onclick = async() => await unlockCards(lockedCards);
     if (lockedCards.length() === 0) {
         button.disable();
     }
