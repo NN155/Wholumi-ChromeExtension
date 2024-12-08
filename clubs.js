@@ -1,4 +1,4 @@
-async function onclick(button2) {
+async function randomTrade(button2 = null) {
     const url = document.querySelector(".button.button--block").getAttribute("href");
     const dom = await Fetch.parseFetch(url)
     const usersList = await getUsersList(dom, true, 5)
@@ -7,7 +7,7 @@ async function onclick(button2) {
     const myUrl = UrlConstructor.getMyUrl();
     const myCards = await getMyCountCards(myUrl, rank);
     await asyncTrade(myCards, tradeInfo);
-    changeCurrentCount(button2);
+    button2 && changeCurrentCount(button2);
 }
 
 async function asyncTrade(cards, tradeInfo) {
@@ -88,11 +88,11 @@ async function getActiveTrades() {
     return ids;
 }
 
-async function cancelAllTrades(button2) {
+async function cancelAllTrades(button2 = null) {
     const ids = await getActiveTrades();
     const promises = ids.map(id => Fetch.cancelTrade(id));
     await Promise.all(promises);
-    changeCurrentCount(button2);
+    button2 && changeCurrentCount(button2);
 }
 async function changeCurrentCount(button2) {
     const ids = await getActiveTrades();
@@ -111,7 +111,7 @@ async function init() {
     let text = "Trade 5 Times";
     button1.text(text);
     button1.place(".club-boost__owners");
-    button1.onclick = () => onclick(button2);
+    button1.onclick = () => randomTrade(button2);
 
     text = "Cancel All Trades";
     button2.text(text);
