@@ -136,3 +136,20 @@ async function trade(card, myCard) {
     }
     window.location.href = `/cards/${card.id}/trade?mycard=${myCard.id}`;
 }
+
+async function compareCards(hostCards, AnotherCards) {
+    AnotherCards.filter(card => {
+        const myCard = hostCards.find(myCard => myCard.src === card.src)
+        if (myCard)
+            card.rate = myCard.rate;
+        return myCard;
+    })
+    return AnotherCards;
+}
+
+async function getUserNeed(user, rank = "s") {
+    const { userUrl, userName } = user;
+    const getCards = new GetCards({ userUrl, userName, rank });
+    const cards = await getCards.getNeed();
+    return cards;
+}

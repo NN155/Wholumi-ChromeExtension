@@ -4,8 +4,8 @@ async function showCards({rank, src}) {
     const myUrl = UrlConstructor.getMyUrl();
     const my = new GetCards({userUrl: myUrl, rank});
     const myCards = await my.getInventory();
-    const usersCards = await findUsersCards(usersList, user => checkUserCards(user, rank));
-    const cards = await compareWithMyCards(myCards, usersCards);
+    const usersCards = await findUsersCards(usersList, user => getUserNeed(user, rank));
+    const cards = await compareCards(myCards, usersCards);
     cards.forEach(card => {
         card.fixCard();
         card.fixLockIcon();
@@ -53,22 +53,6 @@ function changeCards(cards, myCards, {rank, src}) {
     })
 }
 
-async function checkUserCards(user, rank = "s") {
-    const { userUrl, userName } = user;
-    const getCards = new GetCards({ userUrl, userName, rank });
-    const cards = await getCards.getNeed();
-    return cards;
-}
-
-async function compareWithMyCards(myCards, cards) {
-    cards.filter(card => {
-        const myCard = myCards.find(myCard => myCard.src === card.src)
-        if (myCard)
-            card.rate = myCard.rate;
-        return myCard;
-    })
-    return cards;
-}
 
 async function init() {
     const dom = await getDomCardRAnk();
