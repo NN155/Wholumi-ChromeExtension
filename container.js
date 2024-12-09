@@ -138,16 +138,18 @@ function getUsers(dom) {
         const userName = div.textContent;
         const lockIcon = element.querySelector('.fa-lock') || element.querySelector('.fa-exchange') || element.querySelector('.fa-arrow-right-arrow-left');
         const lock = lockIcon ? "lock" : "unlock";
+        const online = element.classList.contains("card-show__owner--online")
         usersList.push({
             userUrl,
             userName,
-            lock
+            lock,
+            online,
         });
     });
     return usersList;
 }
 
-async function getUsersList(dom, filterLock = false, limit = 200) {
+async function getUsersList(dom, {filterLock = false, filterOnline = false, limit = 200}) {
     let usersList = getUsers(dom);
     const pageUrls = findPanel(dom);
     if (pageUrls) {
@@ -167,6 +169,10 @@ async function getUsersList(dom, filterLock = false, limit = 200) {
         usersList = usersList.filter(user => user.lock !== "lock");
     }
 
+    if (filterOnline) {
+        usersList = usersList.filter(user => user.online);
+    }
+    
     if (usersList.length >= limit) {
         usersList = usersList.slice(0, limit);
     }

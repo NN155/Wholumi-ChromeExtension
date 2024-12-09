@@ -1,7 +1,11 @@
 async function randomTrade(button2 = null) {
     const url = document.querySelector(".button.button--block").getAttribute("href");
     const dom = await Fetch.parseFetch(url)
-    const usersList = await getUsersList(dom, true, 5)
+    let usersList = await getUsersList(dom, { 
+        filterLock: true, 
+        filterOnline: true, 
+    });
+    usersList = getRandomNodes(usersList, 5);
     const { rank, src } = await getCardInfo(dom);
     const tradeInfo = await checkTradeInfoUsers(usersList, { rank, src });
     const myUrl = UrlConstructor.getMyUrl();
