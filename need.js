@@ -15,7 +15,7 @@ async function showCards({ rank, src }) {
     })
     const myCard = getCardBySrc(myInventoryCards, src);
     changeCards(usersCards, myCard);
-    if (usersCards.length() > 75) {
+    if (usersCards.length() > 150) {
         usersCards.filter(card => card.rate > 0);
     }
     usersCards.sort();

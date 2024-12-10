@@ -1,11 +1,11 @@
-async function randomTrade(button2 = null) {
+async function randomTrade(button2 = null, tradeLimit = 5) {
     const url = document.querySelector(".button.button--block").getAttribute("href");
     const dom = await Fetch.parseFetch(url)
     let usersList = await getUsersList(dom, { 
         filterLock: true, 
         filterOnline: true, 
     });
-    usersList = getRandomNodes(usersList, 5);
+    usersList = getRandomNodes(usersList, tradeLimit);
     const { rank, src } = await getCardInfo(dom);
     const tradeInfo = await checkTradeInfoUsers(usersList, { rank, src });
     const myUrl = UrlConstructor.getMyUrl();
@@ -108,17 +108,24 @@ async function changeCurrentCount(button2) {
 async function init() {
     const button1 = new Button();
     const button2 = new Button();
+    const button3 = new Button();
 
     button1.button.classList.add("trade-button-by-extension");
     button2.button.classList.add("cancel-button-by-extension");
 
     button1.button.style.margin = "5px";
     button2.button.style.margin = "5px";
+    button3.button.style.margin = "5px";
 
     let text = "Trade 5 Times";
     button1.text(text);
     button1.place(".club-boost__owners");
     button1.onclick = () => randomTrade(button2);
+
+    text = "Trade 20 Times";
+    button3.text(text);
+    button3.place(".club-boost__owners");
+    button3.onclick = () => randomTrade(button2, 20);
 
     text = "Cancel All Trades";
     button2.text(text);

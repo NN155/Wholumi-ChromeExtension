@@ -149,7 +149,7 @@ function getUsers(dom) {
     return usersList;
 }
 
-async function getUsersList(dom, {filterLock = false, filterOnline = false, limit = 200}) {
+async function getUsersList(dom, {filterLock, filterOnline, limit = 200} = {}) {
     let usersList = getUsers(dom);
     const pageUrls = findPanel(dom);
     if (pageUrls) {
