@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "AnimeStars",
-  "version": "1.0",
+  "version": "1.12",
   "permissions": [
     "tabs",
     "scripting"
