@@ -28,6 +28,9 @@
         "https://animestars.org/cards/*/trade?mycard=*",
         "https://animestars.org/clubs/*/boost/"
       ],
+      "css" :[
+        "content/css/button.css"
+      ],
       "js": [
         "content/theme/globalColors.js",
         "content/libs/CardClasses.js",

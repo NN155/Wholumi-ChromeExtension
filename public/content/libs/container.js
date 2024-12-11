@@ -3,7 +3,7 @@ class Button {
         this.onclick = null
         this._buttonContainer = document.createElement('div');
         this.button = document.createElement('button');
-        this.button.className = 'button--primary';
+        this.button.className = 'button--primary extension';
         this.button.style = 'margin-left: 10px;';
         this.button.style.userSelect = "none";
         this._buttonContainer.appendChild(this.button);

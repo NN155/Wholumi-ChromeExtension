@@ -1,0 +1,61 @@
+button.extension {
+    position: relative;
+    margin: 0 auto;
+    padding: 10px 20px;
+    text-align: center;
+    color: aliceblue;
+    background-color: #772ce8;
+    border-radius: 10px;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-image 0.3s ease;
+}
+
+@property --angel {
+    syntax: "<angle>";
+    inherits: false;
+    initial-value: 0deg;
+}
+
+button.extension::after, button.extension::before {
+    content: " ";
+    position: absolute;
+    height: 100%;
+    width: 100%;
+    background-image: conic-gradient(from var(--angel), transparent 70%, #772ce8);
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: -1;
+    filter: blur(2px);
+    padding: 3px;
+    border-radius: 10px;
+    animation: 3s extension-spin linear infinite;
+    transition: background-image 0.3s ease;
+}
+
+button.extension:disabled::after, button.extension:disabled::before {
+    animation: 1s extension-spin linear infinite;
+}
+
+button.extension::before {
+    background-image: conic-gradient(from calc(var(--angel) + 180deg), transparent 70%, #772ce8);
+}
+
+@keyframes extension-spin {
+    from {
+        --angel: 0deg;
+    }
+    to {
+        --angel: 360deg;
+    }
+}
+
+button.extension:hover::after {
+    background-image: conic-gradient(from var(--angel), transparent 70%, #f06102);
+}
+
+button.extension:hover::before {
+    background-image: conic-gradient(from calc(var(--angel) + 180deg), transparent 70%, #f06102);
+}

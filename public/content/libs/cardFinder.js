@@ -153,3 +153,23 @@ async function getUserNeed(user, rank = "s") {
     const cards = await getCards.getNeed();
     return cards;
 }
+
+async function getCardTradeInfo(ownerId) {
+    const url = `/cards/${ownerId}/trade`
+    const dom = await Fetch.parseFetch(url);
+    const tradeDiv = dom.querySelector(".cards--container");
+    try {
+        const info = {
+            receiver: tradeDiv.getAttribute("data-receiver"),
+            receiver_id: tradeDiv.getAttribute("data-receiver-id"),
+            trade_id: tradeDiv.getAttribute("data-trade-id"),
+            sender_foto: tradeDiv.getAttribute("data-sender-foto"),
+            original_card: tradeDiv.getAttribute("data-original-id"),
+        };
+        return info;
+    }
+    catch (e) {
+        console.log(e);
+    }
+    return false;
+}
