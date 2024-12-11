@@ -106,7 +106,7 @@ class ShowBar {
     }
 }
 
-async function getDomCardRAnk() {
+async function getDomCardRank() {
     const container = document.querySelector(".container");
     const cardUrl = container.querySelector(".secondary-title.text-center").querySelector("a").href;
     const dom = await Fetch.parseFetch(cardUrl);

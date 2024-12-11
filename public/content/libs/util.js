@@ -97,9 +97,9 @@ const dynimicSemaphore = new DynimicSemaphore(3);
 
 async function saveFetch(url, options = {}) {
     await dynimicSemaphore.acquire();
-    const requestCount = loadFromLocalStorage().length;
+    const requestCount = await loadFromLocalStorage().length;
 
-    saveToLocalStorage()
+    await saveToLocalStorage()
 
     if (requestCount >= 300) {
         await new Promise(resolve => setTimeout(resolve, 2000)); 

@@ -1,0 +1,87 @@
+{
+  "manifest_version": 3,
+  "name": "AnimeStars",
+  "version": "1.1.0",
+  "permissions": [
+    "tabs",
+    "scripting"
+  ],
+  "content_scripts": [
+    {
+      "matches": [
+        "https://animestars.org/*"
+      ],
+      "js": [
+        "content/libs/getUserHash.js",
+        "content/libs/localStorage.js",
+        "content/libs/util.js",
+        "content/libs/fetchApi.js",
+        "content/getCard.js"
+      ]
+    },
+    {
+      "matches": [
+        "https://animestars.org/cards/*/users/need/",
+        "https://animestars.org/cards/*/users/trade/",
+        "https://animestars.org/cards/*/users/",
+        "https://animestars.org/cards_remelt/*",
+        "https://animestars.org/cards/*/trade?mycard=*",
+        "https://animestars.org/clubs/*/boost/"
+      ],
+      "js": [
+        "content/theme/globalColors.js",
+        "content/libs/CardClasses.js",
+        "content/libs/container.js",
+        "content/libs/cardFinder.js"
+      ]
+    },
+    {
+      "matches": [
+        "https://animestars.org/cards/*/users/need/"
+      ],
+      "js": [
+        "content/need.js"
+      ]
+    },
+    {
+      "matches": [
+        "https://animestars.org/cards/*/users/trade/"
+      ],
+      "js": [
+        "content/trade.js"
+      ]
+    },
+    {
+      "matches": [
+        "https://animestars.org/cards/*/users/"
+      ],
+      "js": [
+        "content/users.js"
+      ]
+    },
+    {
+      "matches": [
+        "https://animestars.org/cards_remelt/*"
+      ],
+      "js": [
+        "content/remelt.js"
+      ]
+    },
+    {
+      "matches": [
+        "https://animestars.org/cards/*/trade?mycard=*"
+      ],
+      "js": [
+        "content/tradeUser.js"
+      ]
+    },
+    {
+      "matches": [
+        "https://animestars.org/clubs/*/boost/"
+      ],
+      "js": [
+        "content/clubs.js"
+      ]
+    }
+  ]
+}

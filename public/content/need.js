@@ -67,7 +67,7 @@ async function checkUserCards(user, rank = "s") {
 }
 
 async function init() {
-    const dom = await getDomCardRAnk();
+    const dom = await getDomCardRank();
     const { rank, src } = await getCardInfo(dom);
     const text = `Show ${rank} Cards`;
     const button = new Button();
