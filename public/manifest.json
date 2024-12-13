@@ -78,14 +78,6 @@
       "js": [
         "content/tradeUser.js"
       ]
-    },
-    {
-      "matches": [
-        "https://animestars.org/clubs/*/boost/*"
-      ],
-      "js": [
-        "content/clubs.js"
-      ]
     }
   ]
 }

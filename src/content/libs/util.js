@@ -60,14 +60,14 @@ class DynimicSemaphore extends Semaphore {
 
     async controllMax() {
         const requestCount = loadFromLocalStorage().length;
-        if (requestCount >= 300) {
+        if (requestCount >= 60) {
             this.setMax(1);
-        } else if (requestCount >= 250) {
+        } else if (requestCount >= 50) {
             this.setMax(4);
-        } else if (requestCount >=  50) {
-            this.setMax(10);
+        } else if (requestCount >=  30) {
+            this.setMax(5);
         } else {
-            this.setMax(30);
+            this.setMax(6);
         }
         if (requestCount % 5 === 0) {
             console.log(`Request count: ${requestCount}, max: ${this.max}`);
@@ -101,10 +101,10 @@ async function saveFetch(url, options = {}) {
 
     await saveToLocalStorage()
 
-    if (requestCount >= 300) {
+    if (requestCount >= 60) {
         await new Promise(resolve => setTimeout(resolve, 2000)); 
     }
-    else if (requestCount > 100) {
+    else if (requestCount > 50) {
         await new Promise(resolve => setTimeout(resolve, 500)); 
     }
     else if (requestCount > 30) {
