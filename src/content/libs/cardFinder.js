@@ -54,7 +54,7 @@ class GetCards {
         }))
         return cards
     }
-    async _getAllCards(url) {
+    async getAllCards(url) {
         const cardsList = new CardsArray();
         const dom = await Fetch.parseFetch(url)
         cardsList.push(...this._getCards(dom));
@@ -74,22 +74,23 @@ class GetCards {
         });
         return cardsList;
     }
+
     async getInventory(unlock = false) {
         let cardUrl = this.UrlConstructor.inventory();
         if (unlock) {
             cardUrl = this.UrlConstructor.unlock(cardUrl);
         }
-        return await this._getAllCards(cardUrl);
+        return await this.getAllCards(cardUrl);
     }
 
     async getNeed() {
         const needCardUrl = this.UrlConstructor.need();
-        return await this._getAllCards(needCardUrl);
+        return await this.getAllCards(needCardUrl);
     }
 
     async getTrade() {
         const tradeCardUrl = this.UrlConstructor.trade();
-        return await this._getAllCards(tradeCardUrl);
+        return await this.getAllCards(tradeCardUrl);
     }
 }
 
@@ -152,24 +153,4 @@ async function getUserNeed(user, rank = "s") {
     const getCards = new GetCards({ userUrl, userName, rank });
     const cards = await getCards.getNeed();
     return cards;
-}
-
-async function getCardTradeInfo(ownerId) {
-    const url = `/cards/${ownerId}/trade`
-    const dom = await Fetch.parseFetch(url);
-    const tradeDiv = dom.querySelector(".cards--container");
-    try {
-        const info = {
-            receiver: tradeDiv.getAttribute("data-receiver"),
-            receiver_id: tradeDiv.getAttribute("data-receiver-id"),
-            trade_id: tradeDiv.getAttribute("data-trade-id"),
-            sender_foto: tradeDiv.getAttribute("data-sender-foto"),
-            original_card: tradeDiv.getAttribute("data-original-id"),
-        };
-        return info;
-    }
-    catch (e) {
-        console.log(e);
-    }
-    return false;
 }

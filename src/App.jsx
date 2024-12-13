@@ -6,6 +6,10 @@ import './App.css'
 function App() {
   const [count, setCount] = useState(0)
 
+  
+const apiUrl = import.meta.env.VITE_API_URL;
+console.log(apiUrl);  // Виведе значення змінної з .env файлу
+
   return (
     <>
       <div>

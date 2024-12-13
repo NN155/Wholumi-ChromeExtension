@@ -26,10 +26,11 @@
         "https://animestars.org/cards/*/users/",
         "https://animestars.org/cards_remelt/*",
         "https://animestars.org/cards/*/trade?mycard=*",
-        "https://animestars.org/clubs/*/boost/"
+        "https://animestars.org/clubs/*/boost/*"
       ],
       "css" :[
-        "content/css/button.css"
+        "content/css/button.css",
+        "content/css/switcher.css"
       ],
       "js": [
         "content/theme/globalColors.js",
@@ -80,7 +81,7 @@
     },
     {
       "matches": [
-        "https://animestars.org/clubs/*/boost/"
+        "https://animestars.org/clubs/*/boost/*"
       ],
       "js": [
         "content/clubs.js"

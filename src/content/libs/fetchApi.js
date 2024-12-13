@@ -103,10 +103,27 @@ class Fetch{
                 user_hash: dle_login_hash,
                 action: "cansel_trade",
                 kind: "sended",
-                id
+                id,
+            }),
+        });
+        return response.json();
+    }
+
+    //boost club card by id
+    static async boostCard(id) {
+        const url = "/engine/ajax/controller.php?mod=clubs_ajax";
+    
+        const response = await saveFetch(url, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded",
+            },
+            body: new URLSearchParams({
+                user_hash: dle_login_hash,
+                action: "boost",
+                card_id: id,
             }),
         });
         return response.json();
     }
 }
-

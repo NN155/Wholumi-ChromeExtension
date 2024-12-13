@@ -17,7 +17,7 @@ class Button {
         finally {
             this.enable();
         }
-        
+
     }
 
     addEventListener(event, func) {
@@ -106,6 +106,91 @@ class ShowBar {
     }
 }
 
+class Switcher {
+    constructor({ checked = false, onChange = null } = {}) {
+        this.checked = checked;
+        this.onChange = onChange;
+
+        this.element = this.createSwitch();
+    }
+
+    createSwitch() {
+        const container = document.createElement('div');
+        container.className = 'switch-component-extension';
+
+        container.innerHTML = `
+            <label class="switch-extension">
+                <input type="checkbox" ${this.checked ? 'checked' : ''}>
+                <span class="slider-extension round"></span>
+                <span class="switch-label-text"></span>
+            </label>
+        `;
+
+        const input = container.querySelector('input');
+        input.addEventListener('change', (event) => {
+            this.checked = event.target.checked;
+            if (this.onChange) {
+                this.onChange(this.checked);
+            }
+        });
+
+        return container;
+    }
+
+    text(labelText) {
+        const labelTextElement = this.element.querySelector('.switch-label-text');
+        labelTextElement.innerText = labelText;
+    }
+
+    render() {
+        return this.element;
+    }
+
+    place(querySelector) {
+        const container = document.querySelector(querySelector);
+        container.appendChild(this.element);
+    }
+    
+    center() {
+        this.element.style.margin = "10px"
+        this.element.style.display = "flex"
+        this.element.style.justifyContent = "center"
+        this.element.style.alignItems = "center"
+    }
+
+    disable() {
+        this.isDisabled = true;
+        const input = this.element.querySelector('input');
+        input.disabled = true;
+        this.element.classList.add('disabled');
+    }
+
+    enable() {
+        this.isDisabled = false;
+        const input = this.element.querySelector('input');
+        input.disabled = false;
+        this.element.classList.remove('disabled');
+    }
+
+    turnOff() {
+        const input = this.element.querySelector('input');
+        input.checked = false;
+        this.checked = false;
+        if (this.onChange) {
+            this.onChange(this.checked);
+        }
+    }
+
+    turnOn() {
+        const input = this.element.querySelector('input');
+        input.checked = true;
+        this.checked = true;
+        if (this.onChange) {
+            this.onChange(this.checked);
+        }
+    }
+}
+
 async function getDomCardRank() {
     const container = document.querySelector(".container");
     const cardUrl = container.querySelector(".secondary-title.text-center").querySelector("a").href;
@@ -125,7 +210,7 @@ async function getCardInfo(dom) {
     rank = rankLetter;
     const card = dom.querySelector(".card-show__image")
     const src = card.getAttribute("src");
-    return {rank, src};
+    return { rank, src };
 }
 
 function getUsers(dom) {
@@ -149,7 +234,7 @@ function getUsers(dom) {
     return usersList;
 }
 
-async function getUsersList(dom, {filterLock, filterOnline, limit = 200} = {}) {
+async function getUsersList(dom, { filterLock, filterOnline, limit = 200 } = {}) {
     let usersList = getUsers(dom);
     const pageUrls = findPanel(dom);
     if (pageUrls) {
@@ -172,7 +257,7 @@ async function getUsersList(dom, {filterLock, filterOnline, limit = 200} = {}) {
     if (filterOnline) {
         usersList = usersList.filter(user => user.online);
     }
-    
+
     if (usersList.length >= limit) {
         usersList = usersList.slice(0, limit);
     }
@@ -187,4 +272,36 @@ function findPanel(dom) {
         const pageUrls = Array.from(panel.querySelectorAll(':scope > a')).map(element => element.href);
         return pageUrls;
     }
+}
+
+async function getCardTradeInfo(ownerId) {
+    const url = `/cards/${ownerId}/trade`
+    const dom = await Fetch.parseFetch(url);
+    const tradeDiv = dom.querySelector(".cards--container");
+    try {
+        const info = {
+            receiver: tradeDiv.getAttribute("data-receiver"),
+            receiver_id: tradeDiv.getAttribute("data-receiver-id"),
+            trade_id: tradeDiv.getAttribute("data-trade-id"),
+            sender_foto: tradeDiv.getAttribute("data-sender-foto"),
+            original_card: tradeDiv.getAttribute("data-original-id"),
+        };
+        return info;
+    }
+    catch (e) {
+        console.log(e);
+    }
+    return false;
+}
+
+async function getActiveTrades() {
+    const dom = await Fetch.parseFetch("/trades/offers/");
+
+    const tradeItems = Array.from(dom.querySelectorAll(".trade__list-item"));
+    const ids = [];
+    for (const item of tradeItems) {
+        let id = item.getAttribute("href").replace("/trades/offers/", "").replace("/", "");
+        ids.push(id);
+    }
+    return ids;
 }
