@@ -29,8 +29,8 @@
         "https://animestars.org/clubs/*/boost/*"
       ],
       "css" :[
-        "content/css/button.css",
-        "content/css/switcher.css"
+        "css/button.css",
+        "css/switcher.css"
       ],
       "js": [
         "content/theme/globalColors.js",
