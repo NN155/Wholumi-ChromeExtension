@@ -72,20 +72,22 @@ class Fetch{
         const url = "/engine/ajax/controller.php?mod=trade_ajax";
 
         const creatorIds = Array.isArray(ids) ? ids : [ids];
+        const body = new URLSearchParams({
+            user_hash: dle_login_hash,
+            action: "trade_card",
+            ...info,
+        });
+    
+        creatorIds.forEach((id) => {
+            body.append("card_ids[]", id);
+        });
     
         const response = await saveFetch(url, {
             method: "POST",
             headers: {
                 "Content-Type": "application/x-www-form-urlencoded",
             },
-            body: new URLSearchParams({
-                user_hash: dle_login_hash,
-                action: "trade_card",
-                ...info,
-                ...Object.fromEntries(
-                    creatorIds.map((creatorId) => ["creator_ids[]", creatorId])
-                ),
-            }),
+            body: body,
         });
         return response.json();
     }
@@ -110,8 +112,8 @@ class Fetch{
     }
 
     //boost club card by id
-    static async boostCard(id) {
-        const url = "/engine/ajax/controller.php?mod=clubs_ajax";
+    static async boostCard(cardId, clubId) {
+        const url = `/clubs/${clubId}/boost/`;
     
         const response = await saveFetch(url, {
             method: "POST",
@@ -121,9 +123,41 @@ class Fetch{
             body: new URLSearchParams({
                 user_hash: dle_login_hash,
                 action: "boost",
-                card_id: id,
+                card_id: cardId,
             }),
         });
         return response.json();
+    }
+    static async watchAnime({ 
+        news_id = -1, 
+        episode = -1, 
+        season = -1, 
+        translationId = -1, 
+        translationTitle = -1 
+    } = {}) {
+        const queryParams = new URLSearchParams({
+            mod: "anime_grabber",
+            module: "kodik_watched",
+            news_id: news_id,
+            "kodik_data[episode]": episode,
+            "kodik_data[season]": season,
+            "kodik_data[translation][id]": translationId,
+            "kodik_data[translation][title]": translationTitle,
+        }).toString();
+        
+        await saveFetch(`/engine/ajax/controller.php?${queryParams}`)
+    }
+
+    static async rateComment({go_rate = "plus", c_id = -1, skin = "New"} = {}) {
+        const queryParams = new URLSearchParams({
+            mod: "ratingcomments",
+            go_rate: go_rate,
+            c_id: c_id,
+            skin: skin,
+            user_hash: dle_login_hash,
+        
+        }).toString();
+        
+        await fetch(`/engine/ajax/controller.php?${queryParams}`)
     }
 }

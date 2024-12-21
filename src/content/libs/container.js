@@ -191,6 +191,48 @@ class Switcher {
     }
 }
 
+class Li {
+    constructor(text) {
+        this.onclick = null
+        this.text = text
+        this.li = document.createElement("li")
+        this.li.textContent = text
+        this._style()
+        this.li.onclick = this._onclick.bind(this)
+    }
+    _style() {
+        this.li.style.cursor = "pointer"
+        this.li.style.color = "#772ce8"
+    }
+    place(querySelector) {
+        const container = document.querySelector(querySelector)
+        container.appendChild(this.li)
+    }
+    disable() {
+        this.li.style.cursor = "default"
+        this.li.onclick = () => {}
+        this.li.style.color = "#4a2c8f"
+    }
+    enable() {
+        this._style()
+        this.li.onclick = this.funk
+    }
+    place(queryParams) {
+        const container = document.querySelector(queryParams)
+        container.appendChild(this.li)
+    }
+    async _onclick() {
+        this.disable()
+        try {
+            this.onclick && await this.onclick();
+        }
+        finally {
+            this.enable();
+        }
+
+    }
+}
+
 async function getDomCardRank() {
     const container = document.querySelector(".container");
     const cardUrl = container.querySelector(".secondary-title.text-center").querySelector("a").href;
