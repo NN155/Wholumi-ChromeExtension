@@ -1,147 +1,95 @@
 let autoBoost = false;
 let autoUnlock = false;
 let stopUpdating = false;
+let cardId = 0;
+let countBoost = 0
 
-async function pageUpdateInfo() {
+async function autoUpdatePageInfo() {
     if (stopUpdating) return;
-    let nextTimeout = 1000;
-    try {
-        const url = window.location.href;
-        const startTime = performance.now();
-        const dom = await Fetch.parseFetch(url);
-        const endTime = performance.now();
-
-        const responseTime = (endTime - startTime) / 1000;
-
-        const data = getPageInfo(dom);
-        updatePageInfo(document, data);
-
-        const event = new CustomEvent("update-page-extension", { detail: data });
-        window.dispatchEvent(event);
-
-        nextTimeout = responseTime > 0.5 ? 4000 : 1000;
-    } catch (error) {
-        console.error("Error during page update:", error);
-    } finally {
-        if (!stopUpdating) {
-            setTimeout(pageUpdateInfo, nextTimeout);
-        }
-    }
-}
-
-
-function getPageInfo(dom) {
-    const src = dom.querySelector(".club-boost__image img").getAttribute("src")
-    const ownersList = dom.querySelector(".club-boost__owners-list")
-    const boostChangeCount = dom.querySelector(".club-boost__change span")
-    const rulesInfo = dom.querySelector(".club-boost__rules")
-    const clubBoostTop = dom.querySelector(".club-boost__top")
-    const clubBoostInner = dom.querySelector(".club-boost--content > :last-child")
-    return {
-        src,
-        ownersList,
-        boostChangeCount,
-        rulesInfo,
-        clubBoostTop,
-        clubBoostInner
-    }
-}
-
-function updatePageInfo(dom, { src, ownersList, boostChangeCount, rulesInfo, clubBoostTop, clubBoostInner }) {
-    const domSrc = dom.querySelector(".club-boost__image img")
-    const domSrcUrl = domSrc.getAttribute("src")
-    updateElement(domSrc, 'src', src);
-    updateElement(dom.querySelector(".club-boost__owners-list"), 'innerHTML', ownersList);
-    updateElement(dom.querySelector(".club-boost__change span"), 'innerText', boostChangeCount);
-    updateElement(dom.querySelector(".club-boost__rules"), 'innerHTML', rulesInfo);
-    if (domSrcUrl !== src) {
-        updateElement(dom.querySelector(".club-boost__top"), 'innerHTML', clubBoostTop);
-    }
-    updateElement(dom.querySelector(".club-boost--content > :last-child"), 'innerHTML', clubBoostInner);
-}
-
-function updateElement(element, property, newValue) {
-    if (element) {
-        let currentValue;
-        if (property === 'innerHTML' || property === 'innerText') {
-            currentValue = element[property];
-            newValue = newValue[property];
-        }
-        else if (property === 'src') {
-            currentValue = element.getAttribute(property);
-        }
-        if (currentValue !== newValue) {
-            if (property === 'src') {
-                element.setAttribute(property, newValue);
-            } else {
-                element[property] = newValue;
+    while (!stopUpdating) {
+        try {
+            const isNewCard = await updateCardInfo();
+            if (autoBoost && isNewCard) {
+                cardId++;
+                const event = new CustomEvent("update-page-extension", { detail: { id: cardId } });
+                window.dispatchEvent(event);
             }
+        } catch (error) {
+            console.error("Error during page update:", error);
         }
     }
 }
 
-function recieveCard(cards, src) {
-    let card = cards.find(card => card.src === src && card.lock === "unlock")
-    if (card) {
-        return card
+async function updateCardInfo() {
+    const cardId = document.querySelector(".club__boost__refresh-btn").getAttribute("data-card-id")
+    const res = await Fetch.updateCardInfo(cardId)
+    if (res.boost_html) {
+        updatePageInfo(res.boost_html)
     }
-    card = cards.find(card => card.src === src && card.lock === "lock")
-    if (card) {
-        return card;
-    }
+    return res.boost_html;
 }
 
-window.addEventListener('update-page-extension', async (event) => {
+function updatePageInfo(html) {
+    const container = document.querySelector(".club-boost--content")
+    container.innerHTML = html
+}
+
+async function boostCard(id) {
     const button = document.querySelector(".club__boost-btn")
     if (button && autoBoost) {
         const cardId = button.getAttribute("data-card-id")
         const clubId = button.getAttribute("data-club-id")
         const res = await Fetch.boostCard(cardId, clubId)
-        switchStatus(res)
-    }
-});
-
-function switchStatus(res) {
-    console.log("Boost Response:", res)
-    if (res.error) {
-        switch (res.error) {
-            case "Достигнут дневной лимит пожертвований в клуб, подождите до завтра":
-                switcherAutoBoost.turnOff()
-                switcherAutoUnlock.turnOff()
-                break;
-        }
-    }
-    else if (res.reloud) {
-
-    }
-    else if (res.status) {
-        countBoost++
-        switcherAutoBoost.text(`Auto Boost Card (${countBoost})`)
+        responceController(res, id)
     }
 }
 
-let countBoost = 0
+async function responceController(res, id) {
+    console.log("Boost Response:", res)
+    if (res.error) {
+        switch (res.error) {
+            case "Ваша карта заблокирована, для пожертвования клубу разблокируйте её":
+            case "У вас нет карты для пожертвования клубу, обновите страницу и попробуйте снова":
+            case "Достигнут дневной лимит пожертвований в клуб, подождите до завтра":
+            case "Вклады в клуб временно отключены и находятся на обновлении":
+                break;
+        }
+    }
+    else if (res.boost_html_changed) {
+        updatePageInfo(res.boost_html_changed)
+    }
+    else if (res.boost_html) {
+        countBoost++
+        switcherAutoBoost.text(`Auto Boost Card (${countBoost})`)
+        updatePageInfo(res.boost_html)
+    }
+    else {
+        await new Promise(resolve => setTimeout(resolve, 500))
+        const event = new CustomEvent("update-page-extension", { detail: { id: id } });
+        window.dispatchEvent(event);
+    }
+}
+
+window.addEventListener('update-page-extension', async (event) => {
+    if (event.detail.id === cardId) {
+        await boostCard(event.detail.id)
+    }
+});
+
 const switcherAutoBoost = new Switcher(
     {
         checked: false,
         onChange: (isChecked) => {
             autoBoost = isChecked
+            if (autoBoost) {
+                const event = new CustomEvent("update-page-extension", { detail: { id: cardId } });
+                window.dispatchEvent(event);
+            }
         }
     }
 )
 switcherAutoBoost.disable()
 switcherAutoBoost.text(`Auto Boost Card (${countBoost})`)
-
-const switcherAutoUnlock = new Switcher(
-    {
-        checked: false,
-        onChange: (isChecked) => {
-            autoUnlock = isChecked
-        }
-    }
-)
-switcherAutoUnlock.disable()
-switcherAutoUnlock.text("Auto Unlock Card")
 
 const switcherUpdatePage = new Switcher(
     {
@@ -150,23 +98,18 @@ const switcherUpdatePage = new Switcher(
 
             if (isChecked) {
                 switcherAutoBoost.enable()
-                switcherAutoUnlock.enable()
                 stopUpdating = false;
-                pageUpdateInfo();
+                autoUpdatePageInfo();
             } else {
                 switcherAutoBoost.turnOff()
                 switcherAutoBoost.disable()
-                switcherAutoUnlock.turnOff()
-                switcherAutoUnlock.disable()
                 stopUpdating = true;
-                clearInterval(intervalId);
             }
         }
     }
 )
 switcherUpdatePage.text("Auto Page Info Update")
 
-switcherUpdatePage.place(".club-boost__owners")
-switcherAutoBoost.place(".club-boost__owners")
-// switcherAutoUnlock.place(".club-boost__owners")
+switcherUpdatePage.place(".secondary-title.text-center")
+switcherAutoBoost.place(".secondary-title.text-center")
 

@@ -104,8 +104,11 @@ async function saveFetch(url, options = {}) {
     if (requestCount >= 300) {
         await new Promise(resolve => setTimeout(resolve, 2000)); 
     }
-    else if (requestCount > 100) {
+    else if (requestCount > 150) {
         await new Promise(resolve => setTimeout(resolve, 500)); 
+    }
+    else if (requestCount > 100) {
+        await new Promise(resolve => setTimeout(resolve, 400)); 
     }
     else if (requestCount > 30) {
         await new Promise(resolve => setTimeout(resolve, 300)); 

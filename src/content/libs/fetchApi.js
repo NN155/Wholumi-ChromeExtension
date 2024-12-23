@@ -1,4 +1,4 @@
-class Fetch{
+class Fetch {
     // get dom from url
     static async parseFetch(url) {
         const response = await saveFetch(url);
@@ -66,7 +66,7 @@ class Fetch{
         const data = await response.json();
         return data;
     }
-    
+
     // trade with user
     static async tradeFetch(info, ids) {
         const url = "/engine/ajax/controller.php?mod=trade_ajax";
@@ -77,11 +77,11 @@ class Fetch{
             action: "trade_card",
             ...info,
         });
-    
+
         creatorIds.forEach((id) => {
             body.append("card_ids[]", id);
         });
-    
+
         const response = await saveFetch(url, {
             method: "POST",
             headers: {
@@ -95,7 +95,7 @@ class Fetch{
     // cancel trade by id
     static async cancelTrade(id) {
         const url = "/engine/ajax/controller.php?mod=trade_ajax";
-    
+
         const response = await saveFetch(url, {
             method: "POST",
             headers: {
@@ -114,7 +114,7 @@ class Fetch{
     //boost club card by id
     static async boostCard(cardId, clubId) {
         const url = `/clubs/${clubId}/boost/`;
-    
+
         const response = await saveFetch(url, {
             method: "POST",
             headers: {
@@ -128,12 +128,30 @@ class Fetch{
         });
         return response.json();
     }
-    static async watchAnime({ 
-        news_id = -1, 
-        episode = -1, 
-        season = -1, 
-        translationId = -1, 
-        translationTitle = -1 
+
+    static async updateCardInfo(cardId) {
+        const url = `/engine/ajax/controller.php?mod=clubs_ajax`;
+
+        const response = await saveFetch(url, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded",
+            },
+            body: new URLSearchParams({
+                user_hash: dle_login_hash,
+                action: "boost_refresh",
+                card_id: cardId,
+            }),
+        });
+        return response.json();
+    }
+
+    static async watchAnime({
+        news_id = -1,
+        episode = -1,
+        season = -1,
+        translationId = -1,
+        translationTitle = -1
     } = {}) {
         const queryParams = new URLSearchParams({
             mod: "anime_grabber",
@@ -144,20 +162,39 @@ class Fetch{
             "kodik_data[translation][id]": translationId,
             "kodik_data[translation][title]": translationTitle,
         }).toString();
-        
+
         await saveFetch(`/engine/ajax/controller.php?${queryParams}`)
     }
 
-    static async rateComment({go_rate = "plus", c_id = -1, skin = "New"} = {}) {
+    static async rateComment({ go_rate = "plus", c_id = -1, skin = "New" } = {}) {
         const queryParams = new URLSearchParams({
             mod: "ratingcomments",
             go_rate: go_rate,
             c_id: c_id,
             skin: skin,
             user_hash: dle_login_hash,
-        
+
         }).toString();
-        
-        await fetch(`/engine/ajax/controller.php?${queryParams}`)
+
+        await saveFetch(`/engine/ajax/controller.php?${queryParams}`)
+    }
+
+    static async remeltCard(cardIds) {
+        const body = new URLSearchParams({
+            user_hash: dle_login_hash,
+            action: "remelt_card",
+        });
+
+        cardIds.forEach((id) => {
+            body.append("card_ids[]", id);
+        });
+
+        await fetch('/engine/ajax/controller.php?mod=cards_ajax', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: body,
+        });
     }
 }

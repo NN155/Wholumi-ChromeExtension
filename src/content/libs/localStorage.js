@@ -14,7 +14,13 @@ function loadFromLocalStorage() {
     let existingData = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
 
     const currentTime = Date.now();
-    const freshData = existingData.filter(item => (currentTime - item.timestamp) <= 1 * 60 * 1000); 
+
+    let index = 0;
+    while (index < existingData.length && currentTime - existingData[index].timestamp > 1 * 60 * 1000) {
+        index++;
+    }
+
+    const freshData = existingData.slice(index);
 
     localStorage.setItem(STORAGE_KEY, JSON.stringify(freshData));
 
