@@ -1,6 +1,9 @@
 async function showCards({rank, src}) {
     ShowBar.createShowBar();
-    const usersList = await getUsersList(document);
+    const usersList = await getUsersList(document, {
+        limit:200, 
+        pageLimit:10,
+    });
     const myUrl = UrlConstructor.getMyUrl();
     const myCards = await getInventoryTrade({userUrl: myUrl, rank});
     const usersCards = await findUsersCards(usersList, user => checkUserCards(user, rank));

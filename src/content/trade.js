@@ -1,6 +1,9 @@
 async function showCards({rank, src}) {
     ShowBar.createShowBar();
-    const usersList = await getUsersList(document);
+    const usersList = await getUsersList(document, {
+        limit:1000, 
+        pageLimit:10,
+    });
     const myUrl = UrlConstructor.getMyUrl();
     const my = new GetCards({userUrl: myUrl, rank});
     const myCards = await my.getInventory();

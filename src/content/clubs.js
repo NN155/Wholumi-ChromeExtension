@@ -6,6 +6,7 @@ let countBoost = 0
 
 async function autoUpdatePageInfo() {
     if (stopUpdating) return;
+    const delay = 800;
     while (!stopUpdating) {
         try {
             const isNewCard = await updateCardInfo();
@@ -16,6 +17,9 @@ async function autoUpdatePageInfo() {
             }
         } catch (error) {
             console.error("Error during page update:", error);
+        }
+        finally {
+            await new Promise(resolve => setTimeout(resolve, delay));
         }
     }
 }
@@ -53,6 +57,16 @@ async function responceController(res, id) {
             case "Достигнут дневной лимит пожертвований в клуб, подождите до завтра":
             case "Вклады в клуб временно отключены и находятся на обновлении":
                 break;
+            default: 
+                const regex = /через\s*(-?\d+)\s*секунд/;
+                
+                const match = res.error.match(regex);
+                if (match) {
+                    const delay = Math.abs(parseInt(match[1])) * 1000 - 1000;
+                    await new Promise(resolve => setTimeout(resolve, delay));
+                }
+                const event = new CustomEvent("update-page-extension", { detail: { id: id } });
+                window.dispatchEvent(event);
         }
     }
     else if (res.boost_html_changed) {
@@ -63,11 +77,7 @@ async function responceController(res, id) {
         switcherAutoBoost.text(`Auto Boost Card (${countBoost})`)
         updatePageInfo(res.boost_html)
     }
-    else {
-        await new Promise(resolve => setTimeout(resolve, 500))
-        const event = new CustomEvent("update-page-extension", { detail: { id: id } });
-        window.dispatchEvent(event);
-    }
+
 }
 
 window.addEventListener('update-page-extension', async (event) => {
@@ -112,4 +122,3 @@ switcherUpdatePage.text("Auto Page Info Update")
 
 switcherUpdatePage.place(".secondary-title.text-center")
 switcherAutoBoost.place(".secondary-title.text-center")
-
