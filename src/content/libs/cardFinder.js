@@ -1,5 +1,5 @@
 class UrlConstructor {
-    constructor({rank, userUrl}) {
+    constructor({ rank, userUrl }) {
         this.userUrl = userUrl;
         this.rank = `?rank=${rank}`;
     }
@@ -13,7 +13,7 @@ class UrlConstructor {
     }
 
     trade() {
-        return this.userUrl + '/cards/trade/' + this.rank ;
+        return this.userUrl + '/cards/trade/' + this.rank;
     }
 
     unlock(url) {
@@ -23,7 +23,6 @@ class UrlConstructor {
     static getMyUrl() {
         const menu = document.querySelector(".login__content.login__menu")
         const urls = menu.querySelectorAll("a")
-    
         const urlsArray = Array.from(urls);
         for (const element of urlsArray) {
             if (element.href.endsWith("/cards/")) {
@@ -31,14 +30,31 @@ class UrlConstructor {
             }
         }
     }
+
+    static getMyName() {
+        const menu = document.querySelector(".login__content.login__menu")
+        const urls = menu.querySelectorAll("a")
+
+        const urlsArray = Array.from(urls);
+        for (const element of urlsArray) {
+            if (element.href.endsWith("/cards/")) {
+                return element.href.match(/\/user\/([^/]+)\//)?.[1];
+            }
+        }
+    }
+
+    static getUserUrl(userName) {
+        const url = this.getMyUrl();
+        return url.replace(/\/user\/[^/]+/, `/user/${userName}`);
+    }
 }
 
 class GetCards {
-    constructor({rank, userUrl, userName}) {
+    constructor({ rank, userUrl, userName }) {
         this.userUrl = userUrl;
         this.userName = userName;
         this.rank = rank;
-        this.UrlConstructor = new UrlConstructor({rank: this.rank, userUrl: this.userUrl});
+        this.UrlConstructor = new UrlConstructor({ rank: this.rank, userUrl: this.userUrl });
     }
     _getCards(dom) {
         const array = dom.querySelector(".anime-cards.anime-cards--full-page");
@@ -96,20 +112,20 @@ class GetCards {
 
 
 async function getInventoryTrade({ userUrl, userName, rank }) {
-        const getCards = new GetCards({ userUrl, userName, rank });
-        const [inventoryCards, trageCards] = await Promise.all([
-            getCards.getInventory(),
-            getCards.getTrade()
-        ]);
-        trageCards.forEach(tradeCards => {
-            inventoryCards.forEach(inventoryCard => {
-                if (tradeCards.src === inventoryCard.src && inventoryCard.lock !== "lock") {
-                    inventoryCard.rate += 1;
-                }
-            });
+    const getCards = new GetCards({ userUrl, userName, rank });
+    const [inventoryCards, trageCards] = await Promise.all([
+        getCards.getInventory(),
+        getCards.getTrade()
+    ]);
+    trageCards.forEach(tradeCards => {
+        inventoryCards.forEach(inventoryCard => {
+            if (tradeCards.src === inventoryCard.src && inventoryCard.lock !== "lock") {
+                inventoryCard.rate += 1;
+            }
         });
-        return inventoryCards;
-    }
+    });
+    return inventoryCards;
+}
 
 async function findUsersCards(usersList, callBack) {
     const usersCards = new CardsArray();

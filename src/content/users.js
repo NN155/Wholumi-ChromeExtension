@@ -1,21 +1,32 @@
-async function showCards({rank, src}) {
+async function showCards({rank, src, input}) {
     ShowBar.createShowBar();
+    
+    const userName = input.getValue();
+    const myUrl = userName ? UrlConstructor.getUserUrl(userName) : UrlConstructor.getMyUrl();
+    let myCards;
+    try {
+        myCards = await getInventoryTrade({userUrl: myUrl, rank});
+    }
+    catch {
+        ShowBar.text("User not found");
+        return;
+    }
+
     const usersList = await getUsersList(document, {
         limit:200, 
         pageLimit:10,
     });
-    const myUrl = UrlConstructor.getMyUrl();
-    const myCards = await getInventoryTrade({userUrl: myUrl, rank});
     const usersCards = await findUsersCards(usersList, user => checkUserCards(user, rank));
     const cards = await compareWithMyCards(myCards, usersCards);
 
     cards.forEach(card => {
-        card.fixCard()
-        card.addLockIcon()
-        card.fixLockIcon()
-        card.addLink()
-        card.setColorByRate()
-        card.removeBorderds()
+        card.fixCard();
+        card.addLockIcon();
+        card.fixLockIcon();
+        card.addLink();
+        card.setColorByRate();
+        card.removeBorderds();
+        card.removeButton();
     });
     changeCards(cards, myCards, {rank, src});
 
@@ -88,12 +99,15 @@ async function compareWithMyCards(myCards, cards) {
 }
 
 async function init() {
-    const {rank, src} = await getCardInfo(document);
-    const text = `Show My ${rank} Cards`;
     const button = new Button();
+    const input = new Input();
+    const {rank, src} = await getCardInfo(document);
+    const text = `Compare ${rank} Cards`;
     button.text(text);
-    button.place(".tabs.tabs--center");
-    button.onclick = () => showCards({rank, src});
+    button.onclick = () => showCards({rank, src, input});
+    input.text(UrlConstructor.getMyName());
+    await button.place(".tabs.tabs--center");
+    input.place(".tabs.tabs--center");
 }
 
 init()

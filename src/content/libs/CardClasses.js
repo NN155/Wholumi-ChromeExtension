@@ -177,6 +177,12 @@ class Card {
     setBorder(color) {
         this.card.querySelector('.anime-cards__item').style.border = `2px solid ${color}`;
     }
+    removeButton() {
+        const button = this.card.querySelector('.card-offer-remove-btn');
+        if (button) {
+            button.remove();
+        }
+    }
 }
 
 class CardsArray {

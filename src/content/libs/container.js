@@ -96,13 +96,16 @@ class ShowBar {
     }
     static addElementsToBar(elements) {
         if (elements.length === 0) {
-            this.showBar.textContent = "No cards found";
+            this.text("No cards found");
         }
         else {
             elements.forEach(element => {
                 this.showBar.appendChild(element);
             });
         }
+    }
+    static text(text) {
+        this.showBar.textContent = text;
     }
 }
 
@@ -230,6 +233,35 @@ class Li {
             this.enable();
         }
 
+    }
+}
+
+class Input {
+    constructor() {
+        this.input = document.createElement("input")
+        this.input.className = "input-extension"
+        this.input.type = "text";
+        this.style()
+    }
+    style () {
+        this.input.style.width = "200px";
+        this.input.style.height = "36px";
+        this.input.style.marginLeft = "10px";
+        this.input.style.borderRadius = "5px";
+        this.input.style.border = "1px solid #772ce8";
+    }
+    place(querySelector) {
+        const container = document.querySelector(querySelector)
+        container.appendChild(this.input)
+    }
+    getValue() {
+        return this.input.value
+    }
+    setValue(value) {
+        this.input.value = value
+    }
+    text(text) {
+        this.input.placeholder = text;
     }
 }
 

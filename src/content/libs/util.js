@@ -1,3 +1,4 @@
+let requestMaxCount = 300;
 class Semaphore {
     constructor(max = 1) {
         this.max = Math.max(1, max);
@@ -60,7 +61,7 @@ class DynimicSemaphore extends Semaphore {
 
     async controllMax() {
         const requestCount = loadFromLocalStorage().length;
-        if (requestCount >= 300) {
+        if (requestCount >= requestMaxCount) {
             this.setMax(1);
         } else if (requestCount >= 250) {
             this.setMax(4);
@@ -101,7 +102,7 @@ async function saveFetch(url, options = {}) {
 
     await saveToLocalStorage()
 
-    if (requestCount >= 300) {
+    if (requestCount >= requestMaxCount) {
         await new Promise(resolve => setTimeout(resolve, 2000)); 
     }
     else if (requestCount > 200) {

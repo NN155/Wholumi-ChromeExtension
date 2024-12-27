@@ -3,10 +3,10 @@ let autoUnlock = false;
 let stopUpdating = false;
 let cardId = 0;
 let countBoost = 0
-
+requestMaxCount = 60;
 async function autoUpdatePageInfo() {
     if (stopUpdating) return;
-    const delay = 800;
+    const delay = 1100;
     while (!stopUpdating) {
         try {
             const isNewCard = await updateCardInfo();

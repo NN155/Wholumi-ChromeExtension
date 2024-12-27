@@ -1,12 +1,23 @@
-async function showCards({rank, src}) {
+async function showCards({rank, src, input}) {
     ShowBar.createShowBar();
+
+    const userName = input.getValue();
+    const myUrl = userName ? UrlConstructor.getUserUrl(userName) : UrlConstructor.getMyUrl();
+    const my = new GetCards({userUrl: myUrl, rank});
+    let myCards;
+    try {
+        myCards = await my.getInventory();
+    }
+    catch {
+        ShowBar.text("User not found");
+        return;
+    }
+    
     const usersList = await getUsersList(document, {
         limit:1000, 
         pageLimit:10,
     });
-    const myUrl = UrlConstructor.getMyUrl();
-    const my = new GetCards({userUrl: myUrl, rank});
-    const myCards = await my.getInventory();
+    
     const usersCards = await findUsersCards(usersList, user => getUserNeed(user, rank));
     const cards = await compareCards(myCards, usersCards);
     cards.forEach(card => {
@@ -58,12 +69,15 @@ function changeCards(cards, myCards, {rank, src}) {
 
 
 async function init() {
+    const button = new Button();
+    const input = new Input();
     const dom = await getDomCardRank();
     const {rank, src} = await getCardInfo(dom);
-    const text = `Show My ${rank} Cards`;
-    const button = new Button();
+    const text = `Compare ${rank} Cards`;
     button.text(text);
-    button.place(".tabs.tabs--center.mb-2");
-    button.onclick = () => showCards({rank, src});
+    button.onclick = () => showCards({rank, src, input});
+    input.text(UrlConstructor.getMyName());
+    await button.place(".tabs.tabs--center.mb-2");
+    input.place(".tabs.tabs--center.mb-2");
 }
 init()

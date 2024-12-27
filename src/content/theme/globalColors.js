@@ -7,4 +7,5 @@ const globalColors = {
     black: '#1b1b1b',
     blue: '#0047ab',
     purple: '#cd00cd',
+    orange: '#f06102',
 }
