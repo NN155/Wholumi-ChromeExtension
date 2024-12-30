@@ -1,5 +1,4 @@
 async function init() {
-    getCard();
     setCardInterval();
 }
 
@@ -15,14 +14,13 @@ async function getCard() {
     else if (data.reason == 'Есть выданная карта, которую пользователь не забрал') {
         await takeCard();
     }
-
     if (data.stop_reward === "yes") {
         return true;
     }
 }
 
 async function setCardInterval() {
-    while (true) {
+    while (!await getCard()) {
         await delay(1000 * 168);
         if (await getCard()) {
             break;

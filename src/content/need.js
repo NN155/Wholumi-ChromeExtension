@@ -45,7 +45,7 @@ async function showCards({ rank, src, input }) {
 
 function upPriority(cards, myNeedCards) {
     cards.forEach(card => {
-        if (myNeedCards.find(myCard => myCard.src === card.src)) {
+        if (myNeedCards.find(myCard => myCard.cardId === card.cardId)) {
             card.sortPriority = 1;
             card.setBorder(globalColors.purple);
         }
@@ -89,7 +89,7 @@ async function checkUserCards(user, rank = "s") {
 function addOrangeBorder(cards, myCards) {
     cards.forEach(card => {
         card.removeBorderds();
-        if (myCards.find(myCard => myCard.src === card.src)) {
+        if (myCards.find(myCard => myCard.cardId === card.cardId)) {
             card.setBorder(globalColors.orange);
         }
     })

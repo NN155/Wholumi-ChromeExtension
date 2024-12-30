@@ -1,6 +1,6 @@
 class Button {
-    constructor() {
-        this.onclick = null
+    constructor({text, onclick} = {text: "Button", onclick: null}) {
+        this.onclick = onclick;
         this._buttonContainer = document.createElement('div');
         this.button = document.createElement('button');
         this.button.className = 'button--primary extension';
@@ -8,6 +8,7 @@ class Button {
         this.button.style.userSelect = "none";
         this._buttonContainer.appendChild(this.button);
         this.button.onclick = this._onclick.bind(this);
+        this.text(text);
     }
     async _onclick() {
         this.disable()
