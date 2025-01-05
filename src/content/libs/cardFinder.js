@@ -47,6 +47,21 @@ class UrlConstructor {
         const url = this.getMyUrl();
         return url.replace(/\/user\/[^/]+/, `/user/${userName}`);
     }
+
+    static isMyPage(url = window.location.href) {
+        const name = this.getMyName().toLowerCase();
+        url = url.toLowerCase();
+
+        const regex = new RegExp(`/user/(${name})($|/)`, 'i');
+        return regex.test(url);
+    }
+
+    static getCardRank(url = window.location.href) {
+        url = url.toLowerCase();
+        const regex = /[?&]rank=([a-zA-Z])/;
+        const match = url.match(regex);
+        return match ? match[1].toLowerCase() : null;
+    }
 }
 
 class GetCards {

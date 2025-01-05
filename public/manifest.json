@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "AnimeStars Alpha",
-  "version": "1.1.9",
+  "version": "1.1.11",
   "author": "MrKoMi",
   "description": "Functionality for AnimeStars: Auto loot card, find needed cards in all categories, and find duplicates in remelt.",
   "permissions": [
@@ -28,7 +28,8 @@
         "https://animestars.org/cards/*/users/",
         "https://animestars.org/cards_remelt/*",
         "https://animestars.org/cards/*/trade?mycard=*",
-        "https://animestars.org/clubs/*/boost/*"
+        "https://animestars.org/clubs/*/boost/*",
+        "https://animestars.org/user/*/cards/trade/*"
       ],
       "css" :[
         "css/button.css",
@@ -87,6 +88,14 @@
       ],
       "js": [
         "content/clubs.js"
+      ]
+    },
+    {
+      "matches": [
+        "https://animestars.org/user/*/cards/trade/*"
+      ],
+      "js": [
+        "content/myPropose.js"
       ]
     }
   ],

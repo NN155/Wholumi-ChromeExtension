@@ -189,7 +189,23 @@ class Fetch {
             body.append("card_ids[]", id);
         });
 
-        await fetch('/engine/ajax/controller.php?mod=cards_ajax', {
+        await saveFetch('/engine/ajax/controller.php?mod=cards_ajax', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: body,
+        });
+    }
+    static async proposeCard(cardId) {
+        const body = new URLSearchParams({
+            user_hash: dle_login_hash,
+            action: "propose_add",
+            type: 1,
+            card_id: cardId,
+        });
+
+        await saveFetch('/engine/ajax/controller.php?mod=trade_ajax', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
