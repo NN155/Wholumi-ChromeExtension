@@ -4,9 +4,18 @@ let stopUpdating = false;
 let cardId = 0;
 let countBoost = 0
 let openCards = null;
+let globalDelay = 50;
+
+saveFetchConfig = {
+    ...saveFetchConfig,
+    delay: {
+        ...saveFetchConfig.delay,
+        min: 0,
+    },
+}
 async function autoUpdatePageInfo() {
     if (stopUpdating) return;
-    const delay = 200;
+    const delay = 200 + globalDelay;
     while (!stopUpdating) {
         try {
             const isNewCard = await updateCardInfo();
@@ -67,6 +76,7 @@ async function responceController(res, id, src) {
                     const delay = Math.abs(parseInt(match[1])) * 1000 - 1000;
                     await new Promise(resolve => setTimeout(resolve, delay));
                 }
+                await new Promise(resolve => setTimeout(resolve, globalDelay));
                 await eventBoostCard({ detail: { id: id } })
         }
     }

@@ -17,7 +17,7 @@ async function fetchApi(cardsIds, count) {
     const url = "https://animestars.org/engine/ajax/controller.php?mod=decks_ajax";
     const body = new URLSearchParams({
         user_hash: dle_login_hash,
-        is_trade: 0,
+        is_trade: 1,
         description: "Да все 1000 S карт в моем инвентаре. Я их спрятал <3",
         name: `Все карты S-тира на сайте. Часть ${count}`,
         action: "create",
@@ -32,14 +32,13 @@ async function fetchApi(cardsIds, count) {
         body.append("card_owner_ids[]", id);
     });
 
-    const response = await fetch(url, {
+    const response = await saveFetch(url, {
         method: "POST",
         headers: {
             "Content-Type": "application/x-www-form-urlencoded",
         },
         body: body,
     });
-
 }
 async function init() {
     const button = new Button();

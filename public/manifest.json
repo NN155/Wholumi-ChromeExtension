@@ -1,41 +1,50 @@
 {
   "manifest_version": 3,
   "name": "AnimeStars Alpha",
-  "version": "1.1.11",
+  "version": "1.2.2",
   "author": "MrKoMi",
-  "description": "Functionality for AnimeStars: Auto loot card, find needed cards in all categories, and find duplicates in remelt.",
+  "description": "Press INSERT to open the menu",
   "permissions": [
     "tabs",
-    "scripting"
+    "scripting",
+    "storage"
   ],
+  "host_permissions": [
+    "https://animestars.org/*"
+  ],
+  "background": {
+    "service_worker": "background/worker.js"
+  },
   "content_scripts": [
     {
       "matches": [
         "https://animestars.org/*"
       ],
       "js": [
-        "content/libs/getUserHash.js",
-        "content/libs/localStorage.js",
-        "content/libs/util.js",
-        "content/libs/fetchApi.js",
-        "content/getCard.js"
+        "content/libs/config.js",
+        "menu/style/menu.js",
+        "menu/components.js",
+        "menu/tab.js",
+        "menu/tabs/misc.js",
+        "menu/tabs/settings.js",
+        "menu/menu.js",
+        "menu/content.js"
       ]
     },
     {
       "matches": [
-        "https://animestars.org/cards/*/users/need/",
-        "https://animestars.org/cards/*/users/trade/",
-        "https://animestars.org/cards/*/users/",
-        "https://animestars.org/cards_remelt/*",
-        "https://animestars.org/cards/*/trade?mycard=*",
-        "https://animestars.org/clubs/*/boost/*",
-        "https://animestars.org/user/*/cards/trade/*"
+        "https://animestars.org/*"
       ],
-      "css" :[
+      "css": [
         "css/button.css",
         "css/switcher.css"
       ],
       "js": [
+        "content/libs/getUserHash.js",
+        "content/libs/localStorage.js",
+        "content/libs/util.js",
+        "content/libs/fetchApi.js",
+        "content/getCard.js",
         "content/theme/globalColors.js",
         "content/libs/CardClasses.js",
         "content/libs/container.js",
@@ -96,6 +105,22 @@
       ],
       "js": [
         "content/myPropose.js"
+      ]
+    },
+    {
+      "matches": [
+        "https://animestars.org/trades/"
+      ],
+      "js": [
+        "content/confirmTrade.js"
+      ]
+    },
+    {
+      "matches": [
+        "https://animestars.org/cards/?rank=s"
+      ],
+      "js": [
+        "content/add-colodes.js"
       ]
     }
   ],

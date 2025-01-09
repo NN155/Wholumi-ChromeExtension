@@ -15,7 +15,10 @@ async function getCard() {
         await takeCard();
     }
     if (data.stop_reward === "yes") {
-        return true;
+        return {stop_reward: "yes"};
+    }
+    else {
+        return {continue: "yes"};
     }
 }
 
@@ -40,5 +43,26 @@ async function takeCard() {
     await Fetch.reportCardViewed(cardInfo.cards?.owner_id)
 }
 
+let getCardPromise = null;
 
-init();
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+    if (request.action === 'get-card') {
+        if (getCardPromise) {
+            getCardPromise.then(sendResponse);
+        } else {
+            getCardPromise = (async () => {
+                const response = await getCard();
+                return response;
+            })();
+
+            getCardPromise.then(response => {
+                sendResponse(response);
+                getCardPromise = null;
+            });
+        }
+
+        return true;
+    }
+});
+chrome.runtime.sendMessage({ action: "get-card", mode: "ping-tab" });
+// init();

@@ -93,7 +93,7 @@ class Fetch {
     }
 
     // cancel trade by id
-    static async cancelTrade(id) {
+    static async cancelTrade(id, kind) { // kind = "sended" or "recieved"
         const url = "/engine/ajax/controller.php?mod=trade_ajax";
 
         const response = await saveFetch(url, {
@@ -104,11 +104,19 @@ class Fetch {
             body: new URLSearchParams({
                 user_hash: dle_login_hash,
                 action: "cansel_trade",
-                kind: "sended",
+                kind,
                 id,
             }),
         });
         return response.json();
+    }
+
+    static async cancelTradeBySended(id) {
+        return this.cancelTrade(id, "sended");
+    }
+
+    static async cancelTradeByRecieved(id) {
+        return this.cancelTrade(id, "recieved");
     }
 
     //boost club card by id
@@ -203,6 +211,22 @@ class Fetch {
             action: "propose_add",
             type: 1,
             card_id: cardId,
+        });
+
+        await saveFetch('/engine/ajax/controller.php?mod=trade_ajax', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: body,
+        });
+    }
+
+    static async confirmTrade(id) {
+        const body = new URLSearchParams({
+            user_hash: dle_login_hash,
+            action: "confirm_trade",
+            id: id,
         });
 
         await saveFetch('/engine/ajax/controller.php?mod=trade_ajax', {

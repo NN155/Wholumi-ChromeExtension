@@ -1,4 +1,24 @@
-let requestMaxCount = 300;
+let saveFetchConfig = {
+    delay: {
+        max: 10000,
+        preMax: 2000,
+        min: 75,
+    },
+    requestLimit: {
+        max: 320,
+        preMax: 300,
+        average: 250,
+        preMin: 50,
+        min: 0,
+    },
+    threadCount: {
+        max: 30,
+        preMax: 10,
+        preMin: 4,
+        min: 1,
+    }
+}
+
 class Semaphore {
     constructor(max = 1) {
         this.max = Math.max(1, max);
@@ -62,14 +82,14 @@ class DynimicSemaphore extends Semaphore {
     async controllMax() {
         const requestCount = loadFromLocalStorage().length;
 
-        if (requestCount >= requestMaxCount || requestCount >= 320) {
-            this.setMax(1);
-        } else if (requestCount >= 250) {
-            this.setMax(4);
-        } else if (requestCount >=  50) {
-            this.setMax(10);
+        if (requestCount >= saveFetchConfig.requestLimit.preMax || requestCount >= saveFetchConfig.requestLimit.max) { // 300, 320
+            this.setMax(saveFetchConfig.threadCount.min); // 1
+        } else if (requestCount >= saveFetchConfig.requestLimit.average) { // 250
+            this.setMax(saveFetchConfig.threadCount.preMin); // 4
+        } else if (requestCount >= saveFetchConfig.requestLimit.preMin) { // 50
+            this.setMax(saveFetchConfig.threadCount.preMax); // 10
         } else {
-            this.setMax(30);
+            this.setMax(saveFetchConfig.threadCount.max); // 30
         }
         if (requestCount % 5 === 0) {
             console.log(`Request count: ${requestCount}, max: ${this.max}`);
@@ -102,16 +122,15 @@ async function saveFetch(url, options = {}) {
     const requestCount = await loadFromLocalStorage().length;
 
     await saveToLocalStorage()
-    if (requestCount >= 320) {
-        await new Promise(resolve => setTimeout(resolve, 10000));
+    if (requestCount >= saveFetchConfig.requestLimit.max) { // 320
+        await new Promise(resolve => setTimeout(resolve, saveFetchConfig.delay.max)); // 10000
     }
-    else if (requestCount >= requestMaxCount) {
-        await new Promise(resolve => setTimeout(resolve, 2000)); 
+    else if (requestCount >= saveFetchConfig.requestLimit.preMax) { // 300
+        await new Promise(resolve => setTimeout(resolve, saveFetchConfig.delay.preMax)); // 2000
     }
     else {
-        await new Promise(resolve => setTimeout(resolve, 75)); 
+        await new Promise(resolve => setTimeout(resolve, saveFetchConfig.delay.min)); // 75
     }
-
 
     try {
         const response = await fetch(url, options);

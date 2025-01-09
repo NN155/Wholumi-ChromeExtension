@@ -16,6 +16,14 @@ export default defineConfig({
             src: 'src/content/*', 
             dest: 'content',
           },
+          {
+            src: 'src/menu/*',
+            dest: 'menu',
+          },
+          {
+            src: 'src/background/*',
+            dest: 'background',
+          }
         ],
       }),
     ],

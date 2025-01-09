@@ -62,6 +62,18 @@ class UrlConstructor {
         const match = url.match(regex);
         return match ? match[1].toLowerCase() : null;
     }
+
+    static getCardUrl(cardId) {
+        return `/cards/${cardId}/users/`;
+    }
+
+    static getCardNeedUrl(cardId) {
+        return `/cards/${cardId}/users/need/`;
+    }
+
+    static getCardTradeUrl(cardId) {
+        return `/cards/${cardId}/users/trade/`;
+    }
 }
 
 class GetCards {
