@@ -1,45 +1,53 @@
 class Config {
     constructor() {
-        this.functionConfig = null; // Кеш для конфігурації
-        this.isInitialized = false; // Флаг, щоб уникнути багаторазової ініціалізації
-        this.initializationPromise = null; // Черга для обіцянок
-        this._receiveUpdateConfig(); // Прослуховування оновлення конфігурації
+        this.configCache = {};
+        this._receiveUpdateConfig();
     }
 
-    async initialization() {
-        if (!this.isInitialized) {
-            // Якщо конфігурація ще не завантажена, створюємо проміс для ініціалізації
-            this.initializationPromise = this.initializationPromise || this.loadConfig();
-            await this.initializationPromise; // Чекаємо на завершення завантаження конфігурації
-        }
-    }
-
-    async loadConfig() {
+    async loadConfig(key, subKeys = null) {
         try {
-            this.functionConfig = await this._getConfig(); // Завантаження конфігурації
-            this.isInitialized = true; // Конфігурація завантажена
+            return await this._getConfig(key, subKeys);
         } catch (error) {
-            console.error("Error loading config:", error);
+            console.error(`Error loading config for key "${key}":`, error);
         }
     }
 
-    async getConfig() {
-        await this.initialization(); // Чекаємо на завантаження конфігурації
-        return this.functionConfig || {}; // Повертаємо кеш або порожній об'єкт
+    async loadFullConfig(key) {
+        const config = await this.loadConfig(key);
+        this.configCache[key] = config;
+        return this.configCache[key];
     }
 
-    async _getConfig() {
-        const response = await this._sendMessageAsync({ action: "get-function-config" });
+    async getConfig(key, subKeys = null) {
+        if (this.configCache[key] ) {
+            if (subKeys && !this._isSubKeysValid(this.configCache[key], subKeys)) {
+                    const config = await this.loadConfig(key, subKeys);
+                    this.configCache[key] = { ...this.configCache[key], ...config };
+            }
+            return this.configCache[key];
+        }
+        
+        const config = await this.loadConfig(key, subKeys);
+        this.configCache[key] = subKeys ? { ...config } : config;
+    
+        return this.configCache[key];
+    }
+
+    _isSubKeysValid(config, subKeys) {
+        return subKeys.every((subKey) => config[subKey] !== undefined);
+    }
+
+    async _getConfig(key, subKeys = null) {
+        const response = await this._sendMessageAsync({ action: "data-config", mode: "get-config", key, subKeys });
         if (response && response.config) {
             return response.config;
         }
         return {};
     }
 
-    async setConfig(config) {
-        await this._sendMessageAsync({ action: "save-function-config", functionConfig: config });
-        this.functionConfig = { ...this.functionConfig, ...config };
-        console.log(this.functionConfig);
+    async setConfig(key, config) {
+        await this._sendMessageAsync({ action: "data-config", mode: "save-config", key, config });
+        this.configCache[key] = { ...this.configCache[key], ...config };
     }
 
     _sendMessageAsync(message) {
@@ -56,14 +64,14 @@ class Config {
 
     _receiveUpdateConfig() {
         chrome.runtime.onMessage.addListener((message) => {
-            if (message.action === "update-function-config") {
-                this.functionConfig = message.functionConfig;
-                const event = new CustomEvent("function-config-updated");
+            if (message.action === "update-config" && message.key) {
+                this.configCache[message.key] = message.config;
+                const event = new CustomEvent(`config-updated`, { detail: { key: message.key }});
                 window.dispatchEvent(event);
             }
-        }), () => chrome.runtime.sendMessage({ status: "success"});
+        });
     }
 }
 
 const ExtensionConfig = new Config();
-ExtensionConfig.initialization();
+ExtensionConfig.loadFullConfig("functionConfig");

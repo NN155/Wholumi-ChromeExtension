@@ -1,0 +1,207 @@
+.col-main {
+    padding-top: 0;
+} 
+.lootbox {
+    display: flex;
+    justify-content: center;
+}
+.lootbox__inner {
+    width: 800px;
+    height: 1270px;
+    overflow: hidden;
+}
+.lootbox__header {
+    border-radius: 14px;
+    padding: 35px;
+    padding-top: 60px;
+    height: 302px;
+    margin-bottom: 25px;
+    position: relative;
+}
+.lootbox__text {
+    position: absolute;
+    background: var(--ui-bg-darker);
+    padding: 20px;
+    z-index: 6;
+    text-align: center;
+    font-weight: 500;
+    font-size: 24px;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    border-radius: 0 0 14px 14px;
+}
+.lootbox__images {
+    position: relative;
+    height: 170px;
+    margin-top: auto;
+}
+.lootbox__image {
+    bottom: -50px;
+    width: 140px;
+    left: 50%;
+    margin-left: -70px;
+    position: absolute;
+    display: block;
+    flex-shrink: 0;
+    cursor: pointer;
+    border-radius: 6px;
+    background-color: #fff;
+}
+.lootbox__image:nth-of-type(1) {
+    transform: rotate(-18deg) translate(-59px, -47px);
+    box-shadow: none;
+    z-index: 1;
+}
+.lootbox__wrapper {
+    position: relative;
+    max-width: 100%;
+    border-radius: 6px;
+    overflow: hidden;
+}
+.lootbox__image:nth-of-type(2) {
+    z-index: 5;
+    transform: translate(0, -39px);
+}
+.lootbox__image:nth-of-type(3) {
+    transform: rotate(18deg) translate(59px, -47px);
+    z-index: 1;
+}
+.lootbox__image:nth-of-type(4) {
+    transform: rotate(-34deg) translate(-105px, -68px);
+}
+.lootbox__image:nth-of-type(5) {
+    transform: rotate(34deg) translate(105px, -68px);
+}
+.lootbox__description {
+    background: var(--bg-2);
+    border-radius: 12px;
+    padding: 10px;
+}
+.lootbox__description-title {
+    margin-bottom: 10px;
+    font-size: 20px;
+}
+.lootbox__description-title span {
+    color: #8b00ff;
+}
+.lootbox__description-text {
+    font-size: 15px;
+    line-height: 20px;
+}
+.lootbox__description-text span {
+    color: #8b00ff;
+}
+.lootbox__middle {
+    border-radius: 10px;
+    padding: 10px 0;
+    display: flex;
+    justify-content: space-between;
+    margin: 15px 0;
+}
+.lootbox__middle-item {
+    border: 1px solid transparent;
+    padding: 9px;
+    width: 31%;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    transition: all .3s;
+    cursor: pointer;
+    background: var(--bg-2);
+}
+.lootbox__middle-item--active {
+    border: 1px solid #8b00ff;
+}
+.lootbox__middle-count {
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 5px;
+}
+.lootbox__middle-price {
+    display: flex;
+    align-items: center;
+}
+
+.lootbox__row {
+    display: flex;
+    flex-direction: column;
+    margin-top: 15px;
+}
+.lootbox__title {
+    font-size: 20px;
+    font-weight: 500;
+    text-align: center;
+    margin-bottom: 15px;
+}
+.lootbox__list {
+    display: flex;
+    justify-content: space-between;
+    padding-bottom: 16px;
+}
+.lootbox__card-disabled {
+    width: 31%;
+    cursor: pointer;
+}
+.lootbox__card-disabled img {
+    border-radius: 12px;
+}
+.tab__menu {
+    display: flex;
+    overflow-x: auto;
+}
+.tab_menu_fon {
+background: var(--bg-btn-dark);
+    box-shadow: var(--bsh-btn-dark);
+    padding: 12px;
+    border-radius: 8px;
+}
+.tab__item {
+    margin-right: 20px;
+    cursor: pointer;
+    display: block;
+    flex-shrink: 0;
+    font-size: 13px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    border-bottom: 3px solid transparent;
+}
+.tab__item-active {
+    font-weight: 700;
+    border-bottom: 3px solid #f06102;
+    padding: 0;
+    cursor: default;
+}
+.tab__item-top {font-weight: 500;}
+.lootbox__counter {color: #8b00ff;}
+@keyframes bounceX {
+  0% {
+    transform: scale(1);
+  }
+  30% {
+    transform: scale(1.1);
+  }
+  50% {
+    transform: scale(0.9);
+  }
+  70% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+.lootbox__card-disabled[data-rank=s] {
+    animation: bounceX 1s ease;
+}
+
+
+.anime-cards__item-disabled {
+    position: relative;
+    background: var(--ui-bg-darker);
+    padding: 6px;
+    border-radius: 16px;
+    box-shadow: 0 1px 1px transparent, 0 2px 2px rgba(0, 0, 0, .12);
+    cursor: pointer;
+}

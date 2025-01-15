@@ -164,8 +164,10 @@ chrome.runtime.onMessage.addListener(async (message, sender, sendResponse, tab) 
     }
 });
 
-self.addEventListener("function-config-updated", () => {
-    processPingTab();
+self.addEventListener("config-updated", (event) => {
+    if (event.detail.key === "functionConfig") {
+        processPingTab();
+    }
 });
 
 

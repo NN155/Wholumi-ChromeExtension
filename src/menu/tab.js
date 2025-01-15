@@ -1,9 +1,9 @@
 class Tab {
-    constructor(tabName, content, menu) {
+    constructor(tabName, content) {
         this.tabName = tabName;
         this.content = content;
         this.isActive = false;
-        this.funcitonConfig = null;
+        this.config = {};
     }
 
     render() {
@@ -46,12 +46,104 @@ class Tab {
         return contentElement;
     }
 
-    async updateConfig() {
-        this.functionConfig = await ExtensionConfig.getConfig();
+    async updateConfig(key) {
+        this.config[key] = await ExtensionConfig.getConfig(key);
     }
 
-    async setConfig(newConfig) {
-        await ExtensionConfig.setConfig(newConfig);
-        this.functionConfig = await ExtensionConfig.getConfig();
+    isTabData(key) {
+        if (!this.tabData) { return true }
+        for (let i = 0; i < this.tabData.length; i++) {
+            if (this.tabData[i] === key) {
+                return true;
+            }
+        }
+        return false;
+    }
+    async onConfigUpdate(event) {
+        const { key } = event.detail;
+        if (!this.isTabData(key)) return;
+        await this.updateConfig(key);
+        this.elementsConfig.forEach((item) => {
+            if (item.config === key) {
+                item.element.updateState(this.config[key][item.data]);
+            }
+        });
+    };
+
+    async setConfig(key, config) {
+        await ExtensionConfig.setConfig(key, config);
+        this.config[key] = await ExtensionConfig.getConfig(key);
+    }
+
+    createElement(item) {
+        const shadowRoot = document.querySelector("#custom-window").shadowRoot;
+        item.container = shadowRoot.querySelector(`#${item.id}${item.html}`);
+
+        if (item.containerStyle) {
+            item.container.style = item.containerStyle;
+        }
+        const tab = this;
+        switch (item.html) {
+            case 'Switcher':
+                item.element = new CustomMenuSwitcher({
+                    id: item.id,
+                    label: item.label,
+                    checked: tab.config[item.config][item.data],
+                    onChange: async (isChecked) => {
+                        await tab.setConfig(item.config, { [item.data]: isChecked });
+                    }
+                });
+                break;
+            case 'Button':
+                item.element = new CustomMenuButton({
+                    id: item.id,
+                    text: item.text ? item.text : (tab.config[item.config][item.data][item.subkey] || "Not updated"),
+                    label: item.label,
+                    onclick: item.onclick,
+                    data: item.data || null,
+                    subkey: item.subkey || null,
+                });
+                break;
+        }
+
+        item.element.render(item.container);
+    }
+
+
+    async onActivate() {
+        this.elementsConfig.forEach((item) => {
+            this.createElement(item);
+        });
+        window.removeEventListener("config-updated", this.onConfigUpdate.bind(this));
+        window.addEventListener("config-updated", this.onConfigUpdate.bind(this));
+    };
+    static createContent(config) {
+        let content = "";
+        const groups = {};
+    
+        config.forEach((item) => {
+            if (!groups[item.group]) {
+                groups[item.group] = [];
+            }
+            groups[item.group].push(item);
+        });
+    
+        const groupKeys = Object.keys(groups);
+        
+        groupKeys.forEach((group, index) => {
+            content += `<div class="group-title">${group}</div>`;
+            
+            groups[group].forEach((item) => {
+                content += `
+                    <div id="${item.id}${item.html}"></div>
+                `;
+            });
+    
+            // Додаємо роздільник, якщо це не остання група
+            if (index !== groupKeys.length - 1) {
+                content += '<hr>';
+            }
+        });
+        return content;
     }
 }

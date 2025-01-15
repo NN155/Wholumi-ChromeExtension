@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "AnimeStars Alpha",
-  "version": "1.2.2",
+  "version": "1.2.5",
   "author": "MrKoMi",
   "description": "Press INSERT to open the menu",
   "permissions": [
@@ -26,6 +26,7 @@
         "menu/components.js",
         "menu/tab.js",
         "menu/tabs/misc.js",
+        "menu/tabs/fun.js",
         "menu/tabs/settings.js",
         "menu/menu.js",
         "menu/content.js"
@@ -48,7 +49,8 @@
         "content/theme/globalColors.js",
         "content/libs/CardClasses.js",
         "content/libs/container.js",
-        "content/libs/cardFinder.js"
+        "content/libs/cardFinder.js",
+        "content/dataConfig.js"
       ]
     },
     {
@@ -121,6 +123,21 @@
       ],
       "js": [
         "content/add-colodes.js"
+      ]
+    },
+    {
+      "matches": [
+        "https://animestars.org/cards/pack/"
+      ],
+      "js": [
+        "content/libs/external/Jquery.js",
+        "content/libs/external/JqueryUI.js",
+        "content/libs/external/AnimeStarsJquery.js",
+        "content/libs/JQueryHTML.js",
+        "content/packs.js"
+      ],
+      "css": [
+        "css/packs.css"
       ]
     }
   ],

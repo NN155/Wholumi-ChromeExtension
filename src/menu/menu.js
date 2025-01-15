@@ -35,8 +35,9 @@ class CustomMenu {
 
     async initializeTabs() {
         const tabsData = [
-            await miscTab(this),
-            settingTab(this)
+            await miscTab(),
+            await funTab(),
+            settingTab(),
         ];
 
         this.tabs = tabsData;

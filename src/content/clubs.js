@@ -1,10 +1,11 @@
 let autoBoost = false;
-let autoUnlock = false;
 let stopUpdating = false;
-let cardId = 0;
 let countBoost = 0
 let openCards = null;
 let globalDelay = 50;
+
+let newDay = false;
+let badData = false;
 
 saveFetchConfig = {
     ...saveFetchConfig,
@@ -18,10 +19,16 @@ async function autoUpdatePageInfo() {
     const delay = 200 + globalDelay;
     while (!stopUpdating) {
         try {
-            const isNewCard = await updateCardInfo();
-            if (autoBoost && isNewCard) {
-                cardId++;
-                await eventBoostCard({ detail: { id: cardId } });
+            const { res, badData } = await updateCardInfo();
+            checkAutoOff(res.boost_count);
+            if (res.boost_html) {
+                newDay = !badData;
+                updatePageInfo(res.boost_html, res.boost_count, res.top_html)
+                
+                const event = new CustomEvent("page-info-updated");
+                window.dispatchEvent(event);
+                
+                await eventBoostCard()
             }
         } catch (error) {
             console.error("Error during page update:", error);
@@ -32,21 +39,37 @@ async function autoUpdatePageInfo() {
     }
 }
 
+function clubCardInfo() {
+    const src = document.querySelector(".club-boost__image img").getAttribute("src")
+    const ownerLists = document.querySelectorAll('.club-boost__owners-list');
+
+    const links = [];
+
+    ownerLists.forEach(list => {
+        links.push(list.querySelector('a').getAttribute("href"));
+    });
+
+    return { links, src }
+}
+
 async function updateCardInfo() {
-    const cardId = document.querySelector(".club__boost__refresh-btn").getAttribute("data-card-id")
-    const res = await Fetch.updateCardInfo(cardId)
-    if (res.boost_html) {
-        updatePageInfo(res.boost_html)
-    }
-    return res.boost_html;
+    const clubRefreshBtn = document.querySelector(".club__boost__refresh-btn")
+    const cardId = clubRefreshBtn ? clubRefreshBtn.getAttribute("data-card-id") : 0;
+    return {res: await Fetch.updateCardInfo(cardId), badData: !clubRefreshBtn};
 }
 
-function updatePageInfo(html) {
+function updatePageInfo(html, boostCount = null, top = null) {
     const container = document.querySelector(".club-boost--content")
-    container.innerHTML = html
+    container.innerHTML = html;
+    if (boostCount && top) {
+        const nav = document.querySelector(".tabs")
+        const boostLimit = document.querySelector(".boost-limit")
+        nav.innerHTML = top;
+        boostLimit.innerHTML = boostCount;
+    }
 }
 
-async function boostCard(id) {
+async function boostCard() {
     const button = document.querySelector(".club__boost-btn")
     if (button && autoBoost) {
         const cardId = button.getAttribute("data-card-id")
@@ -54,12 +77,12 @@ async function boostCard(id) {
         const src = document.querySelector(".club-boost__image img").getAttribute("src")
         if (isOpen(src)) {
             const res = await Fetch.boostCard(cardId, clubId)
-            responceController(res, id, src)
+            responceController(res, src)
         }
     }
 }
 
-async function responceController(res, id, src) {
+async function responceController(res, src) {
     console.log("Boost Response:", res)
     if (res.error) {
         switch (res.error) {
@@ -68,19 +91,21 @@ async function responceController(res, id, src) {
             case "Достигнут дневной лимит пожертвований в клуб, подождите до завтра":
             case "Вклады в клуб временно отключены и находятся на обновлении":
                 break;
-            default: 
+            default:
                 const regex = /через\s*(-?\d+)\s*секунд/;
-                
+
                 const match = res.error.match(regex);
                 if (match) {
                     const delay = Math.abs(parseInt(match[1])) * 1000 - 1000;
                     await new Promise(resolve => setTimeout(resolve, delay));
                 }
                 await new Promise(resolve => setTimeout(resolve, globalDelay));
-                await eventBoostCard({ detail: { id: id } })
+                await eventBoostCard()
         }
+        return;
     }
-    else if (res.boost_html_changed) {
+
+    if (res.boost_html_changed) {
         updatePageInfo(res.boost_html_changed)
     }
     else if (res.boost_html) {
@@ -90,11 +115,22 @@ async function responceController(res, id, src) {
         updatePageInfo(res.boost_html)
     }
 
+    const event = new CustomEvent("page-info-updated");
+    window.dispatchEvent(event);
+
+    await eventBoostCard()
 }
 
-async function eventBoostCard(event) {
+function checkAutoOff(countBoost) {
+    if (newDay && countBoost >= 300) {
+        stopUpdating = true;
+        switcherUpdatePage.turnOff()
+    }
+}
+
+async function eventBoostCard() {
     if (autoBoost) {
-        await boostCard(event.detail.id)
+        await boostCard()
     }
 }
 
@@ -104,15 +140,15 @@ const switcherAutoBoost = new Switcher(
         onChange: (isChecked) => {
             autoBoost = isChecked
             if (autoBoost) {
-                eventBoostCard({ detail: { id: cardId } })
+                eventBoostCard()
             }
         }
     }
 )
 
-async function getOpenInventoryCards(button) {
+async function getOpenInventoryCards() {
     const myUrl = UrlConstructor.getMyUrl();
-    const ranks = ["c","d","e"]
+    const ranks = ["c", "d", "e"]
     const cards = new CardsArray();
     await Promise.all(
         ranks.map(async (rank) => {
@@ -125,7 +161,7 @@ async function getOpenInventoryCards(button) {
     const hashCards = new HashCards();
     cards.forEach(card => hashCards.add(card));
     openCards = hashCards;
-    button.text("Scanned")
+    scanButton.text("Scanned")
 }
 
 
@@ -145,6 +181,7 @@ const switcherUpdatePage = new Switcher(
         onChange: (isChecked) => {
 
             if (isChecked) {
+                newDay = false;
                 switcherAutoBoost.enable()
                 stopUpdating = false;
                 autoUpdatePageInfo();
@@ -160,8 +197,8 @@ switcherUpdatePage.text("Auto Page Info Update")
 
 switcherUpdatePage.place(".secondary-title.text-center")
 switcherAutoBoost.place(".secondary-title.text-center")
-const button = new Button({
+const scanButton = new Button({
     text: "scan open cards",
 })
-button.onclick = () => getOpenInventoryCards(button)
-button.place(".secondary-title.text-center")
+scanButton.onclick = getOpenInventoryCards
+scanButton.place(".secondary-title.text-center")
