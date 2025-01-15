@@ -225,6 +225,27 @@ const switcher = `
 }
 
 `
+const button = `
+button.extension {
+    min-width: 100px;
+    position: relative;
+    margin: 0 auto;
+    padding: 5px 10px;
+    text-align: center;
+    color: aliceblue;
+    background-color: var(--main-helper-tabs-color);
+    border-radius: 10px;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-image 0.3s ease;
+}
 
+button.extension:disabled {
+    cursor: default;
+    opacity: 0.6;
+}
+`
 
 menuStyle.textContent += switcher;
+menuStyle.textContent += button;

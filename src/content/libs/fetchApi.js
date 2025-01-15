@@ -79,7 +79,7 @@ class Fetch {
         });
 
         creatorIds.forEach((id) => {
-            body.append("card_ids[]", id);
+            body.append("creator_ids[]", id);
         });
 
         const response = await saveFetch(url, {

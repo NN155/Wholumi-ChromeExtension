@@ -37,8 +37,10 @@ class Config {
 const config = new Config();
 config.initialization();
 
-self.addEventListener("config-updated", async () => {
-    await config.initialization();
-    const event = new CustomEvent("function-config-updated");
+self.addEventListener("config-update", async (e) => {
+    if (event.detail.key === "functionConfig") {
+        await config.initialization();
+    }
+    const event = new CustomEvent("config-updated", { detail: { key: e.detail.key } });
     self.dispatchEvent(event);
 });

@@ -43,3 +43,51 @@ class CustomMenuSwitcher {
         }
     }
 }
+
+class CustomMenuButton {
+    constructor(options = {}) {
+        const defaults = {
+            id: 'customButton',
+            text: 'Click me',
+            label: 'Function',
+            disabled: false,
+            onclick: () => { },
+        };
+
+        this.settings = { ...defaults, ...options };
+    }
+    async _onclick() {
+        this.button.disabled = true;
+        try {
+            await this.settings.onclick();
+        }
+        finally {
+            this.button.disabled = false;
+        }
+    }
+    render(target) {
+
+        if (!(target instanceof HTMLElement)) {
+            console.error('Target element must be a valid HTML element.');
+            return;
+        }
+
+        target.innerHTML = `
+        <div class="custom-button-container">
+            <button id="${this.settings.id}" class="extension">${this.settings.text}</button>
+            <span class="label-text">${this.settings.label}</span>
+        </div>
+        `;
+        this.button = target.querySelector(`button`)
+        this.button.onclick = this._onclick.bind(this);
+        
+    }
+    updateState(data) {
+        if (!this.settings.data && !this.settings.subkey) return;
+        const shadowRoot = document.querySelector("#custom-window").shadowRoot;
+        const button = shadowRoot.querySelector(`#${this.settings.id}`);
+        if (button) {
+            button.textContent = data[this.settings.subkey];
+        }
+    }
+}
