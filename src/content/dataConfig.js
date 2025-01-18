@@ -1,17 +1,22 @@
-// Обробник події
 window.addEventListener("update-data-config", async (event) => {
+    let data;
     switch(event.detail.key) {
         case "packInventory":
-            const cards = await updateInventoryInfo();
-            const newEvent = new CustomEvent("data-config-updated", {
-                detail: {
-                    key: "packInventory",
-                    cards: cards,
-                },
-            });
-            window.dispatchEvent(newEvent);
+            data = await updateInventoryInfo();
+            break;
+        case "siteInventory": 
+            data = await updateSiteInventory();
             break;
     }
+
+    await ExtensionConfig.setConfig("dataConfig", { [event.detail.key]: data });
+    const newEvent = new CustomEvent(event.detail.event, {
+        detail: {
+            id: event.detail.id,
+        },
+    });
+
+    window.dispatchEvent(newEvent);
 });
 
 async function updateInventoryInfo() {
@@ -28,5 +33,34 @@ async function updateInventoryInfo() {
         }
     });
 
+    return [...cards];
+}
+
+async function updateSiteInventory() {
+    const cards = await getSiteInventory();
+    for (const rank in cards) {
+        const data = [];
+        cards[rank].forEach(card => {
+            data.push({ id: card.cardId, name : card.name, src: card.src });
+        });
+        cards[rank] = data;
+    }
     return cards;
 }
+
+async function getSiteInventory() {
+    const ranks = ["s", "a", "b", "c", "d", "e"];
+    const baseUrl = "https://animestars.org/cards/?rank=";
+    const userName = "Name";
+    
+    const cardsPromises = ranks.map(rank => {
+        const cardInstance = new GetCards({ rank, userUrl: `${baseUrl}${rank}`, userName });
+        return cardInstance.getAllCards(cardInstance.userUrl);
+    });
+    
+    const [s, a, b, c, d, e] = await Promise.all(cardsPromises);
+    const cards = {s, a, b, c, d, e};
+    return cards
+}
+
+

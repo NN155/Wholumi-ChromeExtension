@@ -247,5 +247,26 @@ button.extension:disabled {
 }
 `
 
+const input = `
+.custom-input-extension {
+  width: 100px;
+  height: 30px;
+  padding: 10px;
+  margin: 5px 0;
+  box-sizing: border-box;
+  border: 3px solid var(--main-helper-tabs-color);
+  border-radius: 10px;
+  background-color: var(--second-helper-tabs-color);
+  font-size: 16px;
+  color: var(--helper-text-color);
+}
+
+.custom-input-extension:focus, .custom-input-extension:focus {
+    outline: none;
+}
+
+`
+
 menuStyle.textContent += switcher;
 menuStyle.textContent += button;
+menuStyle.textContent += input;

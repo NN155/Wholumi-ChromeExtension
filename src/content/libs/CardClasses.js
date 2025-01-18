@@ -10,6 +10,7 @@ class Card {
         this.id = null;
         this.sortPriority = 0;
         this.cardId = null;
+        this.name = null;
     }
 
     setSrc() {
@@ -182,6 +183,10 @@ class Card {
         if (button) {
             button.remove();
         }
+    }
+
+    setName() {
+        this.name = this.card.querySelector('.anime-cards__item').getAttribute('data-name');
     }
 }
 

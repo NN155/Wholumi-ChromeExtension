@@ -1,71 +1,3 @@
-// Замість запиту використовуємо задані дані
-const data = {
-    "cards": {
-        "cards": [
-            { "id": "21003", "name": "Где Моя S", "author": "wholumulu", "news_id": "420", "rank": "e", "image": "https://animestars.org/uploads/cards_image/101/e/gde-moja-s-1729714766.webp", "approve": "1", "reward": "1", "comment": "", "new_author": "", "owned": 0 },
-            { "id": "20649", "name": "Гандам Аэриал", "author": "wholumulu", "news_id": "473", "rank": "s", "image": "https://animestars.org/uploads/cards_image/1529/s/gandam-ajerial-1735080502.webp", "approve": "1", "reward": "1", "comment": "", "new_author": "", "owned": 0 },
-            { "id": "14886", "name": "Акоя", "author": "wholumulu", "news_id": "468", "rank": "d", "image": "https://animestars.org/uploads/cards_image/190/d/akoja-1733687901.webp", "approve": "1", "reward": "1", "comment": "", "new_author": "", "owned": 1 }
-        ],
-    },
-    "balance": 342,
-    "counter": 24
-};
-
-const cardData = { "card": { "id": "10056", "name": "Пакунода", "poster": "/uploads/cards_image/101/d/pakunoda-1729826563.webp", "rank": "d" } }
-
-function replaceElement(elementSelector) {
-    var $buttonCopy = $(elementSelector).clone(false);
-    $(elementSelector).replaceWith($buttonCopy);
-    return $buttonCopy;
-}
-
-function replaceAll() {
-    const buyBtn = replaceElement('.lootbox__open-btn');
-    $('.lootbox__card').removeClass('lootbox__card').addClass('lootbox__card-disabled');
-}
-
-function createPack() {
-    var cards_arr = data.cards.cards;
-    cards_arr.forEach(function (item, index) {
-        var card = document.querySelectorAll('.lootbox__card-disabled')[index];
-        card.setAttribute('data-id', item.id);
-        card.setAttribute('data-rank', item.rank);
-        card.querySelector('img').setAttribute('src', item.image);
-
-        if (item.owned == 1) {
-            card.classList.add('anime-cards__item', 'anime-cards__owned-by-user');
-        } else {
-            card.classList.remove('anime-cards__item', 'anime-cards__owned-by-user');
-        }
-    });
-
-    document.querySelector('.lootbox__row').setAttribute('data-pack-id', data.cards.id);
-    document.querySelector('.lootbox__row').style.display = 'block';
-    document.querySelector('.lootbox__balance').textContent = data.balance;
-    document.querySelector('.lootbox__counter').textContent = data.counter;
-    replaceAllElements('.lootbox__card-disabled');
-
-}
-
-function lootCard() {
-    document.querySelectorAll('.lootbox__row').forEach(row => {
-        row.addEventListener('click', () => {
-            row.classList.add('loot-lock');
-
-            document.querySelectorAll('.lootbox__row').forEach(el => el.style.display = 'none');
-            document.querySelector('.lootbox__card-disabled img').setAttribute('src', '/templates/New/cards_system/empty-card.png');
-
-            openCardGiftModal(data.card.poster, data.card.name, data.card.rank);
-        });
-    });
-}
-
-function init() {
-    replaceAll()
-}
-
-
-
 class Pack {
     constructor(cards) {
         this.cards = null;
@@ -76,14 +8,10 @@ class Pack {
         this.init = true;
         $('body').on('click', '.lootbox__card-disabled', (event) => {  // Стрілкова функція
             var row = $(event.currentTarget).closest('.lootbox__row');
-            if (row.hasClass('loot-lock') && false) {
-                return false;
-            }
-
-            row.addClass('loot-lock');
             var button = $(event.currentTarget);
             var id = $(event.currentTarget).attr('data-id');
-            const data = this._lootbox_choose_fetch(id);  // Викликаємо метод класу
+            var rank = $(event.currentTarget).attr('data-rank');
+            const data = this._lootbox_choose_fetch(rank, id);  // Викликаємо метод класу
             if (data.error) {
                 DLEPush.warning(data.error);
                 loadPacks();
@@ -97,17 +25,18 @@ class Pack {
             else {
                 $('.lootbox__row').hide();
                 $('.lootbox__card-disabled img').attr('src', '/templates/New/cards_system/empty-card.png');
-                openCardGiftModal(data.card.poster, data.card.name, data.card.rank);
+                openCardGiftModal(data.card.src, data.card.name, data.card.rank);
                 row.removeClass('loot-lock');
             }
             PacksPromise();
         });
     }
 
-    _lootbox_choose_fetch(id) {
-        const cards = this.cards;
+    _lootbox_choose_fetch(rank, id) {
+        packConfig.packInventory.add(id);
+        const cards = packConfig.siteInventory[rank];
         let card = cards.find(card => card.id === id);
-        return { card: { poster: card.image, name: card.name, rank: card.rank } };
+        return { card: { src: card.src, name: card.name, rank: card.rank } };
     }
 }
 
@@ -124,7 +53,6 @@ class Packs {
         this.garant = null;
     }
     async createPacks() {
-
         for (let i = 0; i < this.count; i++) {
             this.counter -= 1;
             this.genericData(this.counter === 0);
@@ -138,7 +66,7 @@ class Packs {
         this.balance = Number($('.lootbox__balance').text());
         this.counter = Number($('.lootbox__counter').text());
         await new Promise(resolve => setTimeout(resolve, 100));
-        if (this.balance > this.price[this.count]) {
+        if (this.balance >= this.price[this.count]) {
             $('.lootbox__balance').text(this.balance - this.price[this.count]);
             $('.lootbox__counter').text((this.counter - this.count + 39) % 39 || 39);
             await this.createPacks();
@@ -158,13 +86,39 @@ class Packs {
     genericCards(garant = false) {
         const cards = []
         for (let i = 0; i < 3; i++) {
-            cards.push(this.genericOneCard());
+            cards.push(this.genericCard(garant));
         }
-        return cards
+        return cards;
     }
 
-    genericOneCard() {
-        return data.cards.cards[Math.floor(Math.random() * data.cards.cards.length)];
+    genericCard(garant) {
+            const rank = garant ? "a" : this._genericRandomRank();
+            const card = this._genericRandomCard(rank);
+            card.rank = rank;
+            card.owned = packConfig.packInventory.has(card.id) ? 1 : 0;
+            return card;
+    }
+    _genericRandomCard(rank) {
+        const cards = packConfig.siteInventory[rank];
+
+        const randomIndex = Math.floor(Math.random() * cards.length);
+
+        return cards[randomIndex];
+    }
+
+    _genericRandomRank() {
+        const chances = packConfig.chances;
+        const totalChance = chances.reduce((sum, item) => sum + item.chance, 0);
+
+        const randomValue = Math.random() * totalChance;
+    
+        let cumulative = 0;
+        for (const item of chances) {
+            cumulative += item.chance;
+            if (randomValue <= cumulative) {
+                return item.rank;
+            }
+        }
     }
 }
 
@@ -179,7 +133,82 @@ function modifyBuyButton() {
         packs.button_click();
     });
 }
-const packs = new Packs();
+
+function replaceElement(elementSelector) {
+    var $buttonCopy = $(elementSelector).clone(false);
+    $(elementSelector).replaceWith($buttonCopy);
+    return $buttonCopy;
+}
+
+function replaceAll() {
+    replaceElement('.lootbox__open-btn');
+    $('.lootbox__card').removeClass('lootbox__card').addClass('lootbox__card-disabled');
+}
+
+function firstLoad() {
+    replaceAll()
+    packs = new Packs();
+    modifyBuyButton();
+}
+
+async function loadData() {
+    return await ExtensionConfig.loadConfig("dataConfig", ["packInventory", "siteInventory"]);
+}
+
+function loadNewConfig(data) {
+    if (data.packInventory) packConfig.packInventory = new Set(data.packInventory);
+    if (data.siteInventory) packConfig.siteInventory = data.siteInventory;
+    if (data.info) packConfig.info = data.info;
+    if (data.chances) packConfig.chances = data.chances;
+}
+
+function submitChanges() {
+    $('.lootbox__balance').text(packConfig.info.balance);
+    $('.lootbox__counter').text(packConfig.info.counter);
+}
+
+let injected = false;
+let packs;
 let PacksPromise = null;
+
+let packConfig = {
+    packInventory: new Set(),
+    siteInventory: {},
+    info : {
+        balance: 10000,
+        counter: 20,
+    },
+    chances: [
+        { rank: "s", chance: 1 },
+        { rank: "a", chance: 1 },
+        { rank: "b", chance: 1 },
+        { rank: "c", chance: 1 },
+        { rank: "d", chance: 1 },
+        { rank: "e", chance: 1 },
+    ]
+}
+
+function init() {
+    window.addEventListener('packs', async (event) => {
+        switch (event.detail.key) {
+            case 'inject':
+                if (!injected) {
+                    injected = true;
+                    firstLoad();
+                }
+                let data = event.detail.data || {};
+                data = {...data, ... await loadData()};
+                loadNewConfig(data);
+                submitChanges();
+                const newEvent = new CustomEvent(event.detail.event, {
+                    detail: {
+                        id: event.detail.id,
+                    },
+                });
+                window.dispatchEvent(newEvent);
+        }
+    });
+}
+
 init()
-modifyBuyButton();
+

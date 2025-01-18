@@ -12,20 +12,26 @@ chrome.runtime.onInstalled.addListener(() => {
         if (config) {
             defaultConfig = { ...defaultConfig, ...config };
         }
-
         chrome.storage.local.set({ functionConfig: defaultConfig });
-        
-        chrome.storage.local.get("dataConfig", (data) => {
-            let config = data.dataConfig;
-            let defaultConfig = {
-                lastUpdate: {},
-                packInventory : {},
-            }
-            if (config) {
-                defaultConfig = { ...defaultConfig, ...config }; 
-            }
-
-            chrome.storage.local.set({ dataConfig: defaultConfig });
-        })
     });
+
+    chrome.storage.local.get("dataConfig", (data) => {
+        let config = data.dataConfig;
+        let defaultConfig = {
+            lastUpdate: {},
+            packInventory: {},
+        }
+        if (config) {
+            defaultConfig = { ...defaultConfig, ...config };
+        }
+
+        chrome.storage.local.set({ dataConfig: defaultConfig });
+    })
+
+    let defaultConfig = {
+        blockSendingUntil: Date.now(),
+        isBlocked: false,
+    }
+    chrome.storage.local.set({ getCardData: defaultConfig });
+
 });

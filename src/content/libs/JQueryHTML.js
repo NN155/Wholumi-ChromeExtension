@@ -104,7 +104,7 @@ function processLootboxData(data) {
         var $card = $('.lootbox__card-disabled').eq(index);
         $card.attr('data-id', item.id);
         $card.attr('data-rank', item.rank);
-        $card.find('img').attr('src', item.image);
+        $card.find('img').attr('src', item.src);
         if (item.owned == 1) {
             $card.addClass("anime-cards__item-disabled anime-cards__owned-by-user");
         } else {

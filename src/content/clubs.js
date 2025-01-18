@@ -1,11 +1,13 @@
-let autoBoost = false;
-let stopUpdating = false;
-let countBoost = 0
-let openCards = null;
-let globalDelay = 50;
-
-let newDay = false;
-let badData = false;
+const clubData = {
+    autoBoost: false,
+    firstBoost: false,
+    stopUpdating: false,
+    countBoost: 0,
+    openCards: null,
+    globalDelay: 75,
+    newDay: false,
+    telegramBotBool: false,
+}
 
 saveFetchConfig = {
     ...saveFetchConfig,
@@ -15,21 +17,27 @@ saveFetchConfig = {
     },
 }
 async function autoUpdatePageInfo() {
-    if (stopUpdating) return;
-    const delay = 200 + globalDelay;
-    while (!stopUpdating) {
+    if (clubData.stopUpdating) return;
+    const delay = 250;
+    while (!clubData.stopUpdating) {
         try {
             const { res, badData } = await updateCardInfo();
-            checkAutoOff(res.boost_count);
             if (res.boost_html) {
-                newDay = !badData;
+
+                clubData.firstBoost = false;
+                clubData.newDay = !badData;
                 updatePageInfo(res.boost_html, res.boost_count, res.top_html)
-                
-                const event = new CustomEvent("page-info-updated");
-                window.dispatchEvent(event);
-                
+                if (clubData.telegramBotBool) {
+                    const event = new CustomEvent("page-info-updated", { detail: { html: res.boost_html, top: res.top_html, count: res.boost_count, } });
+                    clubData.newDay && window.dispatchEvent(event);
+                }
                 await eventBoostCard()
             }
+            else if (clubData.firstBoost) {
+                clubData.firstBoost = false;
+                await eventBoostCard()
+            }
+            checkAutoOff(res.boost_count, res.top_html);
         } catch (error) {
             console.error("Error during page update:", error);
         }
@@ -37,19 +45,6 @@ async function autoUpdatePageInfo() {
             await new Promise(resolve => setTimeout(resolve, delay));
         }
     }
-}
-
-function clubCardInfo() {
-    const src = document.querySelector(".club-boost__image img").getAttribute("src")
-    const ownerLists = document.querySelectorAll('.club-boost__owners-list');
-
-    const links = [];
-
-    ownerLists.forEach(list => {
-        links.push(list.querySelector('a').getAttribute("href"));
-    });
-
-    return { links, src }
 }
 
 async function updateCardInfo() {
@@ -71,13 +66,13 @@ function updatePageInfo(html, boostCount = null, top = null) {
 
 async function boostCard() {
     const button = document.querySelector(".club__boost-btn")
-    if (button && autoBoost) {
+    if (button && clubData.autoBoost) {
         const cardId = button.getAttribute("data-card-id")
         const clubId = button.getAttribute("data-club-id")
         const src = document.querySelector(".club-boost__image img").getAttribute("src")
         if (isOpen(src)) {
             const res = await Fetch.boostCard(cardId, clubId)
-            responceController(res, src)
+            await responceController(res, src)
         }
     }
 }
@@ -99,7 +94,7 @@ async function responceController(res, src) {
                     const delay = Math.abs(parseInt(match[1])) * 1000 - 1000;
                     await new Promise(resolve => setTimeout(resolve, delay));
                 }
-                await new Promise(resolve => setTimeout(resolve, globalDelay));
+                await new Promise(resolve => setTimeout(resolve, clubData.globalDelay));
                 await eventBoostCard()
         }
         return;
@@ -109,42 +104,34 @@ async function responceController(res, src) {
         updatePageInfo(res.boost_html_changed)
     }
     else if (res.boost_html) {
-        countBoost++
-        switcherAutoBoost.text(`Auto Boost Card (${countBoost})`)
-        openCards && openCards.removeBySrc(src)
+        clubData.countBoost++
+        switcherAutoBoost.text(`Auto Boost Card (${clubData.countBoost})`)
+        clubData.openCards && clubData.openCards.removeBySrc(src)
         updatePageInfo(res.boost_html)
     }
-
-    const event = new CustomEvent("page-info-updated");
-    window.dispatchEvent(event);
-
+    if (clubData.telegramBotBool) {
+        const event = new CustomEvent("page-info-updated", { detail: { html: res.boost_html_changed || res.boost_html } });
+        window.dispatchEvent(event);
+    }
     await eventBoostCard()
 }
 
-function checkAutoOff(countBoost) {
-    if (newDay && countBoost >= 300) {
-        stopUpdating = true;
+function checkAutoOff(countBoost, topBoost) {
+    if (clubData.newDay && countBoost >= 300) {
+        if (clubData.telegramBotBool) {
+            const event = new CustomEvent("clubs-day-limit-reached", { detail: { top: topBoost } }); 
+            window.dispatchEvent(event);
+        }
+        clubData.stopUpdating = true;
         switcherUpdatePage.turnOff()
     }
 }
 
 async function eventBoostCard() {
-    if (autoBoost) {
+    if (clubData.autoBoost) {
         await boostCard()
     }
 }
-
-const switcherAutoBoost = new Switcher(
-    {
-        checked: false,
-        onChange: (isChecked) => {
-            autoBoost = isChecked
-            if (autoBoost) {
-                eventBoostCard()
-            }
-        }
-    }
-)
 
 async function getOpenInventoryCards() {
     const myUrl = UrlConstructor.getMyUrl();
@@ -160,45 +147,61 @@ async function getOpenInventoryCards() {
     cards.filter(card => card.lock !== "trade");
     const hashCards = new HashCards();
     cards.forEach(card => hashCards.add(card));
-    openCards = hashCards;
+    clubData.openCards = hashCards;
     scanButton.text("Scanned")
 }
 
-
-
 function isOpen(src) {
-    if (!openCards) return true;
-    const isOpen = openCards.hasBySrc(src);
+    if (!clubData.openCards) return true;
+    const isOpen = clubData.openCards.hasBySrc(src);
     return isOpen;
 }
-
-switcherAutoBoost.disable()
-switcherAutoBoost.text(`Auto Boost Card (${countBoost})`)
 
 const switcherUpdatePage = new Switcher(
     {
         checked: false,
+        text: "Auto Page Info Update",
         onChange: (isChecked) => {
 
             if (isChecked) {
-                newDay = false;
+                clubData.newDay = false;
                 switcherAutoBoost.enable()
-                stopUpdating = false;
+                clubData.stopUpdating = false;
                 autoUpdatePageInfo();
             } else {
                 switcherAutoBoost.turnOff()
                 switcherAutoBoost.disable()
-                stopUpdating = true;
+                clubData.stopUpdating = true;
             }
-        }
+        },
+        place: ".secondary-title.text-center"
     }
 )
-switcherUpdatePage.text("Auto Page Info Update")
 
-switcherUpdatePage.place(".secondary-title.text-center")
-switcherAutoBoost.place(".secondary-title.text-center")
+const switcherAutoBoost = new Switcher(
+    {
+        checked: false,
+        onChange: (isChecked) => {
+            clubData.autoBoost = isChecked
+            clubData.firstBoost = isChecked
+        },
+        disabled: true,
+        text: `Auto Boost Card (${clubData.countBoost})`,
+        place: ".secondary-title.text-center",
+    }
+)
+
+const switcherTelegram = new Switcher({
+    checked: false,
+    onChange: (isChecked) => {
+        clubData.telegramBotBool = isChecked;
+    },
+    text: "Telegram Bot",
+    place: ".secondary-title.text-center"
+})
+
 const scanButton = new Button({
     text: "scan open cards",
+    onclick: getOpenInventoryCards,
+    place: ".secondary-title.text-center"
 })
-scanButton.onclick = getOpenInventoryCards
-scanButton.place(".secondary-title.text-center")

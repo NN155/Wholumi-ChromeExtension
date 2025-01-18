@@ -30,12 +30,6 @@ class Tab {
 
         const contentElements = document.querySelectorAll('.window-content');
         contentElements.forEach(content => content.style.display = 'none');
-
-        const activeTab = document.querySelector(`.tab[data-tab="${this.tabName}"]`);
-        activeTab.classList.add('active');
-
-        const activeContent = document.querySelector(`.window-content[data-tab="${this.tabName}"]`);
-        activeContent.style.display = 'block';
     }
 
     renderContent() {
@@ -46,8 +40,8 @@ class Tab {
         return contentElement;
     }
 
-    async updateConfig(key) {
-        this.config[key] = await ExtensionConfig.getConfig(key);
+    async updateConfig(key, subKeys = null) {
+        this.config[key] = await ExtensionConfig.getConfig(key, subKeys);
     }
 
     isTabData(key) {
@@ -96,12 +90,13 @@ class Tab {
                 break;
             case 'Button':
                 item.element = new CustomMenuButton({
-                    id: item.id,
                     text: item.text ? item.text : (tab.config[item.config][item.data][item.subkey] || "Not updated"),
-                    label: item.label,
-                    onclick: item.onclick,
-                    data: item.data || null,
-                    subkey: item.subkey || null,
+                    ...item,
+                });
+                break;
+            case 'Input':
+                item.element = new CustomMenuInput({
+                    ...item,
                 });
                 break;
         }

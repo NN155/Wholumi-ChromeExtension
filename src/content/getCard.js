@@ -43,26 +43,36 @@ async function takeCard() {
     await Fetch.reportCardViewed(cardInfo.cards?.owner_id)
 }
 
-let getCardPromise = null;
 
-chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-    if (request.action === 'get-card') {
-        if (getCardPromise) {
-            getCardPromise.then(sendResponse);
-        } else {
-            getCardPromise = (async () => {
-                const response = await getCard();
-                return response;
-            })();
-
-            getCardPromise.then(response => {
-                sendResponse(response);
-                getCardPromise = null;
-            });
+async function setPingInterval() {
+    while (!await sendPing()) {
+        await delay(1000 * 168);
+        if (await sendPing()) {
+            break;
         }
+    }
+}
 
+async function sendPing() {
+    const response = await ExtensionConfig._sendMessageAsync({ action: "get-card", mode: "ping-tab"})
+    if (response.stop) {
         return true;
     }
-});
-chrome.runtime.sendMessage({ action: "get-card", mode: "ping-tab" });
+    else if (response.skip) {
+        return false;
+    }
+
+    const cardResponse = await getCard();
+    if (cardResponse.stop_reward === "yes") {
+        await ExtensionConfig._sendMessageAsync({ action: "get-card", mode: "block-hour"})
+        return true;
+    }
+    return false;
+}
+
+function newInit() {
+    setPingInterval()
+}
+
+newInit();
 // init();

@@ -93,6 +93,7 @@ class GetCards {
             card.setSrc()
             card.setId()
             card.setCardId()
+            card.setName();
             return card
         }))
         return cards

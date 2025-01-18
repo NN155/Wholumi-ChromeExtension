@@ -1,5 +1,5 @@
 async function addColodes() {
-    const my = new GetCards({ ran: "s", userUrl: "https://animestars.org/cards/?rank=s", userName: "Name" })
+    const my = new GetCards({ rank: "s", userUrl: "https://animestars.org/cards/?rank=s", userName: "Name" })
     const cards = await my.getAllCards(my.userUrl)
     cards.map(card => card.cardId);
     let count = 1;

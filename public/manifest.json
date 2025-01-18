@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "AnimeStars Alpha",
-  "version": "1.2.6",
+  "version": "1.2.8",
   "author": "MrKoMi",
   "description": "Press INSERT to open the menu",
   "permissions": [
@@ -98,7 +98,8 @@
         "https://animestars.org/clubs/*/boost/*"
       ],
       "js": [
-        "content/clubs.js"
+        "content/clubs.js",
+        "content/telegram.js"
       ]
     },
     {

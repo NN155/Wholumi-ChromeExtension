@@ -17,21 +17,11 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse, tab) => {
 
                 return true;
             case "get-config":
-                switch (message.key) {
-                    case "functionConfig":
-                        chrome.storage.local.get("functionConfig", (data) => {
-                            data.functionConfig = filterKeys(data.functionConfig, message.subKeys);
-                            sendResponse({ config: data.functionConfig });
-                        });
-                        return true;
-                    case "dataConfig": 
-                        chrome.storage.local.get("dataConfig", (data) => {
-                            data.dataConfig = filterKeys(data.dataConfig, message.subKeys);
-                            sendResponse({ config: data.dataConfig });
-                        });
-                        return true;
-
-                }
+                chrome.storage.local.get(message.key, (data) => {
+                    data[message.key] = filterKeys(data[message.key], message.subKeys);
+                    sendResponse({ config: data[message.key] });
+                });
+                return true;
             case "save-config":
                 switch (message.key) {
                     case "functionConfig":

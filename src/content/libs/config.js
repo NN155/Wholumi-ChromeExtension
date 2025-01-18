@@ -5,15 +5,7 @@ class Config {
     }
 
     async loadConfig(key, subKeys = null) {
-        try {
-            return await this._getConfig(key, subKeys);
-        } catch (error) {
-            console.error(`Error loading config for key "${key}":`, error);
-        }
-    }
-
-    async loadFullConfig(key) {
-        const config = await this.loadConfig(key);
+        const config = await this._getConfig(key, subKeys);
         this.configCache[key] = config;
         return this.configCache[key];
     }
@@ -74,4 +66,4 @@ class Config {
 }
 
 const ExtensionConfig = new Config();
-ExtensionConfig.loadFullConfig("functionConfig");
+ExtensionConfig.loadConfig("functionConfig");

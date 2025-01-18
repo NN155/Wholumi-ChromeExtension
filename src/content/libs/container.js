@@ -1,5 +1,5 @@
 class Button {
-    constructor({text, onclick} = {text: "Button", onclick: null}) {
+    constructor({text = "", onclick = null, place = null} = {text: "", onclick: null, place: null}) {
         this.onclick = onclick;
         this._buttonContainer = document.createElement('div');
         this.button = document.createElement('button');
@@ -9,6 +9,7 @@ class Button {
         this._buttonContainer.appendChild(this.button);
         this.button.onclick = this._onclick.bind(this);
         this.text(text);
+        place && this.place(place);
     }
     async _onclick() {
         this.disable()
@@ -111,11 +112,14 @@ class ShowBar {
 }
 
 class Switcher {
-    constructor({ checked = false, onChange = null } = {}) {
+    constructor({ checked = false, onChange = null, place = null, text = "", disabled = false } = {checked: false, onChange: null, place: null, text: "", disabled: false }) {
         this.checked = checked;
         this.onChange = onChange;
 
         this.element = this.createSwitch();
+        this.text(text);
+        disabled && this.disable();
+        place && this.place(place);
     }
 
     createSwitch() {

@@ -1,174 +1,64 @@
-class TabController {
-    constructor() {
-        this.tabs = new Set();
-        this.newTabs = new Set();
-        this.successTab = null;
-    }
-    addTab(tabId) {
-        this.newTabs.add(tabId);
-    }
-    removeTab(tabId) {
-        this.tabs.delete(tabId);
-    }
-    async tabExists(tabId) {
-        try {
-            const tab = await chrome.tabs.get(tabId);
-            if (!tab || !tab.url.startsWith(TargetDomain)) {
-                return false;
-            }
-            return true;
-        } catch (error) {
-            return false;
-        }
-    }
-
-    async *generateIterator() {
-        while (true) {
-            if (this.newTabs.size > 0) {
-                this.tabs = new Set([...this.newTabs, ...this.tabs]);
-                this.newTabs.clear();
-            }
-            if (this.tabs.size === 0) {
-                yield null;
-                continue;
-            }
-            for (const tabId of this.tabs) {
-                while (this.successTab) {
-                    if (await this.tabExists(this.successTab)) {
-                        yield this.successTab;
-                    }
-                    else {
-                        this.successTab = null;
-                    }
-                }
-                const exists = await this.tabExists(tabId);
-                if (!exists) {
-                    this.removeTab(tabId);
-                    continue;
-                }
-
-                yield tabId;
-            }
-        }
-    }
-}
-
 class TimeController {
-    constructor() {
-        this.blockSendingUntil = null;
-    }
-    setBlockSendingUntil() {
+    static setBlockHour() {
         const now = new Date();
         now.setHours(now.getHours() + 1);
         now.setMinutes(1, 0, 0);
-        this.blockSendingUntil = now.getTime();
+        this.setData({ blockSendingUntil: now.getTime(), isBlocked: true });
     }
-    isBlocked() {
-        return this.blockSendingUntil !== null && this.blockSendingUntil > Date.now();
+    static setBlockMinutes() {
+        this.setData({ blockSendingUntil: Date.now() + 1000 * 168, isBlocked: false });
     }
-}
 
-function sendMessageWithTimeout(tabId, timeoutDuration = 5000) {
-    return new Promise((resolve) => {
-        let timeoutReached = false;
+    static setData(data) {
+        chrome.storage.local.set({ getCardData: data });
+    }
 
-        // Відправляємо повідомлення вкладці
-        chrome.tabs.sendMessage(tabId, { action: "get-card", mode: "get-card" }, response => {
-            if (!timeoutReached) {
-                if (response) {
-                    resolve(response); // Якщо отримали відповідь, резолвимо проміс
+    static getFromStorage(key) {
+        return new Promise((resolve, reject) => {
+            chrome.storage.local.get(key, (data) => {
+                if (chrome.runtime.lastError) {
+                    reject(new Error(chrome.runtime.lastError));
                 } else {
-                    resolve(null); // Якщо немає відповіді, резолвимо null
+                    resolve(data[key]);
                 }
-            }
+            });
         });
-
-        // Тайм-аут, якщо немає відповіді протягом заданого часу
-        setTimeout(() => {
-            timeoutReached = true;
-            resolve(null); // Якщо тайм-аут спрацьовує, повертаємо null
-        }, timeoutDuration);
-    });
-}
-
-async function pingTab() {
-    loggerGetCard("Tabs", tabs);
-    while(true) {
-        const {value: tabId, done} = await iterator.next();
-
-        if (tabId === null) {
-            return { no_tabs: true };
-        }
-        // Send message to next tab
-        const response = await sendMessageWithTimeout(tabId);
-        if (response) {
-            if (!tabs.successTab) {
-                tabs.successTab = tabId;
-            }
-            return response;
-        }
-        else {
-            tabs.successTab = null;
-        }
     }
 }
-
-async function processPingTab() {
-    if (await config.functionConfig.autoLootCards && !working && !time.isBlocked()) { // Check if we are not already working or blocked
-        working = true;
-        loggerGetCard("processPingTab: Starting pingTab process");
-        while (await config.functionConfig.autoLootCards) {
-            const response = await pingTab(); // get response from tab
-            loggerGetCard("processPingTab: got response", response);
-            if (response?.no_tabs) { // if no tabs are available
-                break; // exit loop
-            }
-            else if (response?.stop_reward === "yes") {
-                time.setBlockSendingUntil(); // block sending for 1 hour
-                loggerGetCard(`STOP_REWARD: block sending until ${new Date(time.blockSendingUntil).toLocaleTimeString()}`);
-                break;
-            }
-
-            loggerGetCard("processPingTab: Waiting for 168 seconds");
-            await new Promise(resolve => setTimeout(resolve, 168 * 1000)); // wait for 168 seconds
-        }
-        loggerGetCard("Ending pingTab process");
-        working = false; // set working to false
-    }
-}
-
-
 
 const loggerGetCard = createLogger("getCard");
 
-const tabs = new TabController();
-const iterator = tabs.generateIterator();
-const time = new TimeController();
-let working = false;
-
-chrome.runtime.onMessage.addListener(async (message, sender, sendResponse, tab) => {
+chrome.runtime.onMessage.addListener( (message, sender, sendResponse) => {
     if (message.action === "get-card") {
         switch (message.mode) {
             case "ping-tab":
-                loggerGetCard("Ping tab request from", sender.tab.id);
-                tabs.addTab(sender.tab.id);
-                processPingTab(); // Async process
-
-                sendResponse({ status: "success" });
+                (async () => {
+                    const data = await TimeController.getFromStorage("getCardData");
+                    const functionConfig = await TimeController.getFromStorage("functionConfig");
+                    let response;
+                    if (!functionConfig.autoLootCards) {
+                        response = { stop: "yes" };
+                    }
+                    else if (data.blockSendingUntil < Date.now()) {
+                        TimeController.setBlockMinutes();
+                        response = { continue: "yes" };
+                    }
+                    else if (data.isBlocked) {
+                        response = { stop: "yes" };
+                    }
+                    else {
+                        response = { skip: "yes" };
+                    }
+                    sendResponse(response)
+                    loggerGetCard("Ping tab request from", sender.tab.id, response);
+                })();
                 return true
-            default:
-                console.error("Unknown mode:", message.mode);
-                sendResponse({ success: false, error: "Unknown mode" });
+            case "block-hour":
+                TimeController.setBlockHour();
+                sendResponse({ success: "yes" });
                 return true;
         }
     }
 });
-
-self.addEventListener("config-updated", (event) => {
-    if (event.detail.key === "functionConfig") {
-        processPingTab();
-    }
-});
-
 
 logger("GetCard.js loaded");
