@@ -1,4 +1,6 @@
-function init() {
+async function init() {
+    if (!(await ExtensionConfig.getConfig("functionConfig")).tradeHelper) return;
+
     const myCardId = getMyCardId();
     const cards = getCards();
     cards.forEach(card => {

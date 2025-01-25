@@ -68,9 +68,10 @@ class CustomMenuButton {
             if (this.settings.onclick) {
                 data = await this.settings.onclick();
             }
-            this.settings.onEvent && await this.sendEvent({data, ...this.settings.onEvent});
+            this.settings.onEvent && await this.sendEvent({ data, ...this.settings.onEvent });
         }
         finally {
+            await new Promise(resolve => setTimeout(resolve, 50));
             this.button.disabled = false;
         }
     }
@@ -142,6 +143,7 @@ class CustomMenuInput {
             value: '',
             disabled: false,
             onChange: null,
+            placeHolder: '',
         };
 
         this.settings = { ...defaults, ...options };
@@ -161,7 +163,8 @@ class CustomMenuInput {
                 type="text" 
                 id="${this.settings.id}" 
                 value="${this.settings.value}" 
-                ${this.settings.disabled ? 'disabled' : ''}>
+                ${this.settings.disabled ? 'disabled' : ''}
+                placeholder="${this.settings.placeHolder}">
             <label for="${this.settings.id}">${this.settings.label}</label>
             </div>
         `;
@@ -174,5 +177,18 @@ class CustomMenuInput {
     getValue() {
         const shadowRoot = document.querySelector("#custom-window").shadowRoot;
         return shadowRoot.querySelector(`#${this.settings.id}`).value;
+    }
+
+    updateState(data) {
+        if (!this.settings.data || !this.settings.subkey) return;
+        if (data[this.settings.subkey] === undefined) return;
+        const shadowRoot = document.querySelector("#custom-window").shadowRoot;
+        const input = shadowRoot.querySelector(`#${this.settings.id}`);
+        if (input) {
+            if (input.value !== "") {
+                input.value = data[this.settings.subkey];
+            }
+            input.placeholder = data[this.settings.subkey];
+        }
     }
 }

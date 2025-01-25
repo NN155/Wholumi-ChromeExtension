@@ -2,50 +2,23 @@ async function funTab() {
     const elementsConfig = [
         { config: "dataConfig", html: "Button", id: 'packInventory', label: 'Update inventory info', onEvent: { key: "packInventory", event: "update-data-config" }, group: 'Packs', data: "lastUpdate", subkey: "packInventory" },
         { config: "dataConfig", html: "Button", id: 'siteInventory', label: 'Update site cards info', onEvent: { key: "siteInventory", event: "update-data-config" }, group: 'Packs', data: "lastUpdate", subkey: "siteInventory" },
-        { html: "Input", id: 'packBalance', value: "10000", label: 'Balance', group: 'Packs' },
-        { html: "Input", id: 'packCounter', value: "20", label: 'Counter', group: 'Packs' },
-        { html: "Input", id: 'packS', value: "1", label: 'S chance', group: 'Packs' },
-        { html: "Input", id: 'packA', value: "1", label: 'A chance', group: 'Packs' },
-        { html: "Input", id: 'packB', value: "1", label: 'B chance', group: 'Packs' },
-        { html: "Input", id: 'packC', value: "1", label: 'C chance', group: 'Packs' },
-        { html: "Input", id: 'packD', value: "1", label: 'D chance', group: 'Packs' },
-        { html: "Input", id: 'packE', value: "1", label: 'E chance', group: 'Packs' },
-        { html: "Button", id: 'injectPack', text: 'Inject', onEvent: { key: "inject", event: "packs" }, onclick: () => getPackData(), group: 'Packs' },
+        { html: "Input", id: 'packBalance',  label: 'Balance', type:"Number", min: 0, config: "miscConfig", data: "packs", subkey: "balance", group: 'Packs' },
+        { html: "Input", id: 'packCounter', type:"Number", min: 1, max: 39, label: 'Counter', config: "miscConfig", data: "packs", subkey: "counter", group: 'Packs' },
+        { html: "Input", id: 'packS', type:"Number", min: 0, max: 10000, label: 'S chance', config: "miscConfig", data: "packs", subkey: "sChance", group: 'Packs' },
+        { html: "Input", id: 'packA', type:"Number", min: 0, max: 10000, label: 'A chance', config: "miscConfig", data: "packs", subkey: "aChance", group: 'Packs' },
+        { html: "Input", id: 'packB', type:"Number", min: 0, max: 10000, label: 'B chance', config: "miscConfig", data: "packs", subkey: "bChance", group: 'Packs' },
+        { html: "Input", id: 'packC', type:"Number", min: 0, max: 10000, label: 'C chance', config: "miscConfig", data: "packs", subkey: "cChance", group: 'Packs' },
+        { html: "Input", id: 'packD', type:"Number", min: 0, max: 10000, label: 'D chance', config: "miscConfig", data: "packs", subkey: "dChance", group: 'Packs' },
+        { html: "Input", id: 'packE', type:"Number", min: 0, max: 10000, label: 'E chance', config: "miscConfig", data: "packs", subkey: "eChance", group: 'Packs' },
+        { html: "Button", id: 'injectPack', text: 'Inject', onEvent: { key: "inject", event: "packs" }, onclick: () => tab.saveInputData("miscConfig", "packs"), group: 'Packs' },
     ];
-    function getPackData() {
-        const shadowRoot = document.querySelector("#custom-window").shadowRoot;
-        return {
-            info: {
-                balance: verifyValue('#packBalance', 10000),
-                counter: verifyValue('#packCounter', 20),
-            },
-            chances: [
-                { rank: "s", chance: verifyValue('#packS', 1) },
-                { rank: "a", chance: verifyValue('#packA', 1) },
-                { rank: "b", chance: verifyValue('#packB', 1) },
-                { rank: "c", chance: verifyValue('#packC', 1) },
-                { rank: "d", chance: verifyValue('#packD', 1) },
-                { rank: "e", chance: verifyValue('#packE', 1) },
-            ]
-        };
-    }
 
-    function verifyValue(querySelector, defaultVal) {
-        const shadowRoot = document.querySelector("#custom-window").shadowRoot;
-        const value = shadowRoot.querySelector(querySelector).value;
-        if (!isNaN(value) && Number(value) >= 0) {
-            return Number(value);
-        }
-        return defaultVal;
-    }
     const content = Tab.createContent(elementsConfig);
 
     const tab = new Tab('Fun', content);
 
     tab.elementsConfig = elementsConfig;
 
-    tab.tabData = ["dataConfig"];
-    await tab.updateConfig("dataConfig", ["lastUpdate"]);
-
+    tab.tabData = [["dataConfig", ["lastUpdate"]], ["miscConfig", ["packs"]]];
     return tab;
 }

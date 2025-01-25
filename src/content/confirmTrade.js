@@ -131,11 +131,11 @@ async function init() {
                 if (autoConfirm) {
                     checkPage();
                 }
-            }
+            },
+            text: "Auto Confirm 2/3-to-1",
+            place: ".div-for-extension"
         }
     )
-
-    switcherAutoConfirm.text(`Auto Confirm 2/3-to-1`)
 
     const switcherAutoCancel = new Switcher(
         {
@@ -145,10 +145,11 @@ async function init() {
                 if (autoCancel) {
                     checkPage();
                 }
-            }
+            },
+            text: "Auto Cancel 1-to-1 dubles",
+            place: ".div-for-extension"
         }
     )
-    switcherAutoCancel.text("Auto Cancel 1-to-1 dubles")
 
 
     const switcherAutoMoreWanted = new Switcher(
@@ -159,15 +160,11 @@ async function init() {
                 if (autoMoreWanted) {
                     checkPage();
                 }
-            }
+            },
+            text: "Auto Confirm/Cancel 1-to-1 by priority",
+            place: ".div-for-extension"
         }
     )
-
-    switcherAutoMoreWanted.text("Auto Confirm/Cancel 1-to-1 by priority")
-
-    switcherAutoConfirm.place(".div-for-extension")
-    switcherAutoCancel.place(".div-for-extension")
-    switcherAutoMoreWanted.place(".div-for-extension")
 }
 
 init();

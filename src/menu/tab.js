@@ -47,13 +47,15 @@ class Tab {
     isTabData(key) {
         if (!this.tabData) { return true }
         for (let i = 0; i < this.tabData.length; i++) {
-            if (this.tabData[i] === key) {
+            const [tabKey, subkeys] = this.tabData[i];
+            if (tabKey === key) {
                 return true;
             }
         }
         return false;
     }
     async onConfigUpdate(event) {
+        if (event.detail.tabSender) return;
         const { key } = event.detail;
         if (!this.isTabData(key)) return;
         await this.updateConfig(key);
@@ -96,6 +98,7 @@ class Tab {
                 break;
             case 'Input':
                 item.element = new CustomMenuInput({
+                    placeHolder: item.placeHolder ? item.placeHolder : (tab.config[item.config][item.data][item.subkey]),
                     ...item,
                 });
                 break;
@@ -105,13 +108,58 @@ class Tab {
     }
 
 
+    async saveInputData(key, data) {
+        const config = this.getInputData(data);
+        await this.setConfig(key, config);
+    }
+
+    getInputData(data) {
+        const shadowRoot = document.querySelector("#custom-window").shadowRoot;
+        const config = {[data]: {}};
+        this.elementsConfig.forEach((item) => {
+            if (item.html === "Input" && item.data === data) {
+                const element = shadowRoot.querySelector(`#${item.id}`);
+
+                let value = element.value;
+                let placeHolder = element.placeholder;
+
+
+                if (item.type === "Number") {
+                    config[data][item.subkey] = this.verifyValue(value, placeHolder, item.min, item.max);
+                    return;
+                }
+
+                config[data][item.subkey] = value || placeHolder;
+            }
+        });
+        return config;  
+    }
+
+    verifyValue(value, defaultVal, min=null, max=null) {
+        if (value !== "" && !isNaN(value)) {
+            let num = Number(value);
+            num = min !== null ? Math.max(num, min) : num;
+            num = max !== null ? Math.min(num, max) : num;
+            return num;
+        }
+        return Number(defaultVal);
+    }
+
+    async updatedConfigKeys() {
+        await Promise.all(this.tabData.map(([key, subkyes]) => {
+            return this.updateConfig(key, subkyes);
+        }));
+    }
+
     async onActivate() {
+        await this.updatedConfigKeys();
         this.elementsConfig.forEach((item) => {
             this.createElement(item);
         });
         window.removeEventListener("config-updated", this.onConfigUpdate.bind(this));
         window.addEventListener("config-updated", this.onConfigUpdate.bind(this));
     };
+
     static createContent(config) {
         let content = "";
         const groups = {};

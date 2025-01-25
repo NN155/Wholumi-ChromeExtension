@@ -52,6 +52,16 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse, tab) => {
                             });
                         });
                         return true;
+                    case "miscConfig":
+                        chrome.storage.local.get(message.key, (data) => {
+                            let config = data[message.key];
+                            config = { ...config, ...message.config };
+                            sendResponse({ config: config });
+                            chrome.storage.local.set({ [message.key]: config }, (data) => {
+                                notifyTabsAboutConfig(message.key, config);
+                            });
+                        });
+                        return true;                        
                 }
         }
     }
@@ -62,8 +72,8 @@ function notifyTabsAboutConfig(key, config, senderTabId=null) {
     chrome.tabs.query({}, (tabs) => {
         tabs.forEach((tab) => {
             const url = tab.url || "";
-            if (url.startsWith(TargetDomain) && (senderTabId === null || tab.id !== senderTabId)) {
-                chrome.tabs.sendMessage(tab.id, { action: "update-config", key, config });
+            if (url.startsWith(TargetDomain)) {
+                chrome.tabs.sendMessage(tab.id, { action: "update-config", key, config , tabSender: !(senderTabId === null || tab.id !== senderTabId)});
             }
         });
     });

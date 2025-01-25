@@ -16,9 +16,9 @@ saveFetchConfig = {
         min: 0,
     },
 }
+
 async function autoUpdatePageInfo() {
     if (clubData.stopUpdating) return;
-    const delay = 250;
     while (!clubData.stopUpdating) {
         try {
             const { res, badData } = await updateCardInfo();
@@ -31,18 +31,18 @@ async function autoUpdatePageInfo() {
                     const event = new CustomEvent("page-info-updated", { detail: { html: res.boost_html, top: res.top_html, count: res.boost_count, } });
                     clubData.newDay && window.dispatchEvent(event);
                 }
-                await eventBoostCard()
+                await boostCard.firstBoost()
             }
             else if (clubData.firstBoost) {
                 clubData.firstBoost = false;
-                await eventBoostCard()
+                await boostCard.firstBoost()
             }
             checkAutoOff(res.boost_count, res.top_html);
         } catch (error) {
             console.error("Error during page update:", error);
         }
         finally {
-            await new Promise(resolve => setTimeout(resolve, delay));
+            await new Promise(async resolve => setTimeout(resolve, (await ExtensionConfig.getConfig("miscConfig")).clubBoost.autoUpdateDelay));
         }
     }
 }
@@ -50,7 +50,7 @@ async function autoUpdatePageInfo() {
 async function updateCardInfo() {
     const clubRefreshBtn = document.querySelector(".club__boost__refresh-btn")
     const cardId = clubRefreshBtn ? clubRefreshBtn.getAttribute("data-card-id") : 0;
-    return {res: await Fetch.updateCardInfo(cardId), badData: !clubRefreshBtn};
+    return { res: await Fetch.updateCardInfo(cardId), badData: !clubRefreshBtn };
 }
 
 function updatePageInfo(html, boostCount = null, top = null) {
@@ -64,72 +64,120 @@ function updatePageInfo(html, boostCount = null, top = null) {
     }
 }
 
-async function boostCard() {
-    const button = document.querySelector(".club__boost-btn")
-    if (button && clubData.autoBoost) {
-        const cardId = button.getAttribute("data-card-id")
-        const clubId = button.getAttribute("data-club-id")
-        const src = document.querySelector(".club-boost__image img").getAttribute("src")
-        if (isOpen(src)) {
-            const res = await Fetch.boostCard(cardId, clubId)
-            await responceController(res, src)
-        }
+class BoostCard {
+    constructor() {
+        this.cardId;
+        this.clubId;
+        this.time;
     }
-}
 
-async function responceController(res, src) {
-    console.log("Boost Response:", res)
-    if (res.error) {
-        switch (res.error) {
-            case "Ваша карта заблокирована, для пожертвования клубу разблокируйте её":
-            case "У вас нет карты для пожертвования клубу, обновите страницу и попробуйте снова":
-            case "Достигнут дневной лимит пожертвований в клуб, подождите до завтра":
-            case "Вклады в клуб временно отключены и находятся на обновлении":
-                break;
-            default:
-                const regex = /через\s*(-?\d+)\s*секунд/;
-
-                const match = res.error.match(regex);
-                if (match) {
-                    const delay = Math.abs(parseInt(match[1])) * 1000 - 1000;
-                    await new Promise(resolve => setTimeout(resolve, delay));
+    isBoostable() {
+        if (clubData.autoBoost) {
+            const button = document.querySelector(".club__boost-btn")
+            if (button) {
+                this.src = document.querySelector(".club-boost__image img").getAttribute("src")
+                if (this._isOpen(this.src)) {
+                    this.cardId = button.getAttribute("data-card-id")
+                    this.clubId = button.getAttribute("data-club-id")
+                    return true;
                 }
-                await new Promise(resolve => setTimeout(resolve, clubData.globalDelay));
-                await eventBoostCard()
+            }
         }
-        return;
+        return false;
     }
 
-    if (res.boost_html_changed) {
-        updatePageInfo(res.boost_html_changed)
+    async firstBoost() {
+        if (this.isBoostable()) {
+            this.time = Date.now();
+            await this.Boost()
+        }
     }
-    else if (res.boost_html) {
-        clubData.countBoost++
-        switcherAutoBoost.text(`Auto Boost Card (${clubData.countBoost})`)
-        clubData.openCards && clubData.openCards.removeBySrc(src)
-        updatePageInfo(res.boost_html)
+
+    async Boost() {
+        if (clubData.autoBoost) {
+            const res = await Fetch.boostCard(this.cardId, this.clubId)
+            await this._responceController(res)
+        }
     }
-    if (clubData.telegramBotBool) {
-        const event = new CustomEvent("page-info-updated", { detail: { html: res.boost_html_changed || res.boost_html } });
-        window.dispatchEvent(event);
+
+    _isOpen(src) {
+        if (!clubData.openCards) return true;
+        const isOpen = clubData.openCards.hasBySrc(src);
+        return isOpen;
     }
-    await eventBoostCard()
+
+    async _responceController(res) {
+        console.log("Boost Response:", res)
+        if (res.error) {
+            switch (res.error) {
+                case "Ваша карта заблокирована, для пожертвования клубу разблокируйте её":
+                case "У вас нет карты для пожертвования клубу, обновите страницу и попробуйте снова":
+                case "Достигнут дневной лимит пожертвований в клуб, подождите до завтра":
+                case "Вклады в клуб временно отключены и находятся на обновлении":
+                case "Взносы отключены с 20:55 до 21:01":
+                    break;
+                default:
+                    const regex = /через\s*(-?\d+)\s*секунд/;
+
+                    const match = res.error.match(regex);
+                    if (match) {
+                        const delay = Math.abs(parseInt(match[1])) * 1000 - 1000;
+                        if (delay > 0) {
+                            await new Promise(resolve => setTimeout(resolve, delay));
+                            this.time = Date.now();
+                        }
+                    }
+
+                    await new Promise(async resolve => setTimeout(resolve, await this._calculateDelay()));
+
+                    await this.Boost()
+            }
+            return;
+        }
+        if (res.boost_html_changed) {
+            updatePageInfo(res.boost_html_changed)
+            const dif = Date.now() - this.time;
+            logs.push({"Time": dif, "Success": false});
+            await this.firstBoost()
+        }
+        else if (res.boost_html) {
+            clubData.countBoost++
+            switcherAutoBoost.text(`Auto Boost Card (${clubData.countBoost})`)
+            clubData.openCards && clubData.openCards.removeBySrc(this.src)
+            updatePageInfo(res.boost_html)
+            const dif = Date.now() - this.time;
+            logs.push({"Time": dif, "Success": true});
+            await this.firstBoost()
+        }       
+    }
+
+
+    async _calculateDelay() {
+        const {autoBoostDelay, customBoostTime, customBoostDelay} = (await ExtensionConfig.getConfig("miscConfig")).clubBoost;
+        if ((await ExtensionConfig.getConfig("functionConfig")).customBoostMode) {
+            const dif = Date.now() - this.time;
+            if (dif > customBoostTime) {
+                return customBoostDelay;
+            }
+            else if (customBoostTime - dif < autoBoostDelay) {
+                return Math.abs(customBoostTime - dif);
+            }
+        }
+        return autoBoostDelay;
+    }
 }
+
+const logs = [];
 
 function checkAutoOff(countBoost, topBoost) {
     if (clubData.newDay && countBoost >= 300) {
         if (clubData.telegramBotBool) {
-            const event = new CustomEvent("clubs-day-limit-reached", { detail: { top: topBoost } }); 
+            const event = new CustomEvent("clubs-day-limit-reached", { detail: { top: topBoost } });
             window.dispatchEvent(event);
         }
+        console.log(logs);
         clubData.stopUpdating = true;
         switcherUpdatePage.turnOff()
-    }
-}
-
-async function eventBoostCard() {
-    if (clubData.autoBoost) {
-        await boostCard()
     }
 }
 
@@ -151,10 +199,13 @@ async function getOpenInventoryCards() {
     scanButton.text("Scanned")
 }
 
-function isOpen(src) {
-    if (!clubData.openCards) return true;
-    const isOpen = clubData.openCards.hasBySrc(src);
-    return isOpen;
+async function init() {
+    const { clubBoost } = await ExtensionConfig.getConfig("functionConfig");
+    const array = [switcherUpdatePage, switcherAutoBoost, switcherTelegram, scanButton];
+    array.forEach(item => {
+        item.display(clubBoost)
+        item.place(".secondary-title.text-center")
+    });
 }
 
 const switcherUpdatePage = new Switcher(
@@ -162,7 +213,6 @@ const switcherUpdatePage = new Switcher(
         checked: false,
         text: "Auto Page Info Update",
         onChange: (isChecked) => {
-
             if (isChecked) {
                 clubData.newDay = false;
                 switcherAutoBoost.enable()
@@ -174,7 +224,6 @@ const switcherUpdatePage = new Switcher(
                 clubData.stopUpdating = true;
             }
         },
-        place: ".secondary-title.text-center"
     }
 )
 
@@ -187,7 +236,6 @@ const switcherAutoBoost = new Switcher(
         },
         disabled: true,
         text: `Auto Boost Card (${clubData.countBoost})`,
-        place: ".secondary-title.text-center",
     }
 )
 
@@ -197,11 +245,20 @@ const switcherTelegram = new Switcher({
         clubData.telegramBotBool = isChecked;
     },
     text: "Telegram Bot",
-    place: ".secondary-title.text-center"
 })
 
 const scanButton = new Button({
     text: "scan open cards",
-    onclick: getOpenInventoryCards,
-    place: ".secondary-title.text-center"
+    onClick: getOpenInventoryCards,
 })
+
+const boostCard = new BoostCard();
+init();
+
+window.addEventListener('config-updated', async () => {
+    const { clubBoost } = await ExtensionConfig.getConfig("functionConfig");
+    switcherUpdatePage.display(clubBoost);
+    switcherAutoBoost.display(clubBoost);
+    switcherTelegram.display(clubBoost);
+    scanButton.display(clubBoost);
+});

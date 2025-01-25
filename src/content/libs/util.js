@@ -45,8 +45,6 @@ class Semaphore {
     }
 }
 
-const semaphore = new Semaphore(1);
-
 class DynimicSemaphore extends Semaphore {
     constructor(max = 1) {
         super(max);

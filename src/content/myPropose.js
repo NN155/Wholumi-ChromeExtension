@@ -23,7 +23,23 @@ async function propose(type) {
         });
     }
 
-    await Promise.all([...ids].map(cardId => Fetch.proposeCard(cardId)));
+    await proposeAll(ids);
+}
+
+async function proposeAll(ids) {
+    for (let id of ids) {
+        await Fetch.proposeCard(id);
+        await new Promise(resolve => setTimeout(resolve, 1000));
+    }
+}
+
+async function proposeId(id) {
+    let response;
+    response = await Fetch.proposeCard(id);
+    while (response.error) {
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        response = await Fetch.proposeCard(id);
+    }
 }
 
 async function init() {
@@ -35,15 +51,17 @@ async function init() {
         return
     }
     
-    const proposeOn = new Button();
-    proposeOn.text(`Propose ${rank ? rank : "All"}`);
-    proposeOn.onclick = () => propose(true);
-    await proposeOn.place(".tabs.tabs--center");
+    const proposeOn = new Button({
+        text: `Propose ${rank ? rank : "All"}`,
+        onClick: () => propose(true),
+        place: ".tabs.tabs--center"
+    });
 
-    const proposeOff = new Button();
-    proposeOff.text(`Clear ${rank ? rank : "All"}`);
-    proposeOff.onclick = () => propose(false);
-    await proposeOff.place(".tabs.tabs--center");
+    const proposeOff = new Button({
+        text: `Clear ${rank ? rank : "All"}`,
+        onClick: () => propose(false),
+        place: ".tabs.tabs--center"
+    });
 }
 
 init()

@@ -213,13 +213,14 @@ class Fetch {
             card_id: cardId,
         });
 
-        await saveFetch('/engine/ajax/controller.php?mod=trade_ajax', {
+        const response = await saveFetch('/engine/ajax/controller.php?mod=trade_ajax', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
             },
             body: body,
         });
+        return await response.json();
     }
 
     static async confirmTrade(id) {

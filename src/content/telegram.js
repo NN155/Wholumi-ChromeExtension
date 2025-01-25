@@ -190,7 +190,7 @@ function clubStatsInfo(html) {
     const parser = new DOMParser();
     const dom = parser.parseFromString(html, 'text/html');
 
-    const usersStats = {};
+    let usersStats = [];
 
     const usersStatsLists = dom.querySelectorAll('.club-boost__top-item');
 
@@ -200,9 +200,10 @@ function clubStatsInfo(html) {
 
         const contribution = list.closest('.club-boost__top-item').querySelector('.club-boost__top-contribution').textContent.trim();
 
-        usersStats[userKey] = Number(contribution);
+        usersStats.push({ userName: userKey, value: Number(contribution) });
     });
 
+    usersStats.sort((a, b) => b.value - a.value);
     return usersStats;
 }
 
@@ -218,9 +219,10 @@ function sendCurrentStatistic() {
 }
 
 function generateResultString(statData, data) {
+
     let resultString = `По итогам сегодняшней сдачи:\n\nНасчитано карт: ${CheckedCardsCount}\n\n`;
 
-    for (const [key, value] of Object.entries(statData)) {
+    for (let {userName: key, value} of statData) {
         let cardWord = "карт";
         if (value % 10 === 1 && value % 100 !== 11) {
             cardWord = "карту";
@@ -241,7 +243,7 @@ function generateResultString(statData, data) {
     }
 
     resultString += `\n\n*Под доступными картами имеются в виду карты, которые бот смог отследить. Возможны отклонения от реальных цифр`;
-
+    console.log(resultString);
     return resultString;
 }
 

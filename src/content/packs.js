@@ -152,14 +152,24 @@ function firstLoad() {
 }
 
 async function loadData() {
-    return await ExtensionConfig.loadConfig("dataConfig", ["packInventory", "siteInventory"]);
+    let data = await ExtensionConfig.loadConfig("dataConfig", ["packInventory", "siteInventory"]);
+    data = {...data, ...await ExtensionConfig.loadConfig("miscConfig", ["packs"])};
+    return data;
 }
 
 function loadNewConfig(data) {
     if (data.packInventory) packConfig.packInventory = new Set(data.packInventory);
     if (data.siteInventory) packConfig.siteInventory = data.siteInventory;
-    if (data.info) packConfig.info = data.info;
-    if (data.chances) packConfig.chances = data.chances;
+    packConfig.info.balance = data.packs.balance;
+    packConfig.info.counter = data.packs.counter;
+    packConfig.chances = [
+        { rank: "s", chance: data.packs.sChance },
+        { rank: "a", chance: data.packs.aChance },
+        { rank: "b", chance: data.packs.bChance },
+        { rank: "c", chance: data.packs.cChance },
+        { rank: "d", chance: data.packs.dChance },
+        { rank: "e", chance: data.packs.eChance },
+    ];
 }
 
 function submitChanges() {
@@ -196,8 +206,7 @@ function init() {
                     injected = true;
                     firstLoad();
                 }
-                let data = event.detail.data || {};
-                data = {...data, ... await loadData()};
+                const data = await loadData();
                 loadNewConfig(data);
                 submitChanges();
                 const newEvent = new CustomEvent(event.detail.event, {

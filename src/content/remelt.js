@@ -64,6 +64,9 @@ function getDubles(cards) {
 
 
 async function init() {
+
+    if (!(await ExtensionConfig.getConfig("functionConfig")).remeltDubles) return;
+
     const rank = getRank();
     const myUrl = UrlConstructor.getMyUrl();
     const my = new GetCards({userUrl: myUrl, rank});
@@ -78,12 +81,13 @@ async function init() {
     const lockedCards = dubles.getLockedCards();
 
     const text = `Unlock ${lockedCards.length()} Cards`;
-    const button = new Button();
-    button.text(text);
-    button.place(".remelt__rank-list");
-    button.onclick = async() => await unlockCards(lockedCards);
-    if (lockedCards.length() === 0) {
-        button.disable();
-    }
+    
+    const button = new Button({
+        text,
+        onClick: async () => await unlockCards(lockedCards),
+        disabled: lockedCards.length() === 0,
+        place: ".remelt__rank-list"
+    });
 }
+
 init()

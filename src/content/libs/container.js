@@ -1,52 +1,22 @@
-class Button {
-    constructor({text = "", onclick = null, place = null} = {text: "", onclick: null, place: null}) {
-        this.onclick = onclick;
-        this._buttonContainer = document.createElement('div');
-        this.button = document.createElement('button');
-        this.button.className = 'button--primary extension';
-        this.button.style = 'margin-left: 10px;';
-        this.button.style.userSelect = "none";
-        this._buttonContainer.appendChild(this.button);
-        this.button.onclick = this._onclick.bind(this);
-        this.text(text);
-        place && this.place(place);
-    }
-    async _onclick() {
-        this.disable()
-        try {
-            this.onclick && await this.onclick();
-        }
-        finally {
-            this.enable();
-        }
-
+class Element {
+    constructor(type="div") {
+        this.element = document.createElement(type);
     }
 
-    addEventListener(event, func) {
-        this.button.addEventListener(event, func);
-    }
-    async place(querySelector) {
-        const tabsDiv = await this._waitDiv(querySelector)
-        if (tabsDiv) {
-            tabsDiv.appendChild(this._buttonContainer);
-        }
-    }
-    text(text) {
-        this.button.textContent = text;
+    place(querySelector) {
+        const container = document.querySelector(querySelector);
+        container.appendChild(this.element);
     }
 
-    disable() {
-        this.button.disabled = true;
-        this.button.style.cursor = 'not-allowed';
-        this.button.style.opacity = '0.5';
-        this.button.style.pointerEvents = 'none';
+    async asyncPlace(querySelector) {
+        const container = await this._waitDiv(querySelector);
+        container.appendChild(this.element);
     }
-    enable() {
-        this.button.disabled = false;
-        this.button.style.cursor = 'pointer';
-        this.button.style.opacity = '1';
-        this.button.style.pointerEvents = 'auto';
+
+    display(bool) {
+        this.element.style.display = bool ? "flex" : "none";
     }
+
     _waitDiv(querySelector, timeout = 5000) {
         return new Promise((resolve, reject) => {
             const intervalTime = 100;
@@ -67,11 +37,57 @@ class Button {
     }
 }
 
-class ShowBar {
-    constructor() {
-        this.showBar = null;
+class Button extends Element {
+    constructor({text = "", onClick = null, place = null, display = true, disabled = false} = {text: "", onClick: null, place: null, display: true, disabled: false}) {
+        super();
+        this.onClick = onClick;
+        this.button = document.createElement('button');
+        this.button.className = 'button--primary extension';
+        this.button.style = 'margin-left: 10px;';
+        this.button.style.userSelect = "none";
+        this.element.appendChild(this.button);
+        this.button.onclick = this._onclick.bind(this);
+        this.text(text);
+        disabled && this.disable();
+        this.display(display);
+        place && this.place(place);
     }
 
+    async _onclick() {
+        this.disable()
+        try {
+            this.onClick && await this.onClick();
+        }
+        finally {
+            this.enable();
+        }
+
+    }
+
+    addEventListener(event, func) {
+        this.button.addEventListener(event, func);
+    }
+
+    text(text) {
+        this.button.textContent = text;
+    }
+
+    disable() {
+        this.button.disabled = true;
+        this.button.style.cursor = 'not-allowed';
+        this.button.style.opacity = '0.5';
+        this.button.style.pointerEvents = 'none';
+    }
+
+    enable() {
+        this.button.disabled = false;
+        this.button.style.cursor = 'pointer';
+        this.button.style.opacity = '1';
+        this.button.style.pointerEvents = 'auto';
+    }
+}
+
+class ShowBar {
     static createShowBar() {
         let showBar = document.getElementById('show-bar');
 
@@ -96,6 +112,7 @@ class ShowBar {
         }
         this.showBar = showBar;
     }
+
     static addElementsToBar(elements) {
         if (elements.length === 0) {
             this.text("No cards found");
@@ -106,27 +123,31 @@ class ShowBar {
             });
         }
     }
+
     static text(text) {
         this.showBar.textContent = text;
     }
 }
 
-class Switcher {
-    constructor({ checked = false, onChange = null, place = null, text = "", disabled = false } = {checked: false, onChange: null, place: null, text: "", disabled: false }) {
+class Switcher extends Element {
+    constructor({ checked = false, onChange = null, place = null, text = "", disabled = false , display = true} = {checked: false, onChange: null, place: null, text: "", disabled: false , display: true}) {
+        super();
+
         this.checked = checked;
         this.onChange = onChange;
 
-        this.element = this.createSwitch();
+        this.createSwitch();
+        
         this.text(text);
         disabled && this.disable();
+        this.display(display);
         place && this.place(place);
     }
 
     createSwitch() {
-        const container = document.createElement('div');
-        container.className = 'switch-component-extension';
+        this.element.className = 'switch-component-extension';
 
-        container.innerHTML = `
+        this.element.innerHTML = `
             <label class="switch-extension">
                 <input type="checkbox" ${this.checked ? 'checked' : ''}>
                 <span class="slider-extension round"></span>
@@ -134,15 +155,13 @@ class Switcher {
             </label>
         `;
 
-        const input = container.querySelector('input');
+        const input = this.element.querySelector('input');
         input.addEventListener('change', (event) => {
             this.checked = event.target.checked;
             if (this.onChange) {
                 this.onChange(this.checked);
             }
         });
-
-        return container;
     }
 
     text(labelText) {
@@ -150,15 +169,6 @@ class Switcher {
         labelTextElement.innerText = labelText;
     }
 
-    render() {
-        return this.element;
-    }
-
-    place(querySelector) {
-        const container = document.querySelector(querySelector);
-        container.appendChild(this.element);
-    }
-    
     center() {
         this.element.style.margin = "10px"
         this.element.style.display = "flex"
@@ -197,38 +207,37 @@ class Switcher {
             this.onChange(this.checked);
         }
     }
+
 }
 
-class Li {
+class Li extends Element {
     constructor(text) {
+        super("li")
         this.onclick = null
-        this.text = text
-        this.li = document.createElement("li")
-        this.li.textContent = text
+        this.element.textContent = text
         this._style()
-        this.li.onclick = this._onclick.bind(this)
+        this.element.onclick = this._onclick.bind(this)
     }
+
     _style() {
-        this.li.style.cursor = "pointer"
-        this.li.style.color = "#772ce8"
+        this.element.style.cursor = "pointer"
+        this.element.style.color = "#772ce8"
     }
-    place(querySelector) {
-        const container = document.querySelector(querySelector)
-        container.appendChild(this.li)
-    }
+
     disable() {
-        this.li.style.cursor = "default"
-        this.li.onclick = () => {}
-        this.li.style.color = "#4a2c8f"
+        this.element.style.cursor = "default"
+        this.element.onclick = () => {}
+        this.element.style.color = "#4a2c8f"
     }
     enable() {
         this._style()
-        this.li.onclick = this.funk
+        this.element.onclick = this.funk
     }
     place(queryParams) {
         const container = document.querySelector(queryParams)
-        container.appendChild(this.li)
+        container.appendChild(this.element)
     }
+
     async _onclick() {
         this.disable()
         try {
@@ -241,32 +250,36 @@ class Li {
     }
 }
 
-class Input {
-    constructor() {
-        this.input = document.createElement("input")
-        this.input.className = "input-extension"
-        this.input.type = "text";
+class Input extends Element {
+    constructor({text = "", display = true, place = null} = {text: "", display: true, place: null}) {
+        super("input")
+
+        this.element.className = "input-extension"
+        this.element.type = "text";
         this.style()
+
+        text && this.text(text);
+        this.display(display);
+        place && this.place(place);
     }
     style () {
-        this.input.style.width = "200px";
-        this.input.style.height = "36px";
-        this.input.style.marginLeft = "10px";
-        this.input.style.borderRadius = "5px";
-        this.input.style.border = "1px solid #772ce8";
+        this.element.style.width = "200px";
+        this.element.style.height = "36px";
+        this.element.style.marginLeft = "10px";
+        this.element.style.borderRadius = "5px";
+        this.element.style.border = "1px solid #772ce8";
     }
-    place(querySelector) {
-        const container = document.querySelector(querySelector)
-        container.appendChild(this.input)
-    }
+
     getValue() {
-        return this.input.value
+        return this.element.value
     }
+
     setValue(value) {
-        this.input.value = value
+        this.element.value = value
     }
+
     text(text) {
-        this.input.placeholder = text;
+        this.element.placeholder = text;
     }
 }
 

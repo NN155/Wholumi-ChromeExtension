@@ -43,41 +43,63 @@ function changeCards(cards, myCards, {rank, src}) {
             const userInventory = await getCard.getInventory();
             const card = userInventory.find(card => card.src === src);
             const myCard = myCards.find(card => card.src === tradeCard.src);
-            const button = new Button();
+
             let text;
+            let disabled = false;
+
             if (!card) {
                 text = "In trade or not found";
-                button.disable();
+                disabled = true;
             }
             else if (myCard.lock === "trade") {
                 text = "This card is in trade";
-                button.disable();
+                disabled = true;
             }
             else {
                 text = `${myCard.lock === "lock" ? "Unlock and ": ""}Trade`
             }
-            button.text(text);
-            button.place(".anime-cards__controls")
-            if (myCard) {
-                button.addEventListener('click', async () => {
-                await trade(card, myCard);
-                });
-            }
+
+            const button = new Button({
+                disabled,
+                text,
+                onClick: async () => {
+                    await trade(card, myCard);
+                }
+            });
+
+            await button.asyncPlace(".anime-cards__controls")
         })
     })
 }
 
-
 async function init() {
-    const button = new Button();
-    const input = new Input();
+    const { searchCards, anotherUserMode} = await ExtensionConfig.getConfig("functionConfig");
+
     const dom = await getDomCardRank();
     const {rank, src} = await getCardInfo(dom);
+
     const text = `Compare ${rank} Cards`;
-    button.text(text);
-    button.onclick = () => showCards({rank, src, input});
-    input.text(UrlConstructor.getMyName());
-    await button.place(".tabs.tabs--center.mb-2");
+
+    const input = new Input({
+        text: UrlConstructor.getMyName(),
+        display: anotherUserMode,
+    });
+
+    const button = new Button({
+        text: text,
+        onClick: () => showCards({rank, src, input}),
+        place: ".tabs.tabs--center.mb-2",
+        display: searchCards,
+    });
+
     input.place(".tabs.tabs--center.mb-2");
+
+    window.addEventListener('config-updated' , async () => {
+        const {searchCards, anotherUserMode} = await ExtensionConfig.getConfig("functionConfig");
+    
+        button.display(searchCards);
+        input.display(anotherUserMode);
+    });
+
 }
 init()
