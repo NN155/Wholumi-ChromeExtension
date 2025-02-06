@@ -1,52 +1,31 @@
-async function showCards({rank, src, input}) {
+async function showCards({ input }) {
     ShowBar.createShowBar();
 
-    const userName = input.getValue();
-    const myUrl = userName ? UrlConstructor.getUserUrl(userName) : UrlConstructor.getMyUrl();
-    const my = new GetCards({userUrl: myUrl, rank});
-    let myCards;
-    try {
-        myCards = await my.getInventory();
-    }
-    catch {
-        ShowBar.text("User not found");
+    let userName = input.getValue() || UrlConstructor.getMyName();
+    let id = UrlConstructor.getCardId(window.location.href);
+
+    const cardsFinder = new CardsFinder({ userName,  id});
+    const cards = await cardsFinder.trade();
+    if (cards.error) {
+        ShowBar.text(cards.error);
         return;
     }
-    
-    const usersList = await getUsersList(document, {
-        limit:1000, 
-        pageLimit:10,
-    });
-    
-    const usersCards = await findUsersCards(usersList, user => getUserNeed(user, rank));
-    const cards = await compareCards(myCards, usersCards);
-    cards.forEach(card => {
-        card.fixCard();
-        card.fixLockIcon();
-        card.addLink();
-        card.setColorByRate();
-        card.removeBorderds();
-    });
-    changeCards(cards, myCards, {rank, src});
 
-    if (cards.length() > 75) {
-        cards.filter(card => card.rate > 0);
-    }
-    cards.sort();
+    changeCards(cards, cards.userCards, cardsFinder.rank, cardsFinder.src);
+
     ShowBar.addElementsToBar(cards.getCardsArray());
 }
 
-function changeCards(cards, myCards, {rank, src}) {
-    cards.forEach(tradeCard => {
-        tradeCard.addEventListener('click', async () => {
-            const getCard = new GetCards({ userUrl: tradeCard.url, userName: tradeCard.userName, rank });
+function changeCards(cards, myCards, rank, src) {
+    cards.forEach(tradedCard => {
+        tradedCard.addEventListener('click', async () => {
+            const getCard = new GetCards({ userUrl: tradedCard.url, userName: tradedCard.userName, rank });
             const userInventory = await getCard.getInventory();
             const card = userInventory.find(card => card.src === src);
-            const myCard = myCards.find(card => card.src === tradeCard.src);
-
+            const myCard = myCards.find(card => card.src === tradedCard.src);
+            console.log(userInventory, card, myCard);
             let text;
             let disabled = false;
-
             if (!card) {
                 text = "In trade or not found";
                 disabled = true;
@@ -75,10 +54,7 @@ function changeCards(cards, myCards, {rank, src}) {
 async function init() {
     const { searchCards, anotherUserMode} = await ExtensionConfig.getConfig("functionConfig");
 
-    const dom = await getDomCardRank();
-    const {rank, src} = await getCardInfo(dom);
-
-    const text = `Compare ${rank} Cards`;
+    const text = `Compare Cards`;
 
     const input = new Input({
         text: UrlConstructor.getMyName(),
@@ -87,7 +63,7 @@ async function init() {
 
     const button = new Button({
         text: text,
-        onClick: () => showCards({rank, src, input}),
+        onClick: () => showCards({ input }),
         place: ".tabs.tabs--center.mb-2",
         display: searchCards,
     });

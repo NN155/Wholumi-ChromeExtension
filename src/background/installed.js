@@ -9,6 +9,7 @@ chrome.runtime.onInstalled.addListener(() => {
             remeltDubles: true,
             clubBoost: true,
             customBoostMode: false,
+            openCards: false,
         }
         if (config) {
             defaultConfig = { ...defaultConfig, ...config };
@@ -21,6 +22,7 @@ chrome.runtime.onInstalled.addListener(() => {
         let defaultConfig = {
             lastUpdate: {},
             packInventory: {},
+            openedInventory: null,
         }
         if (config) {
             defaultConfig = { ...defaultConfig, ...config };
@@ -54,12 +56,22 @@ chrome.runtime.onInstalled.addListener(() => {
                 dChance: 1,
                 eChance: 1,
             },
+            menuColors: {
+                mainColor: "#8a1ec9",
+                bgColor: "#34495e",
+                secondBgColor: "#2c3e50",
+                thirdBgColor: "#2c3e50",
+                textColor: "#ecf0f1",
+                secondaryTextColor: "#ecf0f1",
+                thirdTextColor: "#000000",
+            }
         }
         if (config) {
-            defaultConfig = { 
-                clubBoost: { ...defaultConfig.clubBoost, ...config.clubBoost },
-                packs: { ...defaultConfig.packs, ...config.packs },
-             };
+            for (const key in defaultConfig) {
+                if (config[key]) {
+                    defaultConfig[key] = { ...defaultConfig[key], ...config[key] };
+                }
+            }
         }
         chrome.storage.local.set({ miscConfig: defaultConfig });
     });

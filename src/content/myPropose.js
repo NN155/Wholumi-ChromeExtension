@@ -1,12 +1,8 @@
 async function propose(type) {
     const myUrl = UrlConstructor.getMyUrl();
     let rank = UrlConstructor.getCardRank();
-    const my = new GetCards({ userUrl: myUrl, rank });
 
-    const [myCards, myTrade] = await Promise.all([
-        my.getInventory(true),
-        my.getTrade()
-    ]);
+    const [myCards, myTrade] = await proposeData(rank, myUrl);
     const ids = new Set();
 
     if (type) {
@@ -42,14 +38,31 @@ async function proposeId(id) {
     }
 }
 
+async function proposeData(rank, myUrl) {
+    let ranks = [rank];
+    if (!rank) {
+        ranks = ["s", "a", "b", "c", "d", "e"];
+    }
+    const inventory = [];
+    const trade = [];
+    for (const rank of ranks) {
+        const cardInstance = new GetCards({ rank, userUrl: myUrl, userName: null });
+    
+        const [myCards, myTradeCards] = await Promise.all([
+            cardInstance.getInventory(true),
+            cardInstance.getTrade()
+        ]);
+    
+        inventory.push(...myCards);
+        trade.push(...myTradeCards);
+    }
+    return [inventory, trade];
+}
 async function init() {
     if (!UrlConstructor.isMyPage()) {
         return
     }
     const rank = UrlConstructor.getCardRank();
-    if (!rank) {
-        return
-    }
     
     const proposeOn = new Button({
         text: `Propose ${rank ? rank : "All"}`,

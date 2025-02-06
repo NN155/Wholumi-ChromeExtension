@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "AnimeStars Alpha",
-  "version": "1.2.10",
+  "version": "1.2.14",
   "author": "MrKoMi",
   "description": "Press INSERT to open the menu",
   "permissions": [
@@ -27,7 +27,7 @@
         "menu/tab.js",
         "menu/tabs/misc.js",
         "menu/tabs/fun.js",
-        "menu/tabs/settings.js",
+        "menu/tabs/visuals.js",
         "menu/menu.js",
         "menu/content.js"
       ]
@@ -49,7 +49,7 @@
         "content/theme/globalColors.js",
         "content/libs/CardClasses.js",
         "content/libs/container.js",
-        "content/libs/cardFinder.js",
+        "content/libs/cardsFinder.js",
         "content/dataConfig.js"
       ]
     },
@@ -98,8 +98,7 @@
         "https://animestars.org/clubs/*/boost/*"
       ],
       "js": [
-        "content/clubs.js",
-        "content/telegram.js"
+        "content/clubs.js"
       ]
     },
     {
@@ -139,6 +138,14 @@
       ],
       "css": [
         "css/packs.css"
+      ]
+    },
+    {
+      "matches": [
+        "https://animestars.org/user/*/"
+      ],
+      "js": [
+        "content/myProfile.js"
       ]
     }
   ],

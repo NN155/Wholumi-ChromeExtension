@@ -7,6 +7,9 @@ window.addEventListener("update-data-config", async (event) => {
         case "siteInventory": 
             data = await updateSiteInventory();
             break;
+        case "openedInventory": 
+            data = await updateOpenedInventory();
+            break;
     }
 
     await ExtensionConfig.setConfig("dataConfig", { [event.detail.key]: data });
@@ -63,4 +66,19 @@ async function getSiteInventory() {
     return cards
 }
 
-
+async function updateOpenedInventory() {
+    const myUrl = UrlConstructor.getMyUrl();
+    const ranks = ["c", "d", "e"]
+    const cards = new CardsArray();
+    await Promise.all(
+        ranks.map(async (rank) => {
+            const my = new GetCards({ userUrl: myUrl, rank });
+            const myCards = await my.getInventory(true);
+            cards.push(...myCards);
+        })
+    );
+    cards.filter(card => card.lock !== "trade");
+    const hashCards = new HashCards();
+    cards.forEach(card => hashCards.add(card));
+    return hashCards.hash;
+}

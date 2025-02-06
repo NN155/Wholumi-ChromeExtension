@@ -4,18 +4,20 @@ const menuWindowStyle = document.createElement('style');
 menuWindowStyle.textContent = `
 
 :root { 
-    --main-helper-color: #2c3e50;
-    --second-helper-color: #34495e;
-    --main-helper-tabs-color: #8a1ec9;
-    --second-helper-tabs-color: #34495e;
-    --helper-text-color: #ecf0f1;
+    --main-menu-color: #2c3e50;
+    --border-menu-color: #34495e;
+    --main-color: #8a1ec9;
+    --bg-color: #34495e;
+    --second-bg-color: #2c3e50;
+    --third-bg-color: #cccccc;
+    --text-color: #ecf0f1;
+    --second-text-color: #ecf0f1;
+    --third-text-color: #888888;
     /* Switcher root */
     --switch-height: 28px;
     --switch-width: 50px;
     --switch-knob-size: 20px;
     --switch-gap: 8px;
-    --switch-background-color: #ccc;
-
     --label-font-size: 12px;
     --label-margin: 12px;
 }
@@ -28,15 +30,15 @@ menuWindowStyle.textContent = `
     height: auto;
     min-width: 350px;
     min-height: auto;
-    background: var(--main-helper-color); /* Темно-синій колір фону */
-    border: 1px solid var(--second-helper-color); /* Темно-сірий бордер */
+    background: var(--main-menu-color); /* Темно-синій колір фону */
+    border: 1px solid var(--border-menu-color); /* Темно-сірий бордер */
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3); /* Тінь */
     z-index: 10000;
     cursor: default;
     display: none;
     border-radius: 8px; /* Заокруглені краї */
     font-family: 'Arial', sans-serif;
-    color: var(--helper-text-color);
+    color: var(--text-color);
 }
 `;
 
@@ -44,8 +46,8 @@ menuStyle.textContent = `
 
 .drag-bar {
     padding: 10px;
-    background: var(--second-helper-tabs-color); /* Темно-сірий колір фону */
-    color: var(--helper-text-color);
+    background: var(--bg-color); /* Темно-сірий колір фону */
+    color: var(--text-color);
     cursor: move;
     user-select: none; /* Забороняє виділення тексту */
     border-top-left-radius: 8px;
@@ -61,7 +63,7 @@ menuStyle.textContent = `
     margin-right: 5px;
     -webkit-appearance: none;
     padding: 0;
-    border: 2px solid var(--second-helper-tabs-color);
+    border: 2px solid var(--bg-color);
     border-radius: 10px;
     width: 20px;
     height: 20px;
@@ -83,20 +85,20 @@ menuStyle.textContent = `
 }
 
 .drag-bar:hover {
-    background: var(--main-helper-tabs-color); /* Світло-бірюзовий при наведенні */
+    background: var(--main-color); /* Світло-бірюзовий при наведенні */
 }
 
 .tab-container {
     display: flex;
-    background: var(--second-helper-tabs-color); /* Темно-сірий фон для вкладок */
-    border-top: 2px solid var(--main-helper-tabs-color); /* Бірюзова лінія для вкладок */
+    background: var(--bg-color); /* Темно-сірий фон для вкладок */
+    border-top: 2px solid var(--main-color); /* Бірюзова лінія для вкладок */
 }
 
 .tab {
     padding: 10px;
     cursor: pointer;
     user-select: none;
-    color: var(--helper-text-color);
+    color: var(--text-color);
     text-align: center;
     font-size: 14px;
     flex-grow: 1;
@@ -104,23 +106,23 @@ menuStyle.textContent = `
 }
 
 .tab:hover {
-    background: var(--main-helper-tabs-color); /* Світло-бірюзовий при наведенні */
+    background: var(--main-color); /* Світло-бірюзовий при наведенні */
 }
 
 .tab.active {
-    background: var(--main-helper-tabs-color); /* Активна вкладка */
+    background: var(--main-color); /* Активна вкладка */
     font-weight: bold;
 }
 
 .window-content {
     padding: 10px;
     user-select: none;
-    color: var(--helper-text-color);
-    background: var(--second-helper-tabs-color);
+    color: var(--text-color);
+    background: var(--bg-color);
     font-size: 16px;
     line-height: 1.5;
     text-align: left;
-    border-top: 1px solid var(--main-helper-tabs-color); /* Лінія між вкладками і вмістом */
+    border-top: 1px solid var(--main-color); /* Лінія між вкладками і вмістом */
     height: 13rem; /* Висота контенту: загальна висота мінус заголовок і вкладки */
     overflow-y: auto; /* Додає вертикальну прокрутку при надлишковому контенті */
     border-radius: 0px 0px 8px 8px;
@@ -131,23 +133,23 @@ menuStyle.textContent = `
 }
 
 .window-content::-webkit-scrollbar-thumb {
-    background-color: var(--main-helper-tabs-color); /* Колір кнопки скролбару */
+    background-color: var(--main-color); /* Колір кнопки скролбару */
     border-radius: 10px; /* Заокруглені краї скролбару */
-    border: 2px solid var(--second-helper-tabs-color); /* Контур для скролбару */
+    border: 2px solid var(--bg-color); /* Контур для скролбару */
 }
 
 .window-content::-webkit-scrollbar-track {
-    background: #2c3e50; /* Колір фону для сліду скролбару */
+    background: var(--second-bg-color); /* Колір фону для сліду скролбару */
     border-radius: 10px;
 }
 
 .window-content::-webkit-scrollbar-thumb:hover {
-    background-color: var(--main-helper-tabs-color);
+    background-color: var(--main-color);
 }
 
-.window-content p {
+.window-content p, .window-content span, .window-content label {
     margin: 10px 0;
-    color: var(--helper-text-color);
+    color: var(--text-color);
     font-size: 14px;
     line-height: 1.4;
 }
@@ -155,10 +157,6 @@ menuStyle.textContent = `
 `;
 
 const switcher = `
-:root {
-
-}
-
 .custom-switch-extension {
   display: inline-flex;
   align-items: center;
@@ -186,7 +184,7 @@ const switcher = `
   cursor: pointer;
   width: var(--switch-width);
   height: var(--switch-height);
-  background-color: var(--switch-background-color);
+  background-color: var(--third-bg-color);
   border-radius: calc(var(--switch-height) / 2);
   position: relative;
   transition: background-color 0.4s;
@@ -199,13 +197,13 @@ const switcher = `
   width: var(--switch-knob-size);
   left: calc((var(--switch-height) - var(--switch-knob-size)) / 2);
   bottom: calc((var(--switch-height) - var(--switch-knob-size)) / 2);
-  background-color: var(--helper-text-color);
+  background-color: var(--text-color);
   border-radius: 50%;
   transition: transform 0.4s;
 }
 
 .switch-extension input:checked + .slider-extension {
-  background-color: var(--main-helper-tabs-color);
+  background-color: var(--main-color);
 }
 
 .switch-extension input:checked + .slider-extension:before {
@@ -221,7 +219,7 @@ const switcher = `
 }
 
 .switch-extension input:disabled + .slider-extension {
-  background-color: var(--second-helper-tabs-color);
+  background-color: var(--bg-color);
 }
 
 `
@@ -232,8 +230,8 @@ button.extension {
     margin: 0 auto;
     padding: 5px 10px;
     text-align: center;
-    color: aliceblue;
-    background-color: var(--main-helper-tabs-color);
+    color: var(--second-text-color);
+    background-color: var(--main-color);
     border-radius: 10px;
     border: none;
     cursor: pointer;
@@ -254,17 +252,20 @@ const input = `
   padding: 10px;
   margin: 5px 0;
   box-sizing: border-box;
-  border: 3px solid var(--main-helper-tabs-color);
+  border: 3px solid var(--main-color);
   border-radius: 10px;
-  background-color: var(--second-helper-tabs-color);
+  background-color: var(--bg-color);
   font-size: 16px;
-  color: var(--helper-text-color);
+  color: var(--text-color);
 }
 
 .custom-input-extension:focus, .custom-input-extension:focus {
     outline: none;
 }
 
+.custom-input-extension::placeholder {
+    color: var(--third-text-color);
+}
 `
 
 menuStyle.textContent += switcher;

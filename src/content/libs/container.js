@@ -290,7 +290,7 @@ async function getDomCardRank() {
     return dom;
 }
 
-async function getCardInfo(dom) {
+function getCardInfo(dom) {
     let rank = "s";
     const cardRank = dom.querySelector(".anime-cards__rank");
 

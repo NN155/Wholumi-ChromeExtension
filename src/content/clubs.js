@@ -4,9 +4,8 @@ const clubData = {
     stopUpdating: false,
     countBoost: 0,
     openCards: null,
-    globalDelay: 75,
     newDay: false,
-    telegramBotBool: false,
+    openCardsBoostOnly: false,
 }
 
 saveFetchConfig = {
@@ -23,14 +22,9 @@ async function autoUpdatePageInfo() {
         try {
             const { res, badData } = await updateCardInfo();
             if (res.boost_html) {
-
                 clubData.firstBoost = false;
                 clubData.newDay = !badData;
                 updatePageInfo(res.boost_html, res.boost_count, res.top_html)
-                if (clubData.telegramBotBool) {
-                    const event = new CustomEvent("page-info-updated", { detail: { html: res.boost_html, top: res.top_html, count: res.boost_count, } });
-                    clubData.newDay && window.dispatchEvent(event);
-                }
                 await boostCard.firstBoost()
             }
             else if (clubData.firstBoost) {
@@ -101,6 +95,7 @@ class BoostCard {
     }
 
     _isOpen(src) {
+        if (!clubData.openCardsBoostOnly) return true;
         if (!clubData.openCards) return true;
         const isOpen = clubData.openCards.hasBySrc(src);
         return isOpen;
@@ -171,41 +166,28 @@ const logs = [];
 
 function checkAutoOff(countBoost, topBoost) {
     if (clubData.newDay && countBoost >= 300) {
-        if (clubData.telegramBotBool) {
-            const event = new CustomEvent("clubs-day-limit-reached", { detail: { top: topBoost } });
-            window.dispatchEvent(event);
-        }
         console.log(logs);
         clubData.stopUpdating = true;
         switcherUpdatePage.turnOff()
     }
 }
 
-async function getOpenInventoryCards() {
-    const myUrl = UrlConstructor.getMyUrl();
-    const ranks = ["c", "d", "e"]
-    const cards = new CardsArray();
-    await Promise.all(
-        ranks.map(async (rank) => {
-            const my = new GetCards({ userUrl: myUrl, rank });
-            const myCards = await my.getInventory(true);
-            cards.push(...myCards);
-        })
-    );
-    cards.filter(card => card.lock !== "trade");
-    const hashCards = new HashCards();
-    cards.forEach(card => hashCards.add(card));
-    clubData.openCards = hashCards;
-    scanButton.text("Scanned")
+async function setOpenedCards() {
+    const hash = (await ExtensionConfig.loadConfig("dataConfig", ["openedInventory"])).openedInventory;
+    const cards = new HashCards();
+    cards.hash = hash;
+    clubData.openCards = cards
 }
 
 async function init() {
     const { clubBoost } = await ExtensionConfig.getConfig("functionConfig");
-    const array = [switcherUpdatePage, switcherAutoBoost, switcherTelegram, scanButton];
+    const array = [switcherUpdatePage, switcherAutoBoost];
     array.forEach(item => {
         item.display(clubBoost)
         item.place(".secondary-title.text-center")
     });
+    clubData.openCardsBoostOnly = (await ExtensionConfig.getConfig("functionConfig")).openCards;
+    await setOpenedCards();
 }
 
 const switcherUpdatePage = new Switcher(
@@ -239,26 +221,19 @@ const switcherAutoBoost = new Switcher(
     }
 )
 
-const switcherTelegram = new Switcher({
-    checked: false,
-    onChange: (isChecked) => {
-        clubData.telegramBotBool = isChecked;
-    },
-    text: "Telegram Bot",
-})
-
-const scanButton = new Button({
-    text: "scan open cards",
-    onClick: getOpenInventoryCards,
-})
-
 const boostCard = new BoostCard();
 init();
 
-window.addEventListener('config-updated', async () => {
-    const { clubBoost } = await ExtensionConfig.getConfig("functionConfig");
-    switcherUpdatePage.display(clubBoost);
-    switcherAutoBoost.display(clubBoost);
-    switcherTelegram.display(clubBoost);
-    scanButton.display(clubBoost);
+window.addEventListener('config-updated', async (event) => {
+    switch (event.detail.key) {
+        case "functionConfig":
+            const { clubBoost } = await ExtensionConfig.getConfig("functionConfig");
+            switcherUpdatePage.display(clubBoost);
+            switcherAutoBoost.display(clubBoost);
+            clubData.openCardsBoostOnly = (await ExtensionConfig.getConfig("functionConfig")).openCards;
+            break;
+        case "dataConfig":
+            await setOpenedCards();
+            break;
+    }
 });

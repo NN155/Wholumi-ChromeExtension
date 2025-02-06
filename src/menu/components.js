@@ -58,7 +58,7 @@ class CustomMenuButton {
             onEvent: null,
         };
 
-        this.settings = { ...defaults, ...options };
+        this.settings = { ...defaults, ...options, disabled: CustomMenuCallback.promises[options.id] };
     }
 
     async _onclick() {
@@ -84,7 +84,7 @@ class CustomMenuButton {
 
         target.innerHTML = `
         <div class="custom-button-container" style="margin-top: 10px; margin-bottom: 10px;">
-            <button id="${this.settings.id}" class="extension">${this.settings.text}</button>
+            <button id="${this.settings.id}" ${this.settings.disabled ? 'disabled' : ''} class="extension">${this.settings.text}</button>
             <span class="label-text">${this.settings.label}</span>
         </div>
         `;
@@ -191,4 +191,45 @@ class CustomMenuInput {
             input.placeholder = data[this.settings.subkey];
         }
     }
+}
+
+class CustomMenuColor {
+    constructor(options = {}) {
+        const defaults = {
+            id: 'customColor',
+            label: 'Function',
+            value: '',
+            disabled: false,
+            onChange: null,
+            placeHolder: '',
+        };
+
+        this.settings = { ...defaults, ...options };
+    }
+
+    render(target) {
+        if (!(target instanceof HTMLElement)) {
+            console.error('Target element must be a valid HTML element.');
+            return;
+        }
+
+        target.innerHTML = `
+                <div style="margin-top: 10px; margin-bottom: 10px;">
+                <input type="color" id="${this.settings.id}" value="${this.settings.value}" />
+                <label for="${this.settings.id}">${this.settings.label}</label>
+                </div>
+        `;
+
+        const input = target.querySelector(`#${this.settings.id}`);
+        input.addEventListener("input", (event) => {
+            this.colorUpdate(event.target.value, this.settings.targetVariable);
+        });
+    }
+
+    colorUpdate(newColor, property) {
+        const windowDiv = document.querySelector("#custom-window");
+        if (newColor) {
+            windowDiv.style.setProperty(property, newColor);
+        }
+    };
 }

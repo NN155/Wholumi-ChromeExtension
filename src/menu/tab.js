@@ -4,6 +4,7 @@ class Tab {
         this.content = content;
         this.isActive = false;
         this.config = {};
+        this.isRendered = false;
     }
 
     render() {
@@ -102,6 +103,11 @@ class Tab {
                     ...item,
                 });
                 break;
+            case 'Color': 
+                item.element = new CustomMenuColor({
+                    ...item,
+                });
+                break;
         }
 
         item.element.render(item.container);
@@ -152,6 +158,8 @@ class Tab {
     }
 
     async onActivate() {
+        if (this.isRendered) return;
+        this.isRendered = true;
         await this.updatedConfigKeys();
         this.elementsConfig.forEach((item) => {
             this.createElement(item);
