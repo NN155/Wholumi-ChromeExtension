@@ -30,14 +30,14 @@ class CustomMenu {
         this.addDragFunctionality();
 
         await this.initializeTabs();
-        this._addWheelListener();
+        this._addWheelListeners();
     }
 
     async initializeTabs() {
         const tabsData = [
             await miscTab(),
             await funTab(),
-            settingTab(),
+            await visualsTab(),
         ];
 
         this.tabs = tabsData;
@@ -163,9 +163,13 @@ class CustomMenu {
         }
     }
 
-    _addWheelListener() {
-        const menuContent = this.shadowRoot.querySelector('.window-content');
-        
+    _addWheelListeners() {
+        const menuContents = this.shadowRoot.querySelectorAll('.window-content');
+        for (const menuContent of menuContents) {
+            this._addWheelListener(menuContent);
+        }
+    }
+    _addWheelListener(menuContent) {
         menuContent.addEventListener('wheel', (event) => {
             const { scrollTop, scrollHeight, clientHeight } = menuContent;
     
