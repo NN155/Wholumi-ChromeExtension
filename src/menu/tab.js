@@ -93,7 +93,7 @@ class Tab {
                 break;
             case 'Button':
                 item.element = new CustomMenuButton({
-                    text: item.text ? item.text : (tab.config[item.config][item.data][item.subkey] || "Not updated"),
+                    text: item.text ? item.text : (tab.config[item.config][item.data] || "Not updated"),
                     ...item,
                 });
                 break;
@@ -103,7 +103,7 @@ class Tab {
                     ...item,
                 });
                 break;
-            case 'Color': 
+            case 'Color':
                 item.element = new CustomMenuColor({
                     ...item,
                 });
@@ -121,7 +121,7 @@ class Tab {
 
     getInputData(data) {
         const shadowRoot = document.querySelector("#custom-window").shadowRoot;
-        const config = {[data]: {}};
+        const config = { [data]: {} };
         this.elementsConfig.forEach((item) => {
             if (item.html === "Input" && item.data === data) {
                 const element = shadowRoot.querySelector(`#${item.id}`);
@@ -138,10 +138,10 @@ class Tab {
                 config[data][item.subkey] = value || placeHolder;
             }
         });
-        return config;  
+        return config;
     }
 
-    verifyValue(value, defaultVal, min=null, max=null) {
+    verifyValue(value, defaultVal, min = null, max = null) {
         if (value !== "" && !isNaN(value)) {
             let num = Number(value);
             num = min !== null ? Math.max(num, min) : num;
@@ -171,25 +171,25 @@ class Tab {
     static createContent(config) {
         let content = "";
         const groups = {};
-    
+
         config.forEach((item) => {
             if (!groups[item.group]) {
                 groups[item.group] = [];
             }
             groups[item.group].push(item);
         });
-    
+
         const groupKeys = Object.keys(groups);
-        
+
         groupKeys.forEach((group, index) => {
             content += `<div class="group-title">${group}</div>`;
-            
+
             groups[group].forEach((item) => {
                 content += `
                     <div id="${item.id}${item.html}"></div>
                 `;
             });
-    
+
             // Додаємо роздільник, якщо це не остання група
             if (index !== groupKeys.length - 1) {
                 content += '<hr>';

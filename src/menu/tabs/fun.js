@@ -1,7 +1,7 @@
 async function funTab() {
     const elementsConfig = [
-        { config: "dataConfig", html: "Button", id: 'packInventory', label: 'Update inventory info', onEvent: { key: "packInventory", event: "update-data-config" }, group: 'Packs', data: "lastUpdate", subkey: "packInventory" },
-        { config: "dataConfig", html: "Button", id: 'siteInventory', label: 'Update site cards info', onEvent: { key: "siteInventory", event: "update-data-config" }, group: 'Packs', data: "lastUpdate", subkey: "siteInventory" },
+        { config: "lastUpdate", html: "Button", id: 'packInventory', label: 'Update inventory info', onEvent: { key: "packInventory", event: "update-data-config" },  group: 'Packs', data: "packInventory" },
+        { config: "lastUpdate", html: "Button", id: 'siteInventory', label: 'Update site cards info', onEvent: { key: "siteInventory", event: "update-data-config" },  group: 'Packs', data: "siteInventory" },
         { html: "Input", id: 'packBalance',  label: 'Balance', type:"Number", min: 0, config: "miscConfig", data: "packs", subkey: "balance", group: 'Packs' },
         { html: "Input", id: 'packCounter', type:"Number", min: 1, max: 39, label: 'Counter', config: "miscConfig", data: "packs", subkey: "counter", group: 'Packs' },
         { html: "Input", id: 'packS', type:"Number", min: 0, max: 10000, label: 'S chance', config: "miscConfig", data: "packs", subkey: "sChance", group: 'Packs' },
@@ -19,6 +19,6 @@ async function funTab() {
 
     tab.elementsConfig = elementsConfig;
 
-    tab.tabData = [["dataConfig", ["lastUpdate"]], ["miscConfig", ["packs"]]];
+    tab.tabData = [["lastUpdate", null], ["miscConfig", ["packs"]]];
     return tab;
 }

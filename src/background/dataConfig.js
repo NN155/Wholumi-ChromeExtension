@@ -1,21 +1,6 @@
 chrome.runtime.onMessage.addListener((message, sender, sendResponse, tab) => {
     if (message.action === "data-config") {
         switch (message.mode) {
-            case "lastUpdate":
-                chrome.storage.local.get("dataConfig", (result) => {
-                    const dataConfig = result.dataConfig || {};
-                    const updates = {};
-
-                    for (const key in dataConfig) {
-                        if (dataConfig[key]?.lastUpdate) {
-                            updates[key] = dataConfig[key].lastUpdate;
-                        }
-                    }
-
-                    sendResponse({ updates });
-                });
-
-                return true;
             case "get-config":
                 chrome.storage.local.get(message.key, (data) => {
                     data[message.key] = filterKeys(data[message.key], message.subKeys);
@@ -32,7 +17,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse, tab) => {
                             chrome.storage.local.set({ [message.key]: config }, (data) => {
                                 const event = new CustomEvent("config-update", { detail: { key: message.key } });
                                 self.dispatchEvent(event);
-                                notifyTabsAboutConfig(message.key, config, sender.tab.id);
+                                notifyTabsAboutConfig({key: message.key, config, senderTabId: sender.tab.id});
                             });
                         });
                         return true;
@@ -40,16 +25,20 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse, tab) => {
                         chrome.storage.local.get(message.key, (data) => {
                             let config = data[message.key];
                             const messageConfig = message.config;
-
-                            for (const key in messageConfig) {
-                                config.lastUpdate[key] = new Date().toLocaleString();
-                            }
-
                             config = { ...config, ...message.config };
                             sendResponse({ config: config });
-                            chrome.storage.local.set({ [message.key]: config }, (data) => {
-                                notifyTabsAboutConfig(message.key, { lastUpdate: config.lastUpdate } );
+                            chrome.storage.local.set({ [message.key]: config });
+
+                            chrome.storage.local.get("lastUpdate", (data) => {
+                                const lastUpdate = data.lastUpdate;
+                                for (const key in messageConfig) {
+                                    lastUpdate[key] = new Date().toLocaleString();
+                                }
+                                chrome.storage.local.set({ lastUpdate: lastUpdate }, (data) => {
+                                    notifyTabsAboutConfig({key: "lastUpdate", config: lastUpdate});
+                                });
                             });
+
                         });
                         return true;
                     case "miscConfig":
@@ -58,22 +47,22 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse, tab) => {
                             config = { ...config, ...message.config };
                             sendResponse({ config: config });
                             chrome.storage.local.set({ [message.key]: config }, (data) => {
-                                notifyTabsAboutConfig(message.key, config);
+                                notifyTabsAboutConfig({key: message.key, config});
                             });
                         });
-                        return true;                        
+                        return true;
                 }
         }
     }
 });
 
 
-function notifyTabsAboutConfig(key, config, senderTabId=null) {
+function notifyTabsAboutConfig({key, config, senderTabId = null, info=null}) {
     chrome.tabs.query({}, (tabs) => {
         tabs.forEach((tab) => {
             const url = tab.url || "";
             if (url.startsWith(TargetDomain)) {
-                chrome.tabs.sendMessage(tab.id, { action: "update-config", key, config , tabSender: !(senderTabId === null || tab.id !== senderTabId)});
+                chrome.tabs.sendMessage(tab.id, { action: "update-config", key, info, config, tabSender: !(senderTabId === null || tab.id !== senderTabId) });
             }
         });
     });

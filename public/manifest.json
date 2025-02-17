@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "AnimeStars Alpha",
-  "version": "1.2.14",
+  "version": "1.2.15",
   "author": "MrKoMi",
   "description": "Press INSERT to open the menu",
   "permissions": [
@@ -50,6 +50,7 @@
         "content/libs/CardClasses.js",
         "content/libs/container.js",
         "content/libs/cardsFinder.js",
+        "content/libs/graphSearch.js",
         "content/dataConfig.js"
       ]
     },

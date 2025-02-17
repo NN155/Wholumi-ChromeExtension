@@ -44,8 +44,7 @@ class UrlConstructor {
     }
 
     static getUserUrl(userName) {
-        const url = this.getMyUrl();
-        return url.replace(/\/user\/[^/]+/, `/user/${userName}`);
+        return `/user/${userName}/`;
     }
 
     static isMyPage(url = window.location.href) {
@@ -266,7 +265,7 @@ class CardsFinder {
         const usersList = await getUsersList(dom, { limit: this.limit, pageLimit: this.pageLimit });
         const usersCards = await findUsersCards(usersList, user => this._checkUserCards(user, this.rank));
 
-        this._processCards(cards);
+        this._processCards(usersCards);
 
         this._addOrangeBorder(usersCards, userInventoryCards);
         this._upPriority(usersCards, userNeededCards);
@@ -308,20 +307,20 @@ class CardsFinder {
         await this.setData();
         try {
             this.verifyData();
-            return await this.getNeededCards();
         } catch (error) {
             return { error };
         }
+        return await this.getNeededCards();
     }
 
     async trade() {
         await this.setData();
         try {
             this.verifyData();
-            return await this.getTradedCards();
         } catch (error) {
             return { error };
         }
+        return await this.getTradedCards();
     }
 
     async _compareCards(userCards, otherCards) {
@@ -403,10 +402,10 @@ class CardsFinder {
         await this.setData();
         try {
             this.verifyData();
-            return await this.getUsersCards();
         } catch (error) {
             return { error };
         }
+        return await this.getUsersCards();
     }
     _compareUsersCards(userCards, otherCards) {
         otherCards.filter(otherCard => {

@@ -1,18 +1,20 @@
 window.addEventListener("update-data-config", async (event) => {
     let data;
-    switch(event.detail.key) {
+    switch (event.detail.key) {
         case "packInventory":
             data = await updateInventoryInfo();
             break;
-        case "siteInventory": 
+        case "siteInventory":
             data = await updateSiteInventory();
             break;
-        case "openedInventory": 
+        case "openedInventory":
             data = await updateOpenedInventory();
             break;
+        case "cards-data":
+            data = await getCardsGraphInfo(event.detail.rank);
+            break;
     }
-
-    await ExtensionConfig.setConfig("dataConfig", { [event.detail.key]: data });
+    await ExtensionConfig.setConfig("dataConfig", { [event.detail.saveAs || event.detail.key]: data });
     const newEvent = new CustomEvent(event.detail.event, {
         detail: {
             id: event.detail.id,
@@ -24,7 +26,7 @@ window.addEventListener("update-data-config", async (event) => {
 
 async function updateInventoryInfo() {
     const dom = await Fetch.parseFetch("/cards_showcase/");
-    
+
     const container = dom.querySelector('.card-filter-list__items');
 
     const cards = new Set();
@@ -44,7 +46,7 @@ async function updateSiteInventory() {
     for (const rank in cards) {
         const data = [];
         cards[rank].forEach(card => {
-            data.push({ id: card.cardId, name : card.name, src: card.src });
+            data.push({ id: card.cardId, name: card.name, src: card.src });
         });
         cards[rank] = data;
     }
@@ -54,15 +56,14 @@ async function updateSiteInventory() {
 async function getSiteInventory() {
     const ranks = ["s", "a", "b", "c", "d", "e"];
     const baseUrl = "https://animestars.org/cards/?rank=";
-    const userName = "Name";
-    
+
     const cardsPromises = ranks.map(rank => {
-        const cardInstance = new GetCards({ rank, userUrl: `${baseUrl}${rank}`, userName });
+        const cardInstance = new GetCards({ rank, userUrl: `${baseUrl}${rank}` });
         return cardInstance.getAllCards(cardInstance.userUrl);
     });
-    
+
     const [s, a, b, c, d, e] = await Promise.all(cardsPromises);
-    const cards = {s, a, b, c, d, e};
+    const cards = { s, a, b, c, d, e };
     return cards
 }
 
@@ -81,4 +82,104 @@ async function updateOpenedInventory() {
     const hashCards = new HashCards();
     cards.forEach(card => hashCards.add(card));
     return hashCards.hash;
+}
+
+class GraphInfo {
+    constructor(rank) {
+        this.cardsList;
+        this.data;
+        this.rank = rank;
+        this.usersList;
+        this.adjList = {};
+    }
+
+
+    async getData() {
+        await this.getCardsList();
+        this.data = {};
+        await Promise.all(this.cardsList.map(async card => {
+            this.data[card.cardId] = {...await this.getCardInfo(card.cardId), src: card.src};
+        }));
+    }
+
+    async getCardsList() {
+        const baseUrl = "https://animestars.org/cards/?rank=";
+        const cardInstance = new GetCards();
+        const cards = (await cardInstance.getAllCards(`${baseUrl}${this.rank}`)).cards;
+        this.cardsList = cards;
+    }
+
+    async getCardInfo(id) {
+        const urls = [UrlConstructor.getCardNeedUrl(id), UrlConstructor.getCardTradeUrl(id)];
+        const [need, trade] = await Promise.all(urls.map(async url => {
+            const dom = await Fetch.parseFetch(url);
+            return await getUsersList(dom, { limit: 10000, pageLimit: 30 });
+        }));
+        return { need: need, trade: trade };
+    }
+
+    createUsersData() {
+        this.usersList = new UsersList();
+        for (const id in this.data) {
+            for (const user of this.data[id].need) {
+                const { userUrl: url, userName: name } = user;
+                this.usersList.need({ name, url, id });
+            }
+            for (const user of this.data[id].trade) {
+                const { userUrl: url, userName: name } = user;
+                this.usersList.trade({ name, url, id });
+            }
+        }
+    }
+    buildAdjList() {
+        for (let user in this.usersList.users) {
+            const {name, need, trade} = this.usersList.users[user];
+            for (const needID of need) {
+                if (!this.adjList[needID]) {
+                    this.adjList[needID] = { 
+                        cards: {}, 
+                        popularity: this.data[needID].need.length, 
+                        availability: this.data[needID].trade.length, 
+                        src: this.data[needID].src 
+                    };
+                }
+                for (const tradeID of trade) {
+                    if (!this.adjList[needID].cards[tradeID]) {
+                        this.adjList[needID].cards[tradeID] = [];
+                    }
+                    this.adjList[needID].cards[tradeID].push(name);
+                }
+            }
+        }
+    }
+}
+
+class UsersList {
+    constructor() {
+        this.users = {};
+    }
+
+    need({ name, url, id }) {
+        this._checkUser({ name, url });
+        this.users[name].need.add(id);
+    }
+
+    trade({ name, url, id }) {
+        this._checkUser({ name, url });
+        this.users[name].trade.add(id);
+    }
+
+    _checkUser({ name, url }) {
+        if (!this.users[name]) {
+            this.users[name] = { name, url, need: new Set(), trade: new Set() };
+        }
+    }
+}
+async function getCardsGraphInfo(rank) {
+    const graph = new GraphInfo(rank);
+    await graph.getData();
+    graph.createUsersData();
+    graph.buildAdjList();
+
+    return graph.adjList;
 }

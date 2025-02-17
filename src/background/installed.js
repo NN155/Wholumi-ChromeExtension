@@ -17,19 +17,10 @@ chrome.runtime.onInstalled.addListener(() => {
         chrome.storage.local.set({ functionConfig: defaultConfig });
     });
 
-    chrome.storage.local.get("dataConfig", (data) => {
-        let config = data.dataConfig;
-        let defaultConfig = {
-            lastUpdate: {},
-            packInventory: {},
-            openedInventory: null,
-        }
-        if (config) {
-            defaultConfig = { ...defaultConfig, ...config };
-        }
+    const configKeys = ["packInventory", "siteInventory", "openedInventory", "cards-data-s-rank"];
 
-        chrome.storage.local.set({ dataConfig: defaultConfig });
-    })
+    updateConfig("dataConfig", {}, configKeys);
+    updateConfig("lastUpdate", {}, configKeys);
 
     let defaultConfig = {
         blockSendingUntil: Date.now(),
@@ -77,3 +68,19 @@ chrome.runtime.onInstalled.addListener(() => {
     });
 
 });
+
+const updateConfig = (key, defaultValue, configKeys) => {
+    chrome.storage.local.get(key, (data) => {
+        if (!data[key]) {
+            chrome.storage.local.set({ [key]: defaultValue });
+        } else {
+            const config = {};
+            for (const configKey of configKeys) {
+                if (data[key][configKey]) {
+                    config[configKey] = data[key][configKey];
+                }
+            }
+            chrome.storage.local.set({ [key]: config });
+        }
+    });
+};

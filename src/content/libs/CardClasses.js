@@ -262,6 +262,11 @@ class CardsArray {
         });
         return cards;
     }
+
+    slice(start, end) {
+        this.cards = this.cards.slice(start, end);
+        return this;
+    }
 }
 
 class HashCards {

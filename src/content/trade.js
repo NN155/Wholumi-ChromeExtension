@@ -4,7 +4,7 @@ async function showCards({ input }) {
     let userName = input.getValue() || UrlConstructor.getMyName();
     let id = UrlConstructor.getCardId(window.location.href);
 
-    const cardsFinder = new CardsFinder({ userName,  id});
+    const cardsFinder = new CardsFinder({ userName, id });
     const cards = await cardsFinder.trade();
     if (cards.error) {
         ShowBar.text(cards.error);
@@ -16,6 +16,33 @@ async function showCards({ input }) {
     ShowBar.addElementsToBar(cards.getCardsArray());
 }
 
+async function graphSearch({ input }) {
+    ShowBar.createShowBar();
+
+    const userName = input.getValue() || UrlConstructor.getMyName();
+    const userUrl = UrlConstructor.getUserUrl(userName);
+    const id = UrlConstructor.getCardId(window.location.href);
+    const cardUrl = UrlConstructor.getCardUrl(id);
+    const dom = await Fetch.parseFetch(cardUrl);
+    const { rank } = getCardInfo(dom);
+    if (rank !== "s") return;
+
+    const getCards = new GetCards({ userUrl: userUrl, rank: rank });
+    const userCards = await getCards.getInventory();
+    const cardsIds = userCards.cards.map(card => card.cardId);
+
+    const graph = new GraphSearch();
+    await graph.loadData(rank);
+
+    const paths = graph.need(cardsIds, id);
+    paths.sort((a, b) => a.ids.length - b.ids.length);
+
+    const graphPaths = new GraphsPaths({ paths, rank });
+    await graphPaths.initialize();
+    const buildedPaths = graphPaths.buildPaths();
+    ShowBar.addElementsToBar([buildedPaths]);
+}
+
 function changeCards(cards, myCards, rank, src) {
     cards.forEach(tradedCard => {
         tradedCard.addEventListener('click', async () => {
@@ -23,7 +50,6 @@ function changeCards(cards, myCards, rank, src) {
             const userInventory = await getCard.getInventory();
             const card = userInventory.find(card => card.src === src);
             const myCard = myCards.find(card => card.src === tradedCard.src);
-            console.log(userInventory, card, myCard);
             let text;
             let disabled = false;
             if (!card) {
@@ -35,7 +61,7 @@ function changeCards(cards, myCards, rank, src) {
                 disabled = true;
             }
             else {
-                text = `${myCard.lock === "lock" ? "Unlock and ": ""}Trade`
+                text = `${myCard.lock === "lock" ? "Unlock and " : ""}Trade`
             }
 
             const button = new Button({
@@ -52,28 +78,34 @@ function changeCards(cards, myCards, rank, src) {
 }
 
 async function init() {
-    const { searchCards, anotherUserMode} = await ExtensionConfig.getConfig("functionConfig");
-
-    const text = `Compare Cards`;
+    const { searchCards, anotherUserMode } = await ExtensionConfig.getConfig("functionConfig");
 
     const input = new Input({
         text: UrlConstructor.getMyName(),
         display: anotherUserMode,
     });
 
-    const button = new Button({
-        text: text,
+    const buttonSearchCards = new Button({
+        text: `Compare Cards`,
         onClick: () => showCards({ input }),
+        place: ".tabs.tabs--center.mb-2",
+        display: searchCards,
+    });
+
+    const buttonGraphSearch = new Button({
+        text: `Graph Search`,
+        onClick: () => graphSearch({ input }),
         place: ".tabs.tabs--center.mb-2",
         display: searchCards,
     });
 
     input.place(".tabs.tabs--center.mb-2");
 
-    window.addEventListener('config-updated' , async () => {
-        const {searchCards, anotherUserMode} = await ExtensionConfig.getConfig("functionConfig");
-    
-        button.display(searchCards);
+    window.addEventListener('config-updated', async () => {
+        const { searchCards, anotherUserMode } = await ExtensionConfig.getConfig("functionConfig");
+
+        buttonSearchCards.display(searchCards);
+        buttonGraphSearch.display(searchCards);
         input.display(anotherUserMode);
     });
 

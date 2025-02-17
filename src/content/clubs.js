@@ -131,8 +131,6 @@ class BoostCard {
         }
         if (res.boost_html_changed) {
             updatePageInfo(res.boost_html_changed)
-            const dif = Date.now() - this.time;
-            logs.push({"Time": dif, "Success": false});
             await this.firstBoost()
         }
         else if (res.boost_html) {
@@ -140,8 +138,6 @@ class BoostCard {
             switcherAutoBoost.text(`Auto Boost Card (${clubData.countBoost})`)
             clubData.openCards && clubData.openCards.removeBySrc(this.src)
             updatePageInfo(res.boost_html)
-            const dif = Date.now() - this.time;
-            logs.push({"Time": dif, "Success": true});
             await this.firstBoost()
         }       
     }
@@ -162,11 +158,8 @@ class BoostCard {
     }
 }
 
-const logs = [];
-
 function checkAutoOff(countBoost, topBoost) {
     if (clubData.newDay && countBoost >= 300) {
-        console.log(logs);
         clubData.stopUpdating = true;
         switcherUpdatePage.turnOff()
     }
@@ -232,7 +225,7 @@ window.addEventListener('config-updated', async (event) => {
             switcherAutoBoost.display(clubBoost);
             clubData.openCardsBoostOnly = (await ExtensionConfig.getConfig("functionConfig")).openCards;
             break;
-        case "dataConfig":
+        case "lastUpdate":
             await setOpenedCards();
             break;
     }

@@ -58,7 +58,7 @@ class CustomMenuButton {
             onEvent: null,
         };
 
-        this.settings = { ...defaults, ...options, disabled: CustomMenuCallback.promises[options.id] };
+        this.settings = { ...defaults, ...options, disabled: CustomMenuCallback.promises[options.id]};
     }
 
     async _onclick() {
@@ -93,17 +93,16 @@ class CustomMenuButton {
     }
 
     updateState(data) {
-        if (!this.settings.data || !this.settings.subkey) return;
-        if (!data[this.settings.subkey]) return;
+        if (!data) return;
         const shadowRoot = document.querySelector("#custom-window").shadowRoot;
         const button = shadowRoot.querySelector(`#${this.settings.id}`);
         if (button) {
-            button.textContent = data[this.settings.subkey];
+            button.textContent = data;
         }
     }
 
-    async sendEvent({ key, event, data }) {
-        await CustomMenuCallback.sendEvent({ key, event, data, id: this.settings.id });
+    async sendEvent({ key, event, data, ...rest }) {
+        await CustomMenuCallback.sendEvent({ key, event, data, id: this.settings.id, ...rest });
     }
 }
 
@@ -119,13 +118,14 @@ class CustomMenuCallback {
         });
     }
 
-    static async sendEvent({ key, event, data, id }) {
+    static async sendEvent({ key, event, data, id, ...rest }) {
         const e = new CustomEvent(event, {
             detail: {
                 key: key,
                 id: id,
                 data: data,
                 event: "button-task-completed",
+                ...rest,
             },
         });
         window.dispatchEvent(e);

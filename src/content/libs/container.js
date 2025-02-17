@@ -1,5 +1,5 @@
 class Element {
-    constructor(type="div") {
+    constructor(type = "div") {
         this.element = document.createElement(type);
     }
 
@@ -38,7 +38,7 @@ class Element {
 }
 
 class Button extends Element {
-    constructor({text = "", onClick = null, place = null, display = true, disabled = false} = {text: "", onClick: null, place: null, display: true, disabled: false}) {
+    constructor({ text = "", onClick = null, place = null, display = true, disabled = false } = { text: "", onClick: null, place: null, display: true, disabled: false }) {
         super();
         this.onClick = onClick;
         this.button = document.createElement('button');
@@ -129,15 +129,73 @@ class ShowBar {
     }
 }
 
+class GraphsPaths {
+    constructor({ paths, rank }) {
+        this.paths = paths;
+        this.rank = rank;
+        this.data;
+    }
+
+    async initialize() {
+        const config = await ExtensionConfig.getConfig("dataConfig", [`cards-data-${this.rank}-rank`]);
+        this.data = config[`cards-data-${this.rank}-rank`];
+    }
+
+    buildPaths() {
+        const paths = [];
+        this.paths.forEach(path => {
+            paths.push(this.createPath(path));
+        });
+        const pathsElement = document.createElement("div");
+        pathsElement.innerHTML = paths[100].outerHTML;
+        // pathsElement.innerHTML = paths.map(path => path.outerHTML).join('');
+        return pathsElement;
+    }
+
+    createPath(path) {
+        const { ids, names } = path;
+        const cards = [];
+        for (let i = 0; i < ids.length; i++) {
+            cards.push(this.createCard({ id: ids[i], names: names[i] }));
+        }
+        const pathElement = document.createElement("div");
+        pathElement.innerHTML = `
+        <div class="anime-cards__path" style="display: flex; flex-wrap: wrap; margin: 0 -10px;">
+        ${cards.map(card => card.outerHTML).join('')}
+        </div>
+        `
+        return pathElement;
+    }
+
+    createCard({ id, names }) {
+        const card = document.createElement("div");
+        card.innerHTML = `
+            <div class="anime-cards__item-wrapper" style="min-width: 100px;">
+                <div class="anime-cards__item" data-id="${id}" data-image="${this.data[id].src}">
+                    <div class="anime-cards__image">
+                        <img loading="lazy" class="anime-cards__image" src="${this.data[id].src}" alt="card"></img>
+                    </div>
+                    ${Array.isArray(names) ? names.map(name => `
+                        <a href="${UrlConstructor.getUserUrl(name)}" style="display: block; text-align: center;">
+                            ${name}
+                        </a>
+                    `).join('') : ''}
+                </div>
+            </div>
+        `
+        return card;
+    }
+}
+
 class Switcher extends Element {
-    constructor({ checked = false, onChange = null, place = null, text = "", disabled = false , display = true} = {checked: false, onChange: null, place: null, text: "", disabled: false , display: true}) {
+    constructor({ checked = false, onChange = null, place = null, text = "", disabled = false, display = true } = { checked: false, onChange: null, place: null, text: "", disabled: false, display: true }) {
         super();
 
         this.checked = checked;
         this.onChange = onChange;
 
         this.createSwitch();
-        
+
         this.text(text);
         disabled && this.disable();
         this.display(display);
@@ -226,7 +284,7 @@ class Li extends Element {
 
     disable() {
         this.element.style.cursor = "default"
-        this.element.onclick = () => {}
+        this.element.onclick = () => { }
         this.element.style.color = "#4a2c8f"
     }
     enable() {
@@ -251,7 +309,7 @@ class Li extends Element {
 }
 
 class Input extends Element {
-    constructor({text = "", display = true, place = null} = {text: "", display: true, place: null}) {
+    constructor({ text = "", display = true, place = null } = { text: "", display: true, place: null }) {
         super("input")
 
         this.element.className = "input-extension"
@@ -262,7 +320,7 @@ class Input extends Element {
         this.display(display);
         place && this.place(place);
     }
-    style () {
+    style() {
         this.element.style.width = "200px";
         this.element.style.height = "36px";
         this.element.style.marginLeft = "10px";
@@ -326,7 +384,7 @@ function getUsers(dom) {
     return usersList;
 }
 
-async function getUsersList(dom, { filterLock, filterOnline, limit = 200, pageLimit=5} = {}) {
+async function getUsersList(dom, { filterLock, filterOnline, limit = 200, pageLimit = 5 } = {}) {
     let usersList = getUsers(dom);
     let pageUrls = findPanel(dom)
     if (pageUrls) {
@@ -357,7 +415,6 @@ async function getUsersList(dom, { filterLock, filterOnline, limit = 200, pageLi
 
     return usersList;
 }
-
 
 function findPanel(dom) {
     const panel = dom.querySelector('.pagination__pages')
