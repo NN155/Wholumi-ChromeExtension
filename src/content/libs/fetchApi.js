@@ -238,4 +238,18 @@ class Fetch {
             body: body,
         });
     }
+
+    static async giftCode(code) {
+        const response = await fetch("/engine/ajax/controller.php?mod=gift_code_game", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded",
+            },
+            body: new URLSearchParams({
+                user_hash: dle_login_hash,
+                code: code
+            }),
+        });
+        return await response.json();
+      }
 }

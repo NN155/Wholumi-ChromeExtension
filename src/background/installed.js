@@ -10,6 +10,7 @@ chrome.runtime.onInstalled.addListener(() => {
             clubBoost: true,
             customBoostMode: false,
             openCards: false,
+            graphSearch: false,
         }
         if (config) {
             defaultConfig = { ...defaultConfig, ...config };

@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "AnimeStars Alpha",
-  "version": "1.2.15",
+  "version": "1.2.17",
   "author": "MrKoMi",
   "description": "Press INSERT to open the menu",
   "permissions": [
@@ -149,8 +149,5 @@
         "content/myProfile.js"
       ]
     }
-  ],
-  "action": {
-    "default_popup": "index.html"
-  }
+  ]
 }

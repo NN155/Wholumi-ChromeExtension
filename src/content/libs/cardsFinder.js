@@ -88,6 +88,17 @@ class UrlConstructor {
     static getCardId(url) {
         return url.match(/\/cards\/(\d+)\//)?.[1];
     }
+
+    static async validateUser(userName) {
+        const response = await saveFetch(UrlConstructor.getUserUrl(userName));
+        if (response.status === 404) {
+            return null;
+        }
+        const parser = new DOMParser();
+        const dom = parser.parseFromString(await response.text(), "text/html");
+        const user = dom.querySelector(".usp__name").textContent;
+        return user;
+    }
 }
 
 class GetCards {
@@ -217,7 +228,7 @@ class CardsFinder {
     constructor({ id, userName, limit = 3000, pageLimit = 15 }) {
         this.id = id;
         this.userName = userName;
-        this.userUrl = UrlConstructor.getUserUrl(userName);
+        this.userUrl;
         this.limit = limit;
         this.pageLimit = pageLimit;
         this.src = null;
@@ -233,14 +244,15 @@ class CardsFinder {
             const cardInfo = getCardInfo(dom);
             rank = cardInfo.rank;
             src = cardInfo.src;
-        } catch (error) {}
+        } catch (error) { }
 
         this.src = src;
         this.rank = rank;
     }
     async checkUserExistence() {
-        const response = await saveFetch(this.userUrl);
-        this.userExist = response.status !== 404;
+        this.userName = await UrlConstructor.validateUser(this.userName);
+        this.userUrl = UrlConstructor.getUserUrl(this.userName);
+        this.userExist = this.userName !== null
     }
 
     async setData() {
@@ -248,8 +260,8 @@ class CardsFinder {
     }
 
     verifyData() {
-        if (!this.userExist) throw new Error("User not found");
-        if (!this.rank && !this.src) throw new Error("Card not found");
+        if (!this.userExist) return "User not found";
+        if (!this.rank && !this.src) return "Card not found";
     }
 
     async getNeededCards() {
@@ -279,12 +291,12 @@ class CardsFinder {
     }
 
     async getTradedCards() {
-        const getCards = new GetCards({userUrl: this.userUrl, rank: this.rank});
+        const getCards = new GetCards({ userUrl: this.userUrl, rank: this.rank });
         const userCards = await getCards.getInventory();
 
         const dom = await Fetch.parseFetch(UrlConstructor.getCardTradeUrl(this.id));
         const usersList = await getUsersList(dom, {
-            limit:  this.limit, 
+            limit: this.limit,
             pageLimit: this.pageLimit,
         });
 
@@ -295,7 +307,7 @@ class CardsFinder {
         if (cards.length() > 75) {
             cards.filter(card => card.rate > 0);
         }
-        
+
         cards.sort();
         cards.userCards = userCards;
 
@@ -305,21 +317,15 @@ class CardsFinder {
 
     async need() {
         await this.setData();
-        try {
-            this.verifyData();
-        } catch (error) {
-            return { error };
-        }
+        const answer = this.verifyData();
+        if (answer) return { error: answer };
         return await this.getNeededCards();
     }
 
     async trade() {
         await this.setData();
-        try {
-            this.verifyData();
-        } catch (error) {
-            return { error };
-        }
+        const answer = this.verifyData();
+        if (answer) return { error: answer };
         return await this.getTradedCards();
     }
 
@@ -367,11 +373,11 @@ class CardsFinder {
     }
 
     async getUsersCards() {
-        const userCards = await getInventoryTrade({userUrl: this.userUrl, rank: this.rank});
+        const userCards = await getInventoryTrade({ userUrl: this.userUrl, rank: this.rank });
 
         const dom = await Fetch.parseFetch(UrlConstructor.getCardUrl(this.id));
         const usersList = await getUsersList(dom, {
-            limit: this.limit, 
+            limit: this.limit,
             pageLimit: this.pageLimit,
         });
 
@@ -400,11 +406,8 @@ class CardsFinder {
 
     async users() {
         await this.setData();
-        try {
-            this.verifyData();
-        } catch (error) {
-            return { error };
-        }
+        const answer = this.verifyData();
+        if (answer) return { error: answer };
         return await this.getUsersCards();
     }
     _compareUsersCards(userCards, otherCards) {

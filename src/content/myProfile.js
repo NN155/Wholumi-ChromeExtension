@@ -23,6 +23,22 @@ function init() {
 
 init()
 
+async function findGift(url) {
+    const response = await fetch(url);
+    const text = await response.text();
+    const parser = new DOMParser();
+    const htmlDocument = parser.parseFromString(text, "text/html");
+    const gift = htmlDocument.querySelector("#gift-icon")
+    if (gift) {
+        console.log(gift)
+        const code = gift.getAttribute("data-code")
+        const response = await Fetch.giftCode(code)
+        if (response.status == "ok") {
+            diamondFalls()
+        }
+    }
+}
+
 async function visitAllUrls() {
     const name = UrlConstructor.getMyName();
     const clubId = UrlConstructor.getClubId() || 1;
@@ -106,5 +122,5 @@ async function visitAllUrls() {
         "/?do=lastcomments",
         "/aniserials/video/action/2745-podnjatie-urovnja-v-odinochku-2-sezon-vosstante-iz-teni.html",
     ]
-    await Promise.all(urls.map(url => Fetch.parseFetch(url)))
+    await Promise.all(urls.map(url => findGift(url)))
 }

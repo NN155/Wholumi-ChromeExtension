@@ -19,7 +19,14 @@ async function showCards({ input }) {
 async function graphSearch({ input }) {
     ShowBar.createShowBar();
 
-    const userName = input.getValue() || UrlConstructor.getMyName();
+    const userNameInput = input.getValue() || UrlConstructor.getMyName();
+
+    const userName = await UrlConstructor.validateUser(userNameInput);
+    if (userName === null) {
+        ShowBar.text("User not found");
+        return;
+    }
+
     const userUrl = UrlConstructor.getUserUrl(userName);
     const id = UrlConstructor.getCardId(window.location.href);
     const cardUrl = UrlConstructor.getCardUrl(id);
@@ -78,7 +85,7 @@ function changeCards(cards, myCards, rank, src) {
 }
 
 async function init() {
-    const { searchCards, anotherUserMode } = await ExtensionConfig.getConfig("functionConfig");
+    const { searchCards, anotherUserMode, graphSearch: graph } = await ExtensionConfig.getConfig("functionConfig");
 
     const input = new Input({
         text: UrlConstructor.getMyName(),
@@ -96,16 +103,16 @@ async function init() {
         text: `Graph Search`,
         onClick: () => graphSearch({ input }),
         place: ".tabs.tabs--center.mb-2",
-        display: searchCards,
+        display: graph,
     });
 
     input.place(".tabs.tabs--center.mb-2");
 
     window.addEventListener('config-updated', async () => {
-        const { searchCards, anotherUserMode } = await ExtensionConfig.getConfig("functionConfig");
+        const { searchCards, anotherUserMode, graphSearch: graph } = await ExtensionConfig.getConfig("functionConfig");
 
         buttonSearchCards.display(searchCards);
-        buttonGraphSearch.display(searchCards);
+        buttonGraphSearch.display(graph);
         input.display(anotherUserMode);
     });
 
