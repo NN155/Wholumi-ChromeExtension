@@ -240,7 +240,7 @@ class Fetch {
     }
 
     static async giftCode(code) {
-        const response = await fetch("/engine/ajax/controller.php?mod=gift_code_game", {
+        const response = await saveFetch("/engine/ajax/controller.php?mod=gift_code_game", {
             method: "POST",
             headers: {
                 "Content-Type": "application/x-www-form-urlencoded",

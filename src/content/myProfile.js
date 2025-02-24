@@ -24,7 +24,7 @@ function init() {
 init()
 
 async function findGift(url) {
-    const response = await fetch(url);
+    const response = await saveFetch(url);
     const text = await response.text();
     const parser = new DOMParser();
     const htmlDocument = parser.parseFromString(text, "text/html");
