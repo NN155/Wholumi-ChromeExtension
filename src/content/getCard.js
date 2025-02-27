@@ -3,17 +3,8 @@ async function init() {
 }
 
 async function getCard() {
-    await takeCard();
     const data = await Fetch.recieveCard();
 
-    if (data?.cards) {
-        await takeCard();
-        const card = data.cards
-    }
-
-    else if (data.reason == 'Есть выданная карта, которую пользователь не забрал') {
-        await takeCard();
-    }
     if (data.stop_reward === "yes") {
         return {stop_reward: "yes"};
     }
@@ -34,15 +25,6 @@ async function setCardInterval() {
 function delay(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
-
-async function takeCard() {
-    const cardInfo = await Fetch.checkTakeCard()
-    if (!cardInfo?.cards) {
-        return;
-    }
-    await Fetch.reportCardViewed(cardInfo.cards?.owner_id)
-}
-
 
 async function setPingInterval() {
     while (!await sendPing()) {
