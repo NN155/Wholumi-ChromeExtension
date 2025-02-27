@@ -15,7 +15,7 @@ async function getCard() {
 
 async function setCardInterval() {
     while (!await getCard()) {
-        await delay(1000 * 169);
+        await delay(1000 * 170);
         if (await getCard()) {
             break;
         }
@@ -28,7 +28,7 @@ function delay(ms) {
 
 async function setPingInterval() {
     while (!await sendPing()) {
-        await delay(1000 * 169);
+        await delay(1000 * 170);
         if (await sendPing()) {
             break;
         }
