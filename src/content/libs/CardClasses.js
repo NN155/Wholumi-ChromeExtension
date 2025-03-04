@@ -11,6 +11,7 @@ class Card {
         this.sortPriority = 0;
         this.cardId = null;
         this.name = null;
+        this.dubles = 0;
     }
 
     setSrc() {

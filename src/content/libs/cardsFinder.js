@@ -357,6 +357,7 @@ class CardsFinder {
         otherCards.forEach(otherCard => {
             otherCard.removeBorderds();
             if (userCards.find(userCard => userCard.cardId === otherCard.cardId)) {
+                otherCard.dubles = 1;
                 otherCard.setBorder(globalColors.orange);
             }
         })
