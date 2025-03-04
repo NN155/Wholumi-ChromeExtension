@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "name": "AnimeStars Alpha",
+  "name": "AnimeStars Bot",
   "version": "1.2.18",
   "author": "MrKoMi",
   "description": "Press INSERT to open the menu",
@@ -152,6 +152,15 @@
       ],
       "js": [
         "content/myProfile.js"
+      ]
+    },
+    {
+      "matches": [
+        "https://animestars.org/?extension=bot"
+      ],
+      "js": [
+        "content/libs/external/socketIo.js",
+        "content/bot.js"
       ]
     }
   ]

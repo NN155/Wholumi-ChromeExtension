@@ -24,6 +24,6 @@ export default defineConfig({
       }),
     ],
     build : {
-      outDir: 'dist/alpha',
+      outDir: 'dist/bot',
     },
 });
