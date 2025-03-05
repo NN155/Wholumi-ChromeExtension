@@ -270,8 +270,8 @@ class CardsFinder {
     }
 
     verifyData() {
-        if (!this.userExist) return "User not found";
-        if (!this.rank && !this.src) return "Card not found";
+        if (!this.userExist) return "Wrong user name";
+        if (!this.rank && !this.src) return "Wrong card id";
     }
 
     async getNeededCards() {
