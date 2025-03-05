@@ -303,7 +303,7 @@ class CardsFinder {
             card.searchLink = urlConstructor.search(card.name);
         });
 
-        if (!cards.length()) {
+        if (!usersCards.length()) {
             return { error: "No cards found" };
         }
         
