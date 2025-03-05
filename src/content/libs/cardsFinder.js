@@ -16,6 +16,9 @@ class UrlConstructor {
         return this.userUrl + '/cards/trade/' + this.rank;
     }
 
+    search(name) {
+        return this.userUrl + "/cards/" + this.rank + "&search=" + name;
+    } 
     unlock(url) {
         return url += "&locked=0";
     }
@@ -99,6 +102,13 @@ class UrlConstructor {
         const user = dom.querySelector(".usp__name").textContent;
         return user;
     }
+    
+    static async getCardName(id) {
+        const url =  this.getCardNeedUrl(id);
+        const dom = await Fetch.parseFetch(url);
+        return dom.querySelector(".secondary-title.text-center a").textContent;
+    }
+
 }
 
 class GetCards {
@@ -225,7 +235,7 @@ async function getUserNeed(user, rank = "s") {
 }
 
 class CardsFinder {
-    constructor({ id, userName, limit = 3000, pageLimit = 15 }) {
+    constructor({ id, userName, limit = 3000, pageLimit = 15}) {
         this.id = id;
         this.userName = userName;
         this.userUrl;
@@ -287,6 +297,12 @@ class CardsFinder {
         }
         usersCards.sort();
         usersCards.userCard = userCard;
+        
+        usersCards.forEach(card => {
+            const urlConstructor = new UrlConstructor({ rank: this.rank, userUrl: card.url });
+            card.searchLink = urlConstructor.search(card.name);
+        });
+        
         return usersCards;
     }
 
@@ -310,6 +326,12 @@ class CardsFinder {
 
         cards.sort();
         cards.userCards = userCards;
+
+        const name = await UrlConstructor.getCardName(this.id);
+        cards.forEach(card => {
+            const urlConstructor = new UrlConstructor({ rank: this.rank, userUrl: card.url });
+            card.searchLink = urlConstructor.search(name);
+        });
 
         return cards;
     }
@@ -399,8 +421,13 @@ class CardsFinder {
             cards.filter(card => card.rate > 0);
         }
         cards.sort();
-
         cards.userCards = userCards;
+
+        const name = await UrlConstructor.getCardName(this.id);
+        cards.forEach(card => {
+            const urlConstructor = new UrlConstructor({ rank: this.rank, userUrl: card.url });
+            card.searchLink = urlConstructor.search(name);
+        });
 
         return cards
     }
