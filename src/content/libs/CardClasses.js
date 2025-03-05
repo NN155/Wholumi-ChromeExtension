@@ -12,6 +12,7 @@ class Card {
         this.cardId = null;
         this.name = null;
         this.dubles = 0;
+        this.searchLink = null;
     }
 
     setSrc() {
