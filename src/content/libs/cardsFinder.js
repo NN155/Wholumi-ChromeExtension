@@ -302,6 +302,10 @@ class CardsFinder {
             const urlConstructor = new UrlConstructor({ rank: this.rank, userUrl: card.url });
             card.searchLink = urlConstructor.search(card.name);
         });
+
+        if (!cards.length()) {
+            return { error: "No cards found" };
+        }
         
         return usersCards;
     }
@@ -332,6 +336,10 @@ class CardsFinder {
             const urlConstructor = new UrlConstructor({ rank: this.rank, userUrl: card.url });
             card.searchLink = urlConstructor.search(name);
         });
+
+        if (!cards.length()) {
+            return { error: "No cards found" };
+        }
 
         return cards;
     }
@@ -428,7 +436,9 @@ class CardsFinder {
             const urlConstructor = new UrlConstructor({ rank: this.rank, userUrl: card.url });
             card.searchLink = urlConstructor.search(name);
         });
-
+        if (!cards.length()) {
+            return { error: "No cards found" };
+        }
         return cards
     }
 
