@@ -28,23 +28,48 @@ socket.on("searchCards", async (data) => {
                 cards = {error: "Unknown action"};   
         }
         console.log("Results: ", cards)
-
-        socket.emit("searchResults", {
-            requestId: data.requestId,
-            action: data.action,
-            userId: id,
-            userName: userName,
-            result: cards,
-            status: "success"
+        await fetch("http://localhost:54871/action/result", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                action: data.action,
+                userId: id,
+                userName: userName,
+                result: cards,
+                status: "success",
+            }),
         });
+        // socket.emit("searchResults", {
+        //     requestId: data.requestId,
+        //     action: data.action,
+        //     userId: id,
+        //     userName: userName,
+        //     result: cards,
+        //     status: "success"
+        // });
     } catch {
-        socket.emit("searchResults", {
-            requestId: data.requestId,
-            action: data.action,
-            userId: id,
-            userName: userName,
-            result: {error: "Something went wrong"},
-            status: "success"
+        await fetch("http://localhost:54871/action/result", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                action: data.action,
+                userId: id,
+                userName: userName,
+                result: {error: "Something went wrong"},
+                status: "success",
+            }),
         });
+        // socket.emit("searchResults", {
+        //     requestId: data.requestId,
+        //     action: data.action,
+        //     userId: id,
+        //     userName: userName,
+        //     result: {error: "Something went wrong"},
+        //     status: "error"
+        // });
     }
 });

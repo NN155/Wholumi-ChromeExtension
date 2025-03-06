@@ -270,11 +270,18 @@ class CardsFinder {
         if (!this.userExist) return "Wrong user name";
         if (!this.rank && !this.src) return "Wrong card id";
     }
+    _rankValidation() {
+        const banRanks = ["b", "c", "d", "e"];
+        if (banRanks.some(rank => this.rank === rank)) return `Rank ${this.rank.toUpperCase()} is not supported in /need (too much data to load)`;
+    }
 
     async need() {
         await this.setData();
         const answer = this.verifyData();
         if (answer) return { error: answer };
+        const rankAnswer = this._rankValidation();
+        console.log(rankAnswer)
+        if (rankAnswer) return { error: rankAnswer };
         await this.setCardName();
         return await this.getNeededCards();
     }
