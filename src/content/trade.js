@@ -11,7 +11,7 @@ async function showCards({ input }) {
         return;
     }
 
-    changeCards(cards, cards.userCards, cardsFinder.rank, cardsFinder.src);
+    changeCards(cards);
 
     ShowBar.addElementsToBar(cards.getCardsArray());
 }
@@ -48,40 +48,6 @@ async function graphSearch({ input }) {
     await graphPaths.initialize();
     const buildedPaths = graphPaths.buildPaths();
     ShowBar.addElementsToBar([buildedPaths]);
-}
-
-function changeCards(cards, myCards, rank, src) {
-    cards.forEach(tradedCard => {
-        tradedCard.addEventListener('click', async () => {
-            const getCard = new GetCards({ userUrl: tradedCard.url, userName: tradedCard.userName, rank });
-            const userInventory = await getCard.getInventory();
-            const card = userInventory.find(card => card.src === src);
-            const myCard = myCards.find(card => card.src === tradedCard.src);
-            let text;
-            let disabled = false;
-            if (!card) {
-                text = "In trade or not found";
-                disabled = true;
-            }
-            else if (myCard.lock === "trade") {
-                text = "This card is in trade";
-                disabled = true;
-            }
-            else {
-                text = `${myCard.lock === "lock" ? "Unlock and " : ""}Trade`
-            }
-
-            const button = new Button({
-                disabled,
-                text,
-                onClick: async () => {
-                    await trade(card, myCard);
-                }
-            });
-
-            await button.asyncPlace(".anime-cards__controls")
-        })
-    })
 }
 
 async function init() {

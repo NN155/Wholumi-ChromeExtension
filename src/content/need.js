@@ -11,40 +11,9 @@ async function showCards({ input }) {
         return;
     }
 
-    changeCards(cards, cards.userCard);
+    changeCards(cards);
 
     ShowBar.addElementsToBar(cards.getCardsArray());
-}
-
-function changeCards(usersCards, myCard) {
-    usersCards.forEach(card => {
-        card.addEventListener('click', async () => {
-            let text;
-            let disabled = false;
-
-            if (!myCard) {
-                text = "In trade or not found";
-                disabled = true;
-            }
-            else if (card.lock !== "unlock") {
-                text = "This card is locked";
-                disabled = true;
-            }
-            else {
-                text = `${myCard.lock === "lock" ? "Unlock and ": ""}Trade`
-            }
-
-            const button = new Button({
-                disabled,
-                text,
-                onClick: async () => {
-                    await trade(card, myCard);
-                }
-            });
-
-            await button.asyncPlace(".anime-cards__controls")
-        })
-    })
 }
 
 async function init() {

@@ -13,6 +13,7 @@ class Card {
         this.name = null;
         this.dubles = 0;
         this.searchLink = null;
+        this.tradeLink = null;
     }
 
     setSrc() {
@@ -73,7 +74,7 @@ class Card {
     }
 
     addLockIcon() {
-        if (this.lock === "unlock" && this.card.rate > 0) {
+        if (this.lock === "unlock") {
             return;
         }
 

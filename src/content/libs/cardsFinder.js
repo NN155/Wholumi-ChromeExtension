@@ -18,7 +18,7 @@ class UrlConstructor {
 
     search(name) {
         return this.userUrl + "/cards/" + this.rank + "&search=" + name;
-    } 
+    }
     unlock(url) {
         return url += "&locked=0";
     }
@@ -102,11 +102,15 @@ class UrlConstructor {
         const user = dom.querySelector(".usp__name").textContent;
         return user;
     }
-    
+
     static async getCardName(id) {
-        const url =  this.getCardNeedUrl(id);
+        const url = this.getCardNeedUrl(id);
         const dom = await Fetch.parseFetch(url);
         return dom.querySelector(".secondary-title.text-center a").textContent;
+    }
+
+    static tradeLink(cardId, myCardId) {
+        return `/cards/${cardId}/trade?mycard=${myCardId}`;
     }
 
 }
@@ -210,21 +214,11 @@ function getCardBySrc(cards, src) {
     return card;
 }
 
-async function trade(card, myCard) {
-    if (myCard.lock === "lock") {
-        await myCard.unlock();
+async function trade(card, tradeCard) {
+    if (tradeCard.lock === "lock") {
+        await tradeCard.unlock();
     }
-    window.location.href = `/cards/${card.id}/trade?mycard=${myCard.id}`;
-}
-
-async function compareCards(hostCards, AnotherCards) {
-    AnotherCards.filter(card => {
-        const myCard = hostCards.find(myCard => myCard.src === card.src)
-        if (myCard)
-            card.rate = myCard.rate;
-        return myCard;
-    })
-    return AnotherCards;
+    window.location.href = UrlConstructor.tradeLink(card.id, tradeCard.id);
 }
 
 async function getUserNeed(user, rank = "s") {
@@ -235,7 +229,7 @@ async function getUserNeed(user, rank = "s") {
 }
 
 class CardsFinder {
-    constructor({ id, userName, limit = 3000, pageLimit = 15}) {
+    constructor({ id, userName, limit = 3000, pageLimit = 15 }) {
         this.id = id;
         this.userName = userName;
         this.userUrl;
@@ -269,16 +263,43 @@ class CardsFinder {
         await Promise.all([this.setCardData(), this.checkUserExistence()]);
     }
 
+    async setCardName() {
+        this.name = await UrlConstructor.getCardName(this.id);
+    };
     verifyData() {
         if (!this.userExist) return "Wrong user name";
         if (!this.rank && !this.src) return "Wrong card id";
+    }
+
+    async need() {
+        await this.setData();
+        const answer = this.verifyData();
+        if (answer) return { error: answer };
+        await this.setCardName();
+        return await this.getNeededCards();
+    }
+
+    async trade() {
+        await this.setData();
+        const answer = this.verifyData();
+        if (answer) return { error: answer };
+        await this.setCardName();
+        return await this.getTradedCards();
+    }
+
+    async users() {
+        await this.setData();
+        const answer = this.verifyData();
+        if (answer) return { error: answer };
+        await this.setCardName();
+        return await this.getUsersCards();
     }
 
     async getNeededCards() {
         const getCards = new GetCards({ userUrl: this.userUrl, rank: this.rank });
         let [userInventoryCards, userNeededCards] = await Promise.all([
             getCards.getInventory(),
-            getCards.getNeed()
+            getCards.getNeed(),
         ]);
 
         const userCard = getCardBySrc(userInventoryCards, this.src);
@@ -292,21 +313,25 @@ class CardsFinder {
         this._addOrangeBorder(usersCards, userInventoryCards);
         this._upPriority(usersCards, userNeededCards);
 
-        if (usersCards.length() > 150) {
-            usersCards.filter(card => card.rate > 0);
-        }
+        this._filterCards(usersCards, 200, 0);
+
         usersCards.sort();
-        usersCards.userCard = userCard;
-        
-        usersCards.forEach(card => {
-            const urlConstructor = new UrlConstructor({ rank: this.rank, userUrl: card.url });
-            card.searchLink = urlConstructor.search(card.name);
-        });
+
+        this._setSearchLink(usersCards);
+
+        if (userCard) {
+            usersCards.forEach(card => {
+                card.tradeLink = UrlConstructor.tradeLink(card.id, userCard.id);
+                card.tradeId = userCard.id;
+                card.tradeLock = userCard.lock;
+            });
+        }
 
         if (!usersCards.length()) {
             return { error: "No cards found" };
         }
-        
+
+        this._setCardInfo(usersCards);
         return usersCards;
     }
 
@@ -321,51 +346,58 @@ class CardsFinder {
         });
 
         const usersCards = await findUsersCards(usersList, user => getUserNeed(user, this.rank));
-        const cards = await this._compareCards(userCards, usersCards);
+        const cards = this._compareCards(userCards, usersCards);
+        this._setSearchLink(cards, this.name);
+        await this._setTradeLink(cards);
+
+        this._filterCards(cards, 75, -1);
         this._processCards(cards);
 
-        if (cards.length() > 75) {
-            cards.filter(card => card.rate > 0);
+        cards.sort();
+
+        if (!cards.length()) {
+            return { error: "No cards found" };
         }
 
-        cards.sort();
-        cards.userCards = userCards;
+        this._setCardInfo(cards);
+        return cards;
+    }
 
-        const name = await UrlConstructor.getCardName(this.id);
+    async getUsersCards() {
+        const userCards = await getInventoryTrade({ userUrl: this.userUrl, rank: this.rank });
+
+        const dom = await Fetch.parseFetch(UrlConstructor.getCardUrl(this.id));
+        const usersList = await getUsersList(dom, {
+            limit: this.limit,
+            pageLimit: this.pageLimit,
+        });
+
+        const usersCards = await findUsersCards(usersList, user => checkUserCards(user, this.rank));
+        const cards = await this._compareCards(userCards, usersCards);
+
+        this._filterCards(cards, 75, -1);
+
+        this._setSearchLink(cards, this.name);
+        await this._setTradeLink(cards);
+
+        cards.sort();
+
         cards.forEach(card => {
-            const urlConstructor = new UrlConstructor({ rank: this.rank, userUrl: card.url });
-            card.searchLink = urlConstructor.search(name);
+            card.fixCard();
+            card.addLockIcon();
+            card.fixLockIcon();
+            card.addLink();
+            card.setColorByRate();
+            card.removeBorderds();
+            card.removeButton();
         });
 
         if (!cards.length()) {
             return { error: "No cards found" };
         }
 
-        return cards;
-    }
-
-
-    async need() {
-        await this.setData();
-        const answer = this.verifyData();
-        if (answer) return { error: answer };
-        return await this.getNeededCards();
-    }
-
-    async trade() {
-        await this.setData();
-        const answer = this.verifyData();
-        if (answer) return { error: answer };
-        return await this.getTradedCards();
-    }
-
-    async _compareCards(userCards, otherCards) {
-        otherCards.filter(otherCard => {
-            const userCard = userCards.find(userCard => userCard.cardId === otherCard.cardId)
-            if (userCard) otherCard.rate = userCard.rate;
-            return userCard;
-        })
-        return otherCards;
+        this._setCardInfo(cards);
+        return cards
     }
 
     async _checkUserCards(user) {
@@ -403,60 +435,120 @@ class CardsFinder {
         });
     }
 
-    async getUsersCards() {
-        const userCards = await getInventoryTrade({ userUrl: this.userUrl, rank: this.rank });
-
-        const dom = await Fetch.parseFetch(UrlConstructor.getCardUrl(this.id));
-        const usersList = await getUsersList(dom, {
-            limit: this.limit,
-            pageLimit: this.pageLimit,
-        });
-
-        const usersCards = await findUsersCards(usersList, user => checkUserCards(user, this.rank));
-        const cards = await this._compareUsersCards(userCards, usersCards);
-
-        cards.forEach(card => {
-            card.fixCard();
-            card.addLockIcon();
-            card.fixLockIcon();
-            card.addLink();
-            card.setColorByRate();
-            card.removeBorderds();
-            card.removeButton();
-        });
-
-        if (cards.length() > 75) {
-            cards.filter(card => card.rate > 0);
-        }
-        cards.sort();
-        cards.userCards = userCards;
-
-        const name = await UrlConstructor.getCardName(this.id);
-        cards.forEach(card => {
-            const urlConstructor = new UrlConstructor({ rank: this.rank, userUrl: card.url });
-            card.searchLink = urlConstructor.search(name);
-        });
-        if (!cards.length()) {
-            return { error: "No cards found" };
-        }
-        return cards
-    }
-
-    async users() {
-        await this.setData();
-        const answer = this.verifyData();
-        if (answer) return { error: answer };
-        return await this.getUsersCards();
-    }
-    _compareUsersCards(userCards, otherCards) {
+    _compareCards(userCards, otherCards) {
         otherCards.filter(otherCard => {
-            const userCard = userCards.find(userCard => userCard.src === otherCard.src)
+            const copyCards = new CardsArray();
+            copyCards.push(...userCards);
+            copyCards.filter(userCard => userCard.cardId === otherCard.cardId);
+
+            let userCard;
+            userCard = copyCards.find(userCard => userCard.lock === "unlock");
+            userCard = userCard || copyCards.find(userCard => userCard.lock === "lock");
+            userCard = userCard || copyCards.find(userCard => userCard.lock === "trade");
             if (userCard) {
                 otherCard.rate = otherCard.rate < 0 ? otherCard.rate : userCard.rate;
-                otherCard.lock = userCard.lock;
+                otherCard.tradeId = userCard.id;
+                otherCard.tradeLock = userCard.lock;
                 return userCard
             }
         })
         return otherCards;
     }
+
+    _filterCards(cards, length = 75, rate = 0) {
+        if (cards.length() > length) {
+            cards.filter(card => card.rate > rate);
+        }
+    }
+
+    _setSearchLink(cards, name = null) {
+        cards.forEach(card => {
+            const urlConstructor = new UrlConstructor({ rank: this.rank, userUrl: card.url });
+            card.searchLink = urlConstructor.search(name || card.name);
+        });
+    }
+
+    async _setTradeLink(cards) {
+        const users = new Set(cards.cards.map(card => card.searchLink));
+        const results = {};
+        await Promise.all(
+            Array.from(users).map(async searchLink => {
+                const getCards = new GetCards();
+                const cards = await getCards.getAllCards(searchLink);
+                cards.filter(card => card.cardId == this.id);
+                let card;
+                card = cards.find(card => card.lock === "unlock");
+                card = card || cards.find(card => card.lock === "trade");
+                card = card || cards.find(card => card.lock === "lock");
+                results[searchLink] = card;
+            })
+        );
+
+        cards.forEach(card => {
+            const anotherCard = results[card.searchLink];
+
+            if (anotherCard) {
+                card.id = anotherCard.id;
+                card.lock = anotherCard.lock;
+                if (card.lock === "unlock") {
+                    card.tradeLink = UrlConstructor.tradeLink(anotherCard.id, card.id);
+                } else {
+                    card.rate = -1;
+                }
+            }
+        });
+    }
+
+    _setCardInfo(cards) {
+        cards.info = {
+            rank: this.rank,
+            name: this.name,
+            src: this.src,
+            id: this.id,
+        }
+    }
+}
+
+function changeCards(cards) {
+    cards.forEach(card => {
+        card.addEventListener('click', async () => {
+            let text;
+            let disabled = false;
+
+            if (!card.tradeId) {
+                text = "Your card is not found";
+                disabled = true;
+            }
+
+            else if (card.tradeLock === "trade") {
+                text = "Your card is in trade";
+                disabled = true;
+            }
+
+            else if (card.lock === "trade") {
+                text = "This card is in trade";
+                disabled = true;
+            }
+            else if (card.lock === "lock") {
+                text = "This card is locked";
+                disabled = true;
+            }
+            else {
+                text = `${card.tradeLock === "lock" ? "Unlock and " : ""}Trade`
+            }
+            const tradeCard = new Card()
+            tradeCard.id = card.tradeId;
+            tradeCard.lock = card.tradeLock;
+
+            const button = new Button({
+                disabled,
+                text,
+                onClick: async () => {
+                    await trade(card, tradeCard);
+                }
+            });
+
+            await button.asyncPlace(".anime-cards__controls")
+        })
+    })
 }
