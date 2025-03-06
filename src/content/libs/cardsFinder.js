@@ -355,7 +355,8 @@ class CardsFinder {
         const usersCards = await findUsersCards(usersList, user => getUserNeed(user, this.rank));
         const cards = this._compareCards(userCards, usersCards);
         this._setSearchLink(cards, this.name);
-        await this._setTradeLink(cards);
+        await this._setTradeInfo(cards);
+        this._setTradeLink(cards);
 
         this._filterCards(cards, 75, -1);
         this._processCards(cards);
@@ -385,7 +386,8 @@ class CardsFinder {
         this._filterCards(cards, 75, -1);
 
         this._setSearchLink(cards, this.name);
-        await this._setTradeLink(cards);
+        await this._setTradeInfo(cards);
+        this._setTradeLink(cards);
 
         cards.sort();
 
@@ -475,7 +477,7 @@ class CardsFinder {
         });
     }
 
-    async _setTradeLink(cards) {
+    async _setTradeInfo(cards) {
         const users = new Set(cards.cards.map(card => card.searchLink));
         const results = {};
         await Promise.all(
@@ -497,11 +499,18 @@ class CardsFinder {
             if (anotherCard) {
                 card.id = anotherCard.id;
                 card.lock = anotherCard.lock;
-                if (card.lock === "unlock") {
-                    card.tradeLink = UrlConstructor.tradeLink(anotherCard.id, card.id);
-                } else {
+                if (card.lock !== "unlock") {
                     card.rate = -1;
                 }
+            }
+        });
+    }
+
+
+    _setTradeLink(cards) {
+        cards.forEach(card => {
+            if (card.id && card.tradeId && card.lock === "unlock") {
+                card.tradeLink = UrlConstructor.tradeLink(card.id, card.tradeInfo);
             }
         });
     }
