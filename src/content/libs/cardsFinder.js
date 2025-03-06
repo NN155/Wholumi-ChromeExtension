@@ -510,7 +510,7 @@ class CardsFinder {
     _setTradeLink(cards) {
         cards.forEach(card => {
             if (card.id && card.tradeId && card.lock === "unlock") {
-                card.tradeLink = UrlConstructor.tradeLink(card.id, card.tradeInfo);
+                card.tradeLink = UrlConstructor.tradeLink(card.id, card.tradeId);
             }
         });
     }
