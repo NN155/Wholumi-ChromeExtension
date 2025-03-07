@@ -373,7 +373,7 @@ class CardsFinder {
             pageLimit: this.pageLimit,
         });
 
-        const usersCards = await findUsersCards(usersList, user => checkUserCards(user, this.rank));
+        const usersCards = await findUsersCards(usersList, user => this._checkUserCards(user, this.rank));
         const cards = await this._compareCards(userCards, usersCards);
 
         this._filterCards(cards, 75, -1);
