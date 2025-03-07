@@ -41,14 +41,6 @@ socket.on("searchCards", async (data) => {
                 status: "success",
             }),
         });
-        // socket.emit("searchResults", {
-        //     requestId: data.requestId,
-        //     action: data.action,
-        //     userId: id,
-        //     userName: userName,
-        //     result: cards,
-        //     status: "success"
-        // });
     } catch {
         await fetch("http://localhost:54871/action/result", {
             method: "POST",
@@ -63,13 +55,5 @@ socket.on("searchCards", async (data) => {
                 status: "success",
             }),
         });
-        // socket.emit("searchResults", {
-        //     requestId: data.requestId,
-        //     action: data.action,
-        //     userId: id,
-        //     userName: userName,
-        //     result: {error: "Something went wrong"},
-        //     status: "error"
-        // });
     }
 });
