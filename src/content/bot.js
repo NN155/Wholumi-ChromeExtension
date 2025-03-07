@@ -22,6 +22,8 @@ socket.on("searchCards", async (data) => {
                 cards = await cardsFinder.trade();
                 break
             case "users":
+                cardsFinder.limit = 200;
+                cardsFinder.pageLimit = 7;
                 cards = await cardsFinder.users();
                 break;
             default:
