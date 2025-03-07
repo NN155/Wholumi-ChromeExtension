@@ -291,7 +291,7 @@ class CardsFinder {
         const answer = this.verifyData();
         if (answer) return { error: answer };
         await this.setCardName();
-        return await this.getTradedCards();
+        return await this.getTradeUsersCards("trade");
     }
 
     async users() {
@@ -299,7 +299,7 @@ class CardsFinder {
         const answer = this.verifyData();
         if (answer) return { error: answer };
         await this.setCardName();
-        return await this.getUsersCards();
+        return await this.getTradeUsersCards("users");
     }
 
     async getNeededCards() {
@@ -342,11 +342,20 @@ class CardsFinder {
         return usersCards;
     }
 
-    async getTradedCards() {
+    async getTradeUsersCards(mode) {
         const getCards = new GetCards({ userUrl: this.userUrl, rank: this.rank });
         const userCards = await getCards.getInventory();
+        let url; 
+        switch (mode) {
+            case "trade":
+                url = UrlConstructor.getCardTradeUrl(this.id);
+                break;
+            case "users":
+                url = UrlConstructor.getCardUrl(this.id);
+                break;
+        }
 
-        const dom = await Fetch.parseFetch(UrlConstructor.getCardTradeUrl(this.id));
+        const dom = await Fetch.parseFetch(url);
         const usersList = await getUsersList(dom, {
             limit: this.limit,
             pageLimit: this.pageLimit,
@@ -369,44 +378,6 @@ class CardsFinder {
 
         this._setCardInfo(cards);
         return cards;
-    }
-
-    async getUsersCards() {
-        const userCards = await getInventoryTrade({ userUrl: this.userUrl, rank: this.rank });
-
-        const dom = await Fetch.parseFetch(UrlConstructor.getCardUrl(this.id));
-        const usersList = await getUsersList(dom, {
-            limit: this.limit,
-            pageLimit: this.pageLimit,
-        });
-
-        const usersCards = await findUsersCards(usersList, user => this._checkUserCards(user, this.rank));
-        const cards = await this._compareCards(userCards, usersCards);
-
-        this._filterCards(cards, 75, -1);
-
-        this._setSearchLink(cards, this.name);
-        await this._setTradeInfo(cards);
-        this._setTradeLink(cards);
-
-        cards.sort();
-
-        cards.forEach(card => {
-            card.fixCard();
-            card.addLockIcon();
-            card.fixLockIcon();
-            card.addLink();
-            card.setColorByRate();
-            card.removeBorderds();
-            card.removeButton();
-        });
-
-        if (!cards.length()) {
-            return { error: "No cards found" };
-        }
-
-        this._setCardInfo(cards);
-        return cards
     }
 
     async _checkUserCards(user) {
@@ -441,6 +412,7 @@ class CardsFinder {
             card.addLink();
             card.setColorByRate();
             card.removeBorderds();
+            card.removeButton();
         });
     }
 
