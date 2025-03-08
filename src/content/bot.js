@@ -27,9 +27,12 @@ socket.on("searchCards", async (data) => {
                 cards = await cardsFinder.users();
                 break;
             default:
-                cards = {error: "Unknown action"};   
+                cards = {error: "Unknown action", taskId: data.taskId};   
         }
+
+        cards.taskId = data.taskId;
         console.log("Results: ", cards)
+
         await fetch("http://localhost:54871/action/result", {
             method: "POST",
             headers: {
@@ -53,7 +56,7 @@ socket.on("searchCards", async (data) => {
                 action: data.action,
                 userId: id,
                 userName: userName,
-                result: {error: "Something went wrong"},
+                result: {error: "Something went wrong", taskId: data.taskId},
                 status: "success",
             }),
         });
