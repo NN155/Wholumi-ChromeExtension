@@ -41,6 +41,7 @@ chrome.runtime.onInstalled.addListener(() => {
             packs: {
                 balance: 10000,
                 counter: 20,
+                assChance: 1,
                 sChance: 1,
                 aChance: 1,
                 bChance: 1,

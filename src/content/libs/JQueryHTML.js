@@ -1,28 +1,31 @@
-function openCardGiftModal(cardImage, cardName, cardRank) {
-    var rankLabel = '';
-    if (cardRank == 's') rankLabel = 'Мифическая';
-    else if (cardRank == 'a') rankLabel = 'Легендарная';
-    else if (cardRank == 'b') rankLabel = 'Эпическая';
-    else if (cardRank == 'c') rankLabel = 'Редкая';
-    else if (cardRank == 'd') rankLabel = 'Необычная';
-    else if (cardRank == 'e') rankLabel = 'Обычная';
-    else if (cardRank == 'ss') rankLabel = 'Небесная';
-    else if (cardRank == 'sss') rankLabel = 'Божественная';
-
-    var modalContent = '<div class="unique-modal" id="unique-modal-gift-card" tabindex="-1">';
-    modalContent += '<div class="anime-modal__inner">';
-    modalContent += '<div class="anime-modal__content">';
-    modalContent += '<div class="anime-modal__body">';
+function openCardGiftModal({image, name, rank, card_webm, card_mp4}) {
+    var rankname = '';
+    if ( rank == 's' ) rankname = 'мифическая';
+    else if ( rank == 'a' ) rankname = 'легендарная';
+    else if ( rank == 'b' ) rankname = 'эпическая';
+    else if ( rank == 'c' ) rankname = 'редкая';
+    else if ( rank == 'd' ) rankname = 'необычная';
+    else if ( rank == 'e' ) rankname = 'обычная';
+    else if ( rank == 'ass' ) rankname = 'космическая';
+    
+    var modalContent = '<div class="modal modal--open" id="modal-cards" tabindex="-1">';
+    modalContent += '<div class="modal__inner">';
+    modalContent += '<div class="modal__content">';
+    modalContent += '<div class="modal__body">';
     modalContent += '<div class="anime-cards__container">';
-    modalContent += '<div class="anime-cards__header" style="background-image: url(' + cardImage + ');"></div>';
+    if (card_webm && card_mp4) modalContent += '<div class="anime-cards__header anime-cards__header--modal-video"><video poster="' + image + '" pip="false" webkit-playsinline="true" playsinline="true" autoplay="true" muted="muted" loop="true"><source src="' + card_webm + '" type="video/webm"><source src="' + card_mp4 + '" type="video/mp4"></video></div>';
+    else if (card_mp4) modalContent += '<div class="anime-cards__header anime-cards__header--modal-video"><video poster="' + image + '" pip="false" webkit-playsinline="true" playsinline="true" autoplay="true" muted="muted" loop="true"><source src="' + card_mp4 + '" type="video/mp4"></video></div>';
+    else if (card_webm) modalContent += '<div class="anime-cards__header anime-cards__header--modal-video"><video poster="' + image + '" pip="false" webkit-playsinline="true" playsinline="true" autoplay="true" muted="muted" loop="true"><source src="' + card_webm + '" type="video/webm"></video></div>';
+    else modalContent += '<div class="anime-cards__header" style="background-image: url(' + image + ');"></div>';
     modalContent += '<div class="anime-cards__wrapper">';
-    modalContent += '<div class="anime-cards__placeholder">';
-    modalContent += '<img src="' + cardImage + '" alt="Карточка">';
-    modalContent += '</div>';
+    if (card_webm && card_mp4) modalContent += '<video poster="' + image + '" pip="false" webkit-playsinline="true" playsinline="true" autoplay="true" muted="muted" loop="true"><source src="' + card_webm + '" type="video/webm"><source src="' + card_mp4 + '" type="video/mp4"></video>';
+    else if (card_mp4) modalContent += '<video poster="' + image + '" pip="false" webkit-playsinline="true" playsinline="true" autoplay="true" muted="muted" loop="true"><source src="' + card_mp4 + '" type="video/mp4"></video>';
+    else if (card_webm) modalContent += '<video poster="' + image + '" pip="false" webkit-playsinline="true" playsinline="true" autoplay="true" muted="muted" loop="true"><source src="' + card_webm + '" type="video/webm"></video>';
+    else modalContent += '<div class="anime-cards__placeholder"><img src="' + image + '" alt="Карточка"></div>';
     modalContent += '<div class="anime-cards__info">';
-    modalContent += '<div class="anime-cards__rank rank-' + cardRank + '">' + rankLabel + '</div>';
+    modalContent += '<div class="anime-cards__rank rank-' + rank + '">' + rankname + '</div>';
     modalContent += '<div class="anime-cards__name">Твоя уникальная находка!</div>';
-    modalContent += '<div class="anime-cards__text">Поздравляем! Ты открыл карточку с ' + cardName + '. Карточка добавлена в твою коллекцию.</div>';
+    modalContent += '<div class="anime-cards__text">Поздравляем! Ты открыл карточку с ' + name + '. Карточка добавлена в твою коллекцию.</div>';
     modalContent += '</div>';
     modalContent += '</div>';
     modalContent += '</div>';
@@ -89,31 +92,23 @@ function openCardGiftModal(cardImage, cardName, cardRank) {
     });
 }
 
-
-
 function processLootboxData(data) {
-    if (data.error) {
-        DLEPush.warning(data.error, '');
-        $('.lootbox__open-btn').prop('disabled', false);
-        $('.lootbox__open-btn').show();
-        return false;
-    }
-
     var cards_arr = data.cards;
     cards_arr.forEach(function (item, index) {
         var $card = $('.lootbox__card-disabled').eq(index);
         $card.attr('data-id', item.id);
         $card.attr('data-rank', item.rank);
-        $card.find('img').attr('src', item.src);
-        if (item.owned == 1) {
-            $card.addClass("anime-cards__item-disabled anime-cards__owned-by-user");
-        } else {
-            if ($card.hasClass("anime-cards__owned-by-user")) {
-                $card.removeClass("anime-cards__item-disabled anime-cards__owned-by-user");
-            }
+        
+        if ( item.video_mp4 || item.video_webm ) $card.html('<video poster="'+item.image+'" pip="false" webkit-playsinline="true" playsinline="true" autoplay="true" muted="muted" loop="true" style="border-radius: 12px;">'+
+                '<source src="'+item.video_webm+'" type="video/webm">'+
+                '<source src="'+item.video_mp4+'" type="video/mp4">'+
+            '</video>');
+        else $card.html('<img src="'+item.image+'" alt="Карточка">');
+        if ( item.owned == 1 ) $card.addClass( "anime-cards__item-disabled anime-cards__owned-by-user" );
+        else {
+            if ( $card.hasClass( "anime-cards__owned-by-user-disabled" ) ) $card.removeClass( "anime-cards__item-disabled anime-cards__owned-by-user" );
         }
-    });
+     });
 
     $('.lootbox__row').attr('data-pack-id', data.cards.id).show();
-
 }
