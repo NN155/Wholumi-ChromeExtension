@@ -106,7 +106,7 @@ function processLootboxData(data) {
         else $card.html('<img src="'+item.image+'" alt="Карточка">');
         if ( item.owned == 1 ) $card.addClass( "anime-cards__item-disabled anime-cards__owned-by-user" );
         else {
-            if ( $card.hasClass( "anime-cards__owned-by-user-disabled" ) ) $card.removeClass( "anime-cards__item-disabled anime-cards__owned-by-user" );
+            if ( $card.hasClass( "anime-cards__owned-by-user" ) ) $card.removeClass( "anime-cards__item-disabled anime-cards__owned-by-user" );
         }
      });
 
