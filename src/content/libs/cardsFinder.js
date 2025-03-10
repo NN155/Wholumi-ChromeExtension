@@ -276,13 +276,18 @@ class CardsFinder {
         if (banRanks.some(rank => this.rank === rank)) return `Rank ${this.rank.toUpperCase()} is not supported in /need (too much data to load)`;
     }
 
+    _notSupported(banRanks) {
+        if (banRanks.some(rank => this.rank === rank)) return `Rank ${this.rank.toUpperCase()} is not supported`;
+    }
+
     async need() {
         await this.setData();
         const answer = this.verifyData();
         if (answer) return { error: answer };
         const rankAnswer = this._rankValidation();
-        console.log(rankAnswer)
         if (rankAnswer) return { error: rankAnswer };
+        const notSupported = this._notSupported(["ass"]);
+        if (notSupported) return { error: notSupported }
         await this.setCardName();
         return await this.getNeededCards();
     }
@@ -291,6 +296,8 @@ class CardsFinder {
         await this.setData();
         const answer = this.verifyData();
         if (answer) return { error: answer };
+        const notSupported = this._notSupported(["ass"]);
+        if (notSupported) return { error: notSupported }
         await this.setCardName();
         return await this.getTradeUsersCards("trade");
     }
@@ -299,6 +306,8 @@ class CardsFinder {
         await this.setData();
         const answer = this.verifyData();
         if (answer) return { error: answer };
+        const notSupported = this._notSupported(["ass"]);
+        if (notSupported) return { error: notSupported }
         await this.setCardName();
         return await this.getTradeUsersCards("users");
     }
