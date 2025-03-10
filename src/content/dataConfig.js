@@ -46,7 +46,7 @@ async function updateSiteInventory() {
     for (const rank in cards) {
         const data = [];
         cards[rank].forEach(card => {
-            data.push({ id: card.cardId, name: card.name, src: card.src });
+            data.push({ id: card.cardId, name: card.name, image: card.src, video_webm: card.webm, video_mp4: card.mp4, owned: card.owned });
         });
         cards[rank] = data;
     }
@@ -54,7 +54,7 @@ async function updateSiteInventory() {
 }
 
 async function getSiteInventory() {
-    const ranks = ["s", "a", "b", "c", "d", "e"];
+    const ranks = ["ass", "s", "a", "b", "c", "d", "e"];
     const baseUrl = "https://animestars.org/cards/?rank=";
 
     const cardsPromises = ranks.map(rank => {
@@ -62,8 +62,8 @@ async function getSiteInventory() {
         return cardInstance.getAllCards(cardInstance.userUrl);
     });
 
-    const [s, a, b, c, d, e] = await Promise.all(cardsPromises);
-    const cards = { s, a, b, c, d, e };
+    const [ass, s, a, b, c, d, e] = await Promise.all(cardsPromises);
+    const cards = { ass, s, a, b, c, d, e };
     return cards
 }
 

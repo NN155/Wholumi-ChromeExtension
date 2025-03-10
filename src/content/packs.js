@@ -25,7 +25,10 @@ class Pack {
             else {
                 $('.lootbox__row').hide();
                 $('.lootbox__card-disabled img').attr('src', '/templates/New/cards_system/empty-card.png');
-                openCardGiftModal(data.card.src, data.card.name, data.card.rank);
+                const checkbox = $('#disable_pack_card').prop('checked');
+                if (!checkbox) {
+                    openCardGiftModal({...data.card});
+                }
                 row.removeClass('loot-lock');
             }
             PacksPromise();
@@ -36,7 +39,7 @@ class Pack {
         packConfig.packInventory.add(id);
         const cards = packConfig.siteInventory[rank];
         let card = cards.find(card => card.id === id);
-        return { card: { src: card.src, name: card.name, rank: card.rank } };
+        return { card: { image: card.image, name: card.name, rank: card.rank, card_mp4: card.video_mp4, card_webm: card.video_webm } };
     }
 }
 
@@ -163,6 +166,7 @@ function loadNewConfig(data) {
     packConfig.info.balance = data.packs.balance;
     packConfig.info.counter = data.packs.counter;
     packConfig.chances = [
+        { rank: "ass", chance: data.packs.assChance},
         { rank: "s", chance: data.packs.sChance },
         { rank: "a", chance: data.packs.aChance },
         { rank: "b", chance: data.packs.bChance },
@@ -189,6 +193,7 @@ let packConfig = {
         counter: 20,
     },
     chances: [
+        { rank: "ass", chance: 1 },
         { rank: "s", chance: 1 },
         { rank: "a", chance: 1 },
         { rank: "b", chance: 1 },

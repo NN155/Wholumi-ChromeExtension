@@ -130,6 +130,7 @@ class GetCards {
             card.setLock()
             card.setRateByLock()
             card.setSrc()
+            card.setVideoData()
             card.setId()
             card.setCardId()
             card.setName();

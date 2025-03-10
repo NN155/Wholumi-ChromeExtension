@@ -5,6 +5,15 @@
     display: flex;
     justify-content: center;
 }
+
+.lootbox__card-disabled img {
+    border-radius: 12px;
+}
+
+.lootbox__card-disabled video {
+    border-radius: 12px;
+}
+
 .lootbox__inner {
     width: 800px;
     height: 1270px;
@@ -192,7 +201,8 @@ background: var(--bg-btn-dark);
     transform: scale(1);
   }
 }
-.lootbox__card-disabled[data-rank=s] {
+
+.lootbox__card-disabled[data-rank=s], .lootbox__card-disabled[data-rank=ass] {
     animation: bounceX 1s ease;
 }
 

@@ -5,7 +5,6 @@ class Card {
         this.src = null;
         this.userName = null;
         this.lock = null;
-        this._img = null;
         this.rate = 0;
         this.id = null;
         this.sortPriority = 0;
@@ -14,18 +13,20 @@ class Card {
         this.dubles = 0;
         this.searchLink = null;
         this.tradeLink = null;
+        this.mp4 = null;
+        this.webm = null;
     }
 
     setSrc() {
-        this._img = this.card.querySelector('.anime-cards__image').querySelector('img');
-        this.src = this._img.getAttribute('data-src');
+        this.src = this.card.querySelector('.anime-cards__item').getAttribute('data-image');
     }
 
+    setVideoData() {
+        this.mp4 = this.card.querySelector('.anime-cards__item').getAttribute('data-mp4') || null;
+        this.webm = this.card.querySelector('.anime-cards__item').getAttribute('data-webm') || null;
+    }
     fixImage() {
-        if (!this.src) {
-            this.setSrc();
-        }
-        this._img.setAttribute('src', this.src);
+        this.card.querySelector('.anime-cards__image img').setAttribute('src', this.src);
     }
     fixLockIcon() {
         const lockIcon = this.card.querySelector('.lock-trade-btn') || this.card.querySelector('.lock-card-btn');
