@@ -239,20 +239,20 @@ class CardsFinder {
         this.src = null;
         this.rank = null;
         this.userExist = false;
+        this.mp4 = null;
+        this.webm = null;
     }
 
     async setCardData() {
         const cardUrl = UrlConstructor.getCardUrl(this.id);
         const dom = await Fetch.parseFetch(cardUrl);
-        let rank, src;
         try {
             const cardInfo = getCardInfo(dom);
-            rank = cardInfo.rank;
-            src = cardInfo.src;
+            this.rank = cardInfo.rank;
+            this.src = cardInfo.src;
+            this.mp4 = cardInfo.mp4;
+            this.webm = cardInfo.webm;
         } catch (error) { }
-
-        this.src = src;
-        this.rank = rank;
     }
     async checkUserExistence() {
         this.userName = await UrlConstructor.validateUser(this.userName);
@@ -269,7 +269,7 @@ class CardsFinder {
     };
     verifyData() {
         if (!this.userExist) return "Wrong user name";
-        if (!this.rank && !this.src) return "Wrong card id";
+        if (!this.rank && (!this.src || this.mp4)) return "Wrong card id";
     }
 
     async need() {
@@ -487,6 +487,8 @@ class CardsFinder {
             name: this.name,
             src: this.src,
             id: this.id,
+            mp4: this.mp4,
+            webm: this.webm,
         }
     }
 }

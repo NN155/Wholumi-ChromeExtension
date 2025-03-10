@@ -354,7 +354,6 @@ async function getDomCardRank() {
 }
 
 function getCardInfo(dom) {
-    let rank = "s";
     const cardRank = dom.querySelector(".anime-cards__rank");
 
     const classList = Array.from(cardRank.classList);
@@ -362,10 +361,30 @@ function getCardInfo(dom) {
     const rankClass = classList.find(cls => cls.startsWith('rank-'));
 
     const rankLetter = rankClass.split('-')[1];
-    rank = rankLetter;
-    const card = dom.querySelector(".card-show__image")
-    const src = card.getAttribute("src");
-    return { rank, src };
+    const rank = rankLetter;
+    let card = dom.querySelector(".card-show__image")
+    if (card) {
+        const src = card.getAttribute("src");
+        return { type: "img", rank, src };
+    }
+    card = dom .querySelector("video")
+    if (card) {
+        const sources = card.querySelectorAll("source");
+        let webm, mp4;
+        
+        sources.forEach(source => {
+            const type = source.getAttribute("type");
+            const src = source.getAttribute("src");
+            
+            if (type === "video/webm") {
+                webm = src;
+            } else if (type === "video/mp4") {
+                mp4 = src;
+            }
+        });
+        return { type: "video", rank, webm, mp4 };
+    }
+
 }
 
 function getUsers(dom) {
