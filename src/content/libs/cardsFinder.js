@@ -241,6 +241,7 @@ class CardsFinder {
         this.userExist = false;
         this.mp4 = null;
         this.webm = null;
+        this.usersLength = null
     }
 
     async setCardData() {
@@ -333,7 +334,7 @@ class CardsFinder {
             return { error: "No cards found" };
         }
 
-        this._setCardInfo(usersCards);
+        this._setCardInfo(usersCards, usersList);
         return usersCards;
     }
 
@@ -371,7 +372,7 @@ class CardsFinder {
             return { error: "No cards found" };
         }
 
-        this._setCardInfo(cards);
+        this._setCardInfo(cards, usersList);
         return cards;
     }
 
@@ -482,7 +483,7 @@ class CardsFinder {
         });
     }
 
-    _setCardInfo(cards) {
+    _setCardInfo(cards, users) {
         cards.info = {
             rank: this.rank,
             name: this.name,
@@ -490,7 +491,7 @@ class CardsFinder {
             id: this.id,
             mp4: this.mp4,
             webm: this.webm,
-            usersLength: cards.length(),
+            usersLength: users.length,
         }
     }
 }
