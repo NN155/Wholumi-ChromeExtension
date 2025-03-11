@@ -179,10 +179,10 @@ class GetCards {
 }
 
 
-async function getInventoryTrade({ userUrl, userName, rank }) {
+async function getInventoryTrade({ userUrl, userName, rank, unlock = false }) {
     const getCards = new GetCards({ userUrl, userName, rank });
     const [inventoryCards, trageCards] = await Promise.all([
-        getCards.getInventory(),
+        getCards.getInventory(unlock),
         getCards.getTrade()
     ]);
     trageCards.forEach(tradeCards => {
@@ -323,7 +323,8 @@ class CardsFinder {
 
         const dom = await Fetch.parseFetch(UrlConstructor.getCardNeedUrl(this.id));
         const usersList = await getUsersList(dom, { limit: this.limit, pageLimit: this.pageLimit });
-        const usersCards = await findUsersCards(usersList, user => this._checkUserCards(user, this.rank));
+
+        const usersCards = await findUsersCards(usersList, user => this._checkUserCards(user, usersList.length > 75));
 
         this._processCards(usersCards);
 
@@ -390,9 +391,9 @@ class CardsFinder {
         return cards;
     }
 
-    async _checkUserCards(user) {
+    async _checkUserCards(user, unlock = false) {
         const { userUrl, userName } = user;
-        const cards = await getInventoryTrade({ userUrl, userName, rank: this.rank });
+        const cards = await getInventoryTrade({ userUrl, userName, rank: this.rank, unlock });
         return cards;
     }
 
@@ -505,6 +506,7 @@ class CardsFinder {
             id: this.id,
             mp4: this.mp4,
             webm: this.webm,
+            usersLength: cards.length(),
         }
     }
 }
