@@ -46,7 +46,8 @@ socket.on("searchCards", async (data) => {
                 status: "success",
             }),
         });
-    } catch {
+    } catch (error) {
+        console.log("Search Cards Error: ", error);
         await fetch("http://localhost:54871/action/result", {
             method: "POST",
             headers: {
