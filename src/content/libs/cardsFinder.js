@@ -314,6 +314,9 @@ class CardsFinder {
     }
 
     async getNeededCards() {
+        if (this.rank === "a") {
+            this.limit = 100;
+        }
         const getCards = new GetCards({ userUrl: this.userUrl, rank: this.rank });
         let [userInventoryCards, userNeededCards] = await Promise.all([
             getCards.getInventory(),
