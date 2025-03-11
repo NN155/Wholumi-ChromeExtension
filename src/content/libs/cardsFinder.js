@@ -241,7 +241,6 @@ class CardsFinder {
         this.userExist = false;
         this.mp4 = null;
         this.webm = null;
-        this.usersLength = null
     }
 
     async setCardData() {
