@@ -99,14 +99,14 @@ class UrlConstructor {
         }
         const parser = new DOMParser();
         const dom = parser.parseFromString(await response.text(), "text/html");
-        const user = dom.querySelector(".usp__name").textContent;
+        const user = dom.querySelector(".usp__name").firstChild.textContent.trim();
         return user;
     }
 
     static async getCardName(id) {
         const url = this.getCardNeedUrl(id);
         const dom = await Fetch.parseFetch(url);
-        return dom.querySelector(".secondary-title.text-center a").textContent;
+        return dom.querySelector(".secondary-title.text-center a").textContent.trim();
     }
 
     static tradeLink(cardId, myCardId) {
