@@ -123,20 +123,26 @@ class GetCards {
         this.UrlConstructor = new UrlConstructor({ rank: this.rank, userUrl: this.userUrl });
     }
     _getCards(dom) {
-        const array = dom.querySelector(".anime-cards.anime-cards--full-page");
-        const childrens = Array.from(array.children);
-        const cards = new CardsArray(childrens.map(element => {
-            const card = new Card(element)
-            card.setLock()
-            card.setRateByLock()
-            card.setSrc()
-            card.setVideoData()
-            card.setId()
-            card.setCardId()
-            card.setName();
-            return card
-        }))
-        return cards
+        try {
+            const array = dom.querySelector(".anime-cards.anime-cards--full-page");
+            const childrens = Array.from(array.children);
+            const cards = new CardsArray(childrens.map(element => {
+                const card = new Card(element)
+                card.setLock()
+                card.setRateByLock()
+                card.setSrc()
+                card.setVideoData()
+                card.setId()
+                card.setCardId()
+                card.setName();
+                return card
+            }))
+            return cards;
+        } catch (error) {
+            console.log(dom);
+            return new CardsArray();
+        }
+
     }
     async getAllCards(url) {
         const cardsList = new CardsArray();
