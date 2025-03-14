@@ -25,11 +25,11 @@ async function autoUpdatePageInfo() {
                 clubData.firstBoost = false;
                 clubData.newDay = !badData;
                 updatePageInfo(res.boost_html, res.boost_count, res.top_html)
-                await boostCard.firstBoost()
+                await boostCard.boosting()
             }
             else if (clubData.firstBoost) {
                 clubData.firstBoost = false;
-                await boostCard.firstBoost()
+                await boostCard.boosting()
             }
             checkAutoOff(res.boost_count, res.top_html);
         } catch (error) {
@@ -80,17 +80,21 @@ class BoostCard {
         return false;
     }
 
-    async firstBoost() {
-        if (this.isBoostable()) {
-            this.time = Date.now();
-            await this.Boost()
+    async boosting() {
+        let res = {isFirstBoost: true, stop: false};
+        while (true) {
+            if (res.stop) return;
+            if (!this.isBoostable()) return;
+            if (res.isFirstBoost) {
+                this.time = Date.now();
+            }
+            res = await this.Boost()
         }
     }
-
     async Boost() {
         if (clubData.autoBoost) {
             const res = await Fetch.boostCard(this.cardId, this.clubId)
-            await this._responceController(res)
+            return await this._responceController(res)
         }
     }
 
@@ -104,47 +108,38 @@ class BoostCard {
     async _responceController(res) {
         console.log("Boost Response:", res)
         if (res.error) {
-            switch (res.error) {
-                case "Ваша карта заблокирована, для пожертвования клубу разблокируйте её":
-                case "У вас нет карты для пожертвования клубу, обновите страницу и попробуйте снова":
-                case "Достигнут дневной лимит пожертвований в клуб, подождите до завтра":
-                case "Вклады в клуб временно отключены и находятся на обновлении":
-                case "Взносы отключены с 20:55 до 21:01":
-                    break;
-                default:
-                    const regex = /через\s*(-?\d+)\s*секунд/;
+            const regex = /через\s*(-?\d+)\s*секунд/;
+            const match = res.error.match(regex);
 
-                    const match = res.error.match(regex);
-                    if (match) {
-                        const delay = Math.abs(parseInt(match[1])) * 1000 - 1000;
-                        if (delay > 0) {
-                            await new Promise(resolve => setTimeout(resolve, delay));
-                            this.time = Date.now();
-                        }
-                    }
+            if (match) {
+                const delay = Math.abs(parseInt(match[1])) * 1000 - 1000;
+                if (delay > 0) {
+                    await new Promise(resolve => setTimeout(resolve, delay));
+                    this.time = Date.now();
+                }
 
-                    await new Promise(async resolve => setTimeout(resolve, await this._calculateDelay()));
-
-                    await this.Boost()
+                await new Promise(async resolve => setTimeout(resolve, await this._calculateDelay()));
+                return { stop: false, isFirstBoost: false };
+            } else {
+                return { stop: true, isFirstBoost: false };
             }
-            return;
         }
         if (res.boost_html_changed) {
             updatePageInfo(res.boost_html_changed)
-            await this.firstBoost()
+            return { stop: false, isFirstBoost: true };
         }
         else if (res.boost_html) {
             clubData.countBoost++
             switcherAutoBoost.text(`Auto Boost Card (${clubData.countBoost})`)
             clubData.openCards && clubData.openCards.removeBySrc(this.src)
             updatePageInfo(res.boost_html)
-            await this.firstBoost()
-        }       
+            return { stop: false, isFirstBoost: true };
+        }
     }
 
 
     async _calculateDelay() {
-        const {autoBoostDelay, customBoostTime, customBoostDelay} = (await ExtensionConfig.getConfig("miscConfig")).clubBoost;
+        const { autoBoostDelay, customBoostTime, customBoostDelay } = (await ExtensionConfig.getConfig("miscConfig")).clubBoost;
         if ((await ExtensionConfig.getConfig("functionConfig")).customBoostMode) {
             const dif = Date.now() - this.time;
             if (dif > customBoostTime) {
