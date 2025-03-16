@@ -30,7 +30,7 @@ async function init() {
         text: text,
         onClick: () => showCards({ input }),
         place: ".tabs.tabs--center.mb-2",
-        display: searchCards,
+        display: searchCards && searchCards,
     });
 
     input.place(".tabs.tabs--center.mb-2");
@@ -39,7 +39,7 @@ async function init() {
         const {searchCards, anotherUserMode} = await ExtensionConfig.getConfig("functionConfig");
     
         button.display(searchCards);
-        input.display(anotherUserMode);
+        input.display(searchCards && anotherUserMode);
     });
 }
 

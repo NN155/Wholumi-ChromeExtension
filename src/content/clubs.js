@@ -25,6 +25,10 @@ async function autoUpdatePageInfo() {
                 clubData.firstBoost = false;
                 clubData.newDay = !badData;
                 updatePageInfo(res.boost_html, res.boost_count, res.top_html)
+
+                const event = new CustomEvent('update-page-info', { detail: { html: res.boost_html, count: res.boost_count, top: res.top_html } });
+                window.dispatchEvent(event);
+
                 await boostCard.boosting()
             }
             else if (clubData.firstBoost) {
@@ -93,6 +97,9 @@ class BoostCard {
     }
     async Boost() {
         if (clubData.autoBoost) {
+            const event = new CustomEvent('boost-card', { detail: { cardId: this.cardId, clubId: this.clubId } });
+            window.dispatchEvent(event);
+            
             const res = await Fetch.boostCard(this.cardId, this.clubId)
             return await this._responceController(res)
         }
@@ -126,11 +133,18 @@ class BoostCard {
         }
         if (res.boost_html_changed) {
             updatePageInfo(res.boost_html_changed)
+            const event = new CustomEvent('update-page-info', { detail: { html: res.boost_html_changed} });
+            window.dispatchEvent(event);
             return { stop: false, isFirstBoost: true };
         }
         else if (res.boost_html) {
-            clubData.countBoost++
-            switcherAutoBoost.text(`Auto Boost Card (${clubData.countBoost})`)
+            let event;
+            event = new CustomEvent('boost-success');
+            window.dispatchEvent(event);
+
+            event = new CustomEvent('update-page-info', { detail: { html: res.boost_html} });
+            window.dispatchEvent(event);
+
             clubData.openCards && clubData.openCards.removeBySrc(this.src)
             updatePageInfo(res.boost_html)
             return { stop: false, isFirstBoost: true };
@@ -167,14 +181,19 @@ async function setOpenedCards() {
     clubData.openCards = cards
 }
 
-async function init() {
-    const { clubBoost } = await ExtensionConfig.getConfig("functionConfig");
-    const array = [switcherUpdatePage, switcherAutoBoost];
+async function setConfig(place = false) {
+    const { clubBoost, openCards } = await ExtensionConfig.getConfig("functionConfig");
+    const array = [{switcher: switcherUpdatePage, config: clubBoost}, {switcher: switcherAutoBoost, config: clubBoost}];
     array.forEach(item => {
-        item.display(clubBoost)
-        item.place(".secondary-title.text-center")
+        item.switcher.display(clubBoost && item.config)
+        place && item.switcher.place(".secondary-title.text-center")
     });
-    clubData.openCardsBoostOnly = (await ExtensionConfig.getConfig("functionConfig")).openCards;
+
+    clubData.openCardsBoostOnly = openCards;
+}
+
+async function init() {
+    await setConfig(true);
     await setOpenedCards();
 }
 
@@ -215,13 +234,15 @@ init();
 window.addEventListener('config-updated', async (event) => {
     switch (event.detail.key) {
         case "functionConfig":
-            const { clubBoost } = await ExtensionConfig.getConfig("functionConfig");
-            switcherUpdatePage.display(clubBoost);
-            switcherAutoBoost.display(clubBoost);
-            clubData.openCardsBoostOnly = (await ExtensionConfig.getConfig("functionConfig")).openCards;
+            await setConfig();
             break;
         case "lastUpdate":
             await setOpenedCards();
             break;
     }
-});
+});    
+
+window.addEventListener('boost-success', () => {
+    clubData.countBoost++
+    switcherAutoBoost.text(`Auto Boost Card (${clubData.countBoost})`)
+})

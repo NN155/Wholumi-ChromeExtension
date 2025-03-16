@@ -16,32 +16,6 @@ async function showCards({ input }) {
     ShowBar.addElementsToBar(cards.getCardsArray());
 }
 
-async function checkUserCards(user, rank = "s") {
-    const { userUrl, userName, lock } = user;
-    const getCards = new GetCards({ userUrl, userName, rank });
-    const cards = await getCards.getNeed();
-    cards.forEach(card => {
-        card.userName = userName;
-        card.url = userUrl;
-        if (lock === "lock") {
-            card.rate = -1;
-        }
-    });
-    return cards;
-}
-
-async function compareWithMyCards(myCards, cards) {
-    cards.filter(card => {
-        const myCard = myCards.find(myCard => myCard.src === card.src)
-        if (myCard) {
-            card.rate = card.rate < 0 ? card.rate : myCard.rate;
-            card.lock = myCard.lock;
-            return myCard
-        }
-    })
-    return cards;
-}
-
 async function init() {
     const { searchCards, anotherUserMode} = await ExtensionConfig.getConfig("functionConfig");
     
@@ -49,7 +23,7 @@ async function init() {
 
     const input = new Input({
         text: UrlConstructor.getMyName(),
-        display: anotherUserMode,
+        display: searchCards && anotherUserMode,
     });
 
     const button = new Button({
@@ -65,7 +39,7 @@ async function init() {
         const {searchCards, anotherUserMode} = await ExtensionConfig.getConfig("functionConfig");
     
         button.display(searchCards);
-        input.display(anotherUserMode);
+        input.display(searchCards && anotherUserMode);
     });
 }
 

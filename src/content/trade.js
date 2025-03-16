@@ -62,14 +62,14 @@ async function init() {
         text: `Compare Cards`,
         onClick: () => showCards({ input }),
         place: ".tabs.tabs--center.mb-2",
-        display: searchCards,
+        display: searchCards && searchCards,
     });
 
     const buttonGraphSearch = new Button({
         text: `Graph Search`,
         onClick: () => graphSearch({ input }),
         place: ".tabs.tabs--center.mb-2",
-        display: graph,
+        display: searchCards && graph,
     });
 
     input.place(".tabs.tabs--center.mb-2");
@@ -78,8 +78,8 @@ async function init() {
         const { searchCards, anotherUserMode, graphSearch: graph } = await ExtensionConfig.getConfig("functionConfig");
 
         buttonSearchCards.display(searchCards);
-        buttonGraphSearch.display(graph);
-        input.display(anotherUserMode);
+        buttonGraphSearch.display(searchCards && graph);
+        input.display(searchCards && anotherUserMode);
     });
 
 }

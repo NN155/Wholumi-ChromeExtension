@@ -104,7 +104,9 @@
         "https://animestars.org/clubs/*/boost/*"
       ],
       "js": [
-        "content/clubs.js"
+        "content/libs/external/socketIo.js",
+        "content/clubs.js",
+        "content/clubsBoostServer.js"
       ]
     },
     {
