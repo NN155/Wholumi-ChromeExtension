@@ -34,9 +34,9 @@ async function graphSearch({ input }) {
     const { rank } = getCardInfo(dom);
     if (rank !== "s") return;
 
-    const getCards = new GetCards({ userUrl: userUrl, rank: rank });
+    const getCards = new GetCards({ user: new User({userUrl}), rank: rank });
     const userCards = await getCards.getInventory();
-    const cardsIds = userCards.cards.map(card => card.cardId);
+    const cardsIds = userCards.map(card => card.cardId);
 
     const graph = new GraphSearch();
     await graph.loadData(rank);

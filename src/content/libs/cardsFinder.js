@@ -4,6 +4,10 @@ class UrlConstructor {
         this.rank = `?rank=${rank}`;
     }
 
+    static myUrl;
+    static myName;
+    static clubId;
+
     inventory() {
         return this.userUrl + '/cards/' + this.rank;
     }
@@ -19,31 +23,35 @@ class UrlConstructor {
     search(name) {
         return this.userUrl + "/cards/" + this.rank + "&search=" + name;
     }
-    unlock(url) {
-        return url += "&locked=0";
+    unlock(url, unlock = true) {
+        return url += `${unlock !== null ? `&locked=${unlock ? 0 : 1}` : ""}`;
+    }
+    static params(rank = null, unlock = null) {
+        return `?${rank ? `rank=${rank}` : ""}${unlock !== null ? `&locked=${unlock ? 0 : 1}` : ""}`;
     }
 
     static getMyUrl() {
-        const menu = document.querySelector(".login__content.login__menu")
+        if (this.myUrl) {
+            return this.myUrl;
+        }
+        const menu = document.querySelector(".lgn__inner")
         const urls = menu.querySelectorAll("a")
         const urlsArray = Array.from(urls);
         for (const element of urlsArray) {
             if (element.href.endsWith("/cards/")) {
-                return element.href.replace("/cards/", "");
+                this.myUrl = element.getAttribute("href").replace("cards/", "");
+                return this.myUrl;
             }
         }
     }
 
     static getMyName() {
-        const menu = document.querySelector(".login__content.login__menu")
-        const urls = menu.querySelectorAll("a")
-
-        const urlsArray = Array.from(urls);
-        for (const element of urlsArray) {
-            if (element.href.endsWith("/cards/")) {
-                return element.href.match(/\/user\/([^/]+)\//)?.[1];
-            }
+        if (this.myName) {
+            return this.myName;
         }
+        const myUrl = this.getMyUrl();
+        this.myName = myUrl.match(/\/user\/([^/]+)\//)?.[1];
+        return this.myName;
     }
 
     static getUserUrl(userName) {
@@ -65,8 +73,8 @@ class UrlConstructor {
         return match ? match[1].toLowerCase() : null;
     }
 
-    static getCardUrl(cardId) {
-        return `/cards/${cardId}/users/`;
+    static getCardUrl(cardId, unlocked = false) {
+        return `/cards/${cardId}/users/` + (unlocked ? "?unlocked=1" : "");
     }
 
     static getCardNeedUrl(cardId) {
@@ -78,12 +86,16 @@ class UrlConstructor {
     }
 
     static getClubId() {
-        const menu = document.querySelector(".login__content.login__menu")
+        if (this.clubId) {
+            return this.clubId;
+        }
+        const menu = document.querySelector(".lgn__inner")
         const urls = menu.querySelectorAll("a")
         const urlsArray = Array.from(urls);
         for (const element of urlsArray) {
             if (element.href.includes("/clubs/")) {
-                return element.href.match(/\/clubs\/(\d+)\//)?.[1];
+                this.clubId = element.href.match(/\/clubs\/(\d+)\//)?.[1];
+                return this.clubId;
             }
         }
     }
@@ -99,7 +111,7 @@ class UrlConstructor {
         }
         const parser = new DOMParser();
         const dom = parser.parseFromString(await response.text(), "text/html");
-        const user = dom.querySelector(".usp__name").firstChild.textContent.trim();
+        const user = dom.querySelector(".usn__name h1").textContent.trim();
         return user;
     }
 
@@ -109,24 +121,44 @@ class UrlConstructor {
         return dom.querySelector(".secondary-title.text-center a").textContent.trim();
     }
 
-    static tradeLink(cardId, myCardId) {
-        return `/cards/${cardId}/trade?mycard=${myCardId}`;
+    static tradeLink(wantedCardId, tradedCardId = null) {
+        return `/cards/${wantedCardId}/trade${tradedCardId ? `?mycard=${tradedCardId}` : ""}`;
     }
 
+    static getSentLink(id = null) {
+        return `/trades/offers/${id ? `${id}/` : ""}`;
+    }
+
+    static getOfferLink(id = null) {
+        return `/trades/${id ? `${id}/` : ""}`;
+    }
+
+    static getAnimeId(url) {
+        const match = url.match(/\/aniserials\/video\/[^\/]+\/(\d+)-/);
+        const id = match ? match[1] : null;
+        return id;
+    }
+
+    static getRankBySrc(src) {
+        const match = src.match(/\/uploads\/cards_image\/\d+\/([a-z])\/[^/]+$/);
+        return match ? match[1].toLowerCase() : null;
+    }
 }
 
 class GetCards {
-    constructor({ rank = null, userUrl = null, userName = null } = { rank: null, userUrl: null, userName: null }) {
-        this.userUrl = userUrl;
-        this.userName = userName;
+    constructor({ rank = null, user } = { rank: null, user: new User() }) {
         this.rank = rank;
-        this.UrlConstructor = new UrlConstructor({ rank: this.rank, userUrl: this.userUrl });
+        this.user = user;
+        this.UrlConstructor = new UrlConstructor({ rank: this.rank, userUrl: this.user.userUrl });
     }
+
+    static cash = {};
+
     _getCards(dom) {
         try {
             const array = dom.querySelector(".anime-cards.anime-cards--full-page");
             const childrens = Array.from(array.children);
-            const cards = new CardsArray(childrens.map(element => {
+            const cards = new CardsArray(...childrens.map(element => {
                 const card = new Card(element)
                 card.setLock()
                 card.setRateByLock()
@@ -159,46 +191,224 @@ class GetCards {
             pagesCards.forEach(cards => cardsList.push(...cards));
         }
         cardsList.forEach(card => {
-            card.userName = this.userName;
-            card.url = this.userUrl;
+            card.userName = this.user.userName;
+            card.url = this.user.userUrl;
+            card.online = this.user.online;
         });
         return cardsList;
     }
 
-    async getInventory(unlock = false) {
-        let cardUrl = this.UrlConstructor.inventory();
-        if (unlock) {
-            cardUrl = this.UrlConstructor.unlock(cardUrl);
+    async getInventory({ unlock = null, cash = false } = { unlock: null, cash: false }) {
+        // Check if the cards are in cache
+        if (cash) {
+            const cards = GetCards.getCash({ method: "getInventory", rank: this.rank, userName: this.user.userName })
+            if (cards) return cards;
         }
-        return await this.getAllCards(cardUrl);
+
+        // Check if the user is me
+        if (UrlConstructor.getMyUrl() === this.user.userUrl) {
+            try {
+                const cards = await GetCards.getMyCards({ rank: this.rank, unlock });
+
+                // cash results
+                cash && (GetCards.saveCash({ method: "getInventory", rank: this.rank, userName: this.user.userName, cards }));
+
+                return cards;
+            } catch (error) { }
+        }
+        let cardUrl = this.UrlConstructor.inventory();
+        cardUrl = this.UrlConstructor.unlock(cardUrl, unlock);
+        const cards = await this.getAllCards(cardUrl)
+
+        // cash results
+        cash && (GetCards.saveCash({ method: "getInventory", rank: this.rank, userName: this.user.userName, cards }));
+
+        return cards;
     }
 
-    async getNeed() {
+    async getNeed({ cash = false } = { cash: false }) {
+        // Check if the cards are in cache
+        if (cash) {
+            const cards = GetCards.getCash({ method: "getNeed", rank: this.rank, userName: this.user.userName })
+            if (cards) return cards;
+        }
+
         const needCardUrl = this.UrlConstructor.need();
-        return await this.getAllCards(needCardUrl);
+        const cards = await this.getAllCards(needCardUrl);
+
+        cash && (GetCards.saveCash({ method: "getNeed", rank: this.rank, userName: this.user.userName, cards }));
+
+        return cards;
     }
 
-    async getTrade() {
+    async getTrade({ cash = false } = { cash: false }) {
+        // Check if the cards are in cache
+        if (cash) {
+            const cards = GetCards.getCash({ method: "getTrade", rank: this.rank, userName: this.user.userName })
+            if (cards) return cards;
+        }
+
         const tradeCardUrl = this.UrlConstructor.trade();
-        return await this.getAllCards(tradeCardUrl);
+        const cards = await this.getAllCards(tradeCardUrl);
+
+        cash && (GetCards.saveCash({ method: "getTrade", rank: this.rank, userName: this.user.userName, cards }));
+
+        return cards;
     }
-}
 
+    async getInventoryTrade({ unlock = null, cash = false } = { unlock: null, cash: false }) {
+        const [inventoryCards, tradeCards] = await Promise.all([
+            this.getInventory({ unlock, cash }),
+            this.getTrade({ cash }),
+        ]);
+        tradeCards.forEach(tradeCard => {
+            inventoryCards.forEach(inventoryCard => {
+                if (tradeCard.cardId === inventoryCard.cardId && inventoryCard.lock !== "lock") {
+                    inventoryCard.rate += 1;
+                }
+            });
+        });
+        return inventoryCards;
+    }
 
-async function getInventoryTrade({ userUrl, userName, rank, unlock = false }) {
-    const getCards = new GetCards({ userUrl, userName, rank });
-    const [inventoryCards, trageCards] = await Promise.all([
-        getCards.getInventory(unlock),
-        getCards.getTrade()
-    ]);
-    trageCards.forEach(tradeCards => {
-        inventoryCards.forEach(inventoryCard => {
-            if (tradeCards.src === inventoryCard.src && inventoryCard.lock !== "lock") {
-                inventoryCard.rate += 1;
+    static async getByRemelt({ rank, unlock = null }) {
+        const url = "/cards_remelt/" + UrlConstructor.params(rank, unlock);
+        const dom = await Fetch.parseFetch(url);
+        const cards = this._getByRemelt(dom);
+        return cards;
+    }
+
+    static _getByRemelt(dom) {
+        const container = dom.querySelector('.remelt__inventory');
+        const nodes = container.querySelectorAll('.remelt__inventory-item');
+        let cards = new CardsArray();
+
+        nodes.forEach(element => {
+            const card = new Card(element);
+            card.setId();
+            card.setSrc();
+            card.setLock();
+            card.setRateByLock();
+            card.userName = UrlConstructor.getMyName();
+            card.url = UrlConstructor.getMyUrl();
+            cards.push(card);
+        });
+        return cards;
+    }
+
+    static async getByShowcase({ rank = "", unlock = null, search = "" }) {
+        const text = await Fetch.showcase({ rank, locked: unlock === null ? "" : (unlock) ? 0 : 1, search });
+        const parser = new DOMParser();
+        const dom = parser.parseFromString(text, 'text/html');
+
+        const nodes = dom.querySelectorAll('.card-filter-list__card');
+        let cards = new CardsArray();
+
+        nodes.forEach(element => {
+            const card = new Card(element);
+            card.setId();
+            card.setCardId();
+            card.setSrc();
+            card.setName();
+            card.setAnimeName();
+            card.setRank();
+            card.userName = UrlConstructor.getMyName();
+            card.url = UrlConstructor.getMyUrl();
+            cards.push(card);
+        });
+        return cards;
+    }
+
+    static async getMyCards({ rank, unlock = null }) {
+        const ranks = ["a", "b", "c", "d", "e"];
+        if (ranks.includes(rank.toLowerCase())) {
+            return await this._getMyCards(rank, unlock);
+        } else {
+            throw new Error("Wrong rank");
+        }
+    }
+
+    static async _getMyCards(rank, unlock = null) {
+        const [showcase, remelt] = await Promise.all([
+            this.getByShowcase({ rank, unlock }),
+            this.getByRemelt({ rank, unlock })
+        ]);
+        this._proccessCards(showcase, remelt);
+        showcase.forEach(card => {
+            card.transformToCard();
+        });
+        return showcase;
+    }
+    static _proccessCards(showcase, remelt) {
+        showcase.forEach(card => {
+            const remeltCard = remelt.find(remeltCard => remeltCard.id === card.id);
+            if (remeltCard) {
+                card.lock = remeltCard.lock;
+                card.rate = remeltCard.rate;
+            } else {
+                card.lock = "trophy";
             }
         });
-    });
-    return inventoryCards;
+    }
+
+    static saveCash({ method, rank, userName, cards, count, id }) {
+        if (!this.cash[method]) {
+            this.cash[method] = {};
+        }
+
+        if (rank) {
+            if (!this.cash[method][rank]) {
+                this.cash[method][rank] = {};
+            }
+            this.cash[method][rank][userName] = cards.clone();
+            return;
+        } else if (id) {
+            this.cash[method][id] = count;
+            return;
+        }
+    }
+
+    static getCash({ method, rank, userName, id }) {
+        if (this.cash[method]) {
+            if (rank) {
+                if (this.cash[method][rank] && this.cash[method][rank][userName]) {
+                    return this.cash[method][rank][userName].clone();
+                }
+            } else if (id) {
+                if (this.cash[method][id]) {
+                    return this.cash[method][id];
+                }
+            }
+        }
+        return null;
+    }
+
+    static deleteFromCash({ method, rank, userName, cardId, id }) {
+        if (this.cash[method]) {
+            if (rank) {
+                if (this.cash[method][rank] && this.cash[method][rank][userName]) {
+                    if (id) this.cash[method][rank][userName].filter(card => card.id !== id);
+                    else if (cardId) this.cash[method][rank][userName].filter(card => card.cardId !== cardId);
+                    else delete this.cash[method][rank][userName];
+                }
+            }
+        }
+    }
+
+    static async getNeedCount({ id, cash = false }) {
+        if (cash) {
+            const count = GetCards.getCash({ method: "getNeedCount", id });
+            if (count !== null) return count;
+        }
+
+        const url = UrlConstructor.getCardNeedUrl(id);
+        const usersList = await getUsersList(url);
+        const count = usersList.length;
+
+        cash && (GetCards.saveCash({ method: "getNeedCount", id, count }));
+
+        return count;
+    }
 }
 
 async function findUsersCards(usersList, callBack) {
@@ -223,16 +433,9 @@ function getCardBySrc(cards, src) {
 
 async function trade(card, tradeCard) {
     if (tradeCard.lock === "lock") {
-        await tradeCard.unlock();
+        await tradeCard.unlockCard();
     }
     window.location.href = UrlConstructor.tradeLink(card.id, tradeCard.id);
-}
-
-async function getUserNeed(user, rank = "s") {
-    const { userUrl, userName } = user;
-    const getCards = new GetCards({ userUrl, userName, rank });
-    const cards = await getCards.getNeed();
-    return cards;
 }
 
 class CardsFinder {
@@ -278,43 +481,49 @@ class CardsFinder {
         if (!this.rank && (!this.src || this.mp4)) return "Wrong card id";
     }
 
-    async need() {
+    async need({ filter, cash } = {}) {
         await this.setData();
         const answer = this.verifyData();
         if (answer) return { error: answer };
         await this.setCardName();
-        return await this.getNeededCards();
+        return await this.getNeededCards({ filter, cash });
     }
 
-    async trade() {
+    async trade({ filter, cash, online, needCount } = {}) {
         await this.setData();
         const answer = this.verifyData();
         if (answer) return { error: answer };
         await this.setCardName();
-        return await this.getTradeUsersCards("trade");
+        return await this.getTradeUsersCards("trade", { filter, cash, online, needCount });
     }
 
-    async users() {
+    async users({ filter, cash, online, needCount } = {}) {
         await this.setData();
         const answer = this.verifyData();
         if (answer) return { error: answer };
         await this.setCardName();
-        return await this.getTradeUsersCards("users");
+        return await this.getTradeUsersCards("users", { filter, cash, online, needCount });
     }
 
-    async getNeededCards() {
-        const getCards = new GetCards({ userUrl: this.userUrl, rank: this.rank });
+    async getNeededCards({ filter = false, cash = false } = { filter: false, cash: false }) {
+        const getCards = new GetCards({ user: new User({ userUrl: this.userUrl, userName: this.userName }), rank: this.rank });
         let [userInventoryCards, userNeededCards] = await Promise.all([
-            getCards.getInventory(),
-            getCards.getNeed(),
+            getCards.getInventory({ unlock: filter ? true : null, cash }),
+            getCards.getNeed({ cash }),
         ]);
 
         const userCard = getCardBySrc(userInventoryCards, this.src);
 
-        const dom = await Fetch.parseFetch(UrlConstructor.getCardNeedUrl(this.id));
-        const usersList = await getUsersList(dom, { limit: this.limit, pageLimit: this.pageLimit });
+        const url = UrlConstructor.getCardNeedUrl(this.id);
+        const usersList = await getUsersList(url, { limit: this.limit, pageLimit: this.pageLimit });
 
-        const usersCards = await findUsersCards(usersList, user => this._checkUserCards(user, usersList.length > 75));
+        const usersCards = await findUsersCards(usersList, async user => {
+            const { userUrl, userName } = user;
+            const getCard = new GetCards({ user: new User({ userUrl, userName }), rank: this.rank });
+            const unlock = filter ? true : (usersList.length > 75 ? true : null);
+            const cards = await getCard.getInventoryTrade({ unlock, cash });
+            return cards;
+        });
 
         this._processCards(usersCards);
 
@@ -332,58 +541,71 @@ class CardsFinder {
                 card.tradeLink = UrlConstructor.tradeLink(card.id, userCard.id);
                 card.tradeId = userCard.id;
                 card.tradeLock = userCard.lock;
+                card.tradeCardId = userCard.cardId;
             });
         }
 
-        if (!usersCards.length()) {
+        if (!usersCards.length) {
             return { error: "No cards found" };
         }
 
-        this._setCardInfo(usersCards, usersList);
+        this._setCardInfo({ cards: usersCards, users: usersList });
         return usersCards;
     }
 
-    async getTradeUsersCards(mode) {
-        const getCards = new GetCards({ userUrl: this.userUrl, rank: this.rank });
-        const userCards = await getCards.getInventory();
-        let url; 
+    async getTradeUsersCards(mode, { filter = false, cash = false, online = false, needCount = false } = { filter: false, cash: false, online: false, needCount: false }) {
+        const getCards = new GetCards({ user: new User({ userUrl: this.userUrl, userName: this.userName }), rank: this.rank });
+        const userCards = await getCards.getInventory({ unlock: filter ? true : null, cash });
+        let url;
         switch (mode) {
             case "trade":
                 url = UrlConstructor.getCardTradeUrl(this.id);
                 break;
             case "users":
-                url = UrlConstructor.getCardUrl(this.id);
+                url = UrlConstructor.getCardUrl(this.id, true);
                 break;
         }
 
-        const dom = await Fetch.parseFetch(url);
-        const usersList = await getUsersList(dom, {
+        const usersList = await getUsersList(url, {
             limit: this.limit,
             pageLimit: this.pageLimit,
+            filterLock: filter,
+            filterOnline: online,
         });
 
-        const usersCards = await findUsersCards(usersList, user => getUserNeed(user, this.rank));
+        const usersCards = await findUsersCards(usersList, async user => {
+            const { userUrl, userName } = user;
+            const getCards = new GetCards({ user: new User({ userUrl, userName }), rank: this.rank });
+            const cards = await getCards.getNeed({ cash });
+            return cards;
+        });
+
         const cards = this._compareCards(userCards, usersCards);
+
         this._setSearchLink(cards, this.name);
         await this._setTradeInfo(cards);
         this._setTradeLink(cards);
 
-        this._filterCards(cards, 75, -1);
-        this._processCards(cards);
+        filter ? this._filterNotAvailable(cards) : this._filterCards(cards, 75, -1);
 
-        cards.sort();
+        this._processCards(cards, true);
 
-        if (!cards.length()) {
-            return { error: "No cards found" };
+        
+        if (!cards.length) return { error: "No cards found" };
+        
+        
+        if (needCount) {
+            const [_, cardNeedCount] = await Promise.all([
+                this._needCount(cards, { cash }),
+                GetCards.getNeedCount({ id: this.id, cash })
+            ]);
+            this._setNeedCount({ cards, needCount: cardNeedCount });
         }
 
-        this._setCardInfo(cards, usersList);
-        return cards;
-    }
+        this._setCardInfo({ cards, users: usersList} );
+        
+        cards.sort();
 
-    async _checkUserCards(user, unlock = false) {
-        const { userUrl, userName } = user;
-        const cards = await getInventoryTrade({ userUrl, userName, rank: this.rank, unlock });
         return cards;
     }
 
@@ -406,14 +628,35 @@ class CardsFinder {
         })
     }
 
-    _processCards(cards) {
+    _processCards(cards, addIcon = false) {
         cards.forEach(card => {
             card.fixCard();
+            addIcon && card.addLockIcon(card.tradeLock);
             card.fixLockIcon();
             card.addLink();
             card.setColorByRate();
             card.removeBorderds();
             card.removeButton();
+        });
+    }
+
+    async _needCount(cards, { cash = false } = { cash: false }) {
+        const setCards = new Set(cards.map(card => card.cardId));
+
+        const promises = Array.from(setCards).map(async cardId => {
+            const count = await GetCards.getNeedCount({ id: cardId, cash });
+            return { cardId, count };
+        });
+
+        const results = await Promise.all(promises);
+
+        const countsMap = new Map();
+        results.forEach(({ cardId, count }) => {
+            countsMap.set(cardId, count);
+        });
+
+        cards.forEach(card => {
+            card.needCount = countsMap.get(card.cardId) || 0;
         });
     }
 
@@ -427,6 +670,7 @@ class CardsFinder {
             userCard = copyCards.find(userCard => userCard.lock === "unlock");
             userCard = userCard || copyCards.find(userCard => userCard.lock === "lock");
             userCard = userCard || copyCards.find(userCard => userCard.lock === "trade");
+            userCard = userCard || copyCards.find(userCard => userCard.lock === "trophy");
             if (userCard) {
                 otherCard.rate = otherCard.rate < 0 ? otherCard.rate : userCard.rate;
                 otherCard.tradeId = userCard.id;
@@ -438,9 +682,13 @@ class CardsFinder {
     }
 
     _filterCards(cards, length = 75, rate = 0) {
-        if (cards.length() > length) {
+        if (cards.length > length) {
             cards.filter(card => card.rate > rate);
         }
+    }
+
+    _filterNotAvailable(cards) {
+        cards.filter(card => card.rate > 0.5 && card.rate !== 1.5);
     }
 
     _setSearchLink(cards, name = null) {
@@ -451,7 +699,7 @@ class CardsFinder {
     }
 
     async _setTradeInfo(cards) {
-        const users = new Set(cards.cards.map(card => card.searchLink));
+        const users = new Set(cards.map(card => card.searchLink));
         const results = {};
         await Promise.all(
             Array.from(users).map(async searchLink => {
@@ -462,6 +710,7 @@ class CardsFinder {
                 card = cards.find(card => card.lock === "unlock");
                 card = card || cards.find(card => card.lock === "trade");
                 card = card || cards.find(card => card.lock === "lock");
+                card = card || cards.find(card => card.lock === "trophy");
                 results[searchLink] = card;
             })
         );
@@ -488,8 +737,9 @@ class CardsFinder {
         });
     }
 
-    _setCardInfo(cards, users) {
+    _setCardInfo({ cards, users }) {
         cards.info = {
+            ...cards.info,
             rank: this.rank,
             name: this.name,
             src: this.src,
@@ -497,6 +747,13 @@ class CardsFinder {
             mp4: this.mp4,
             webm: this.webm,
             usersLength: users.length,
+        }
+    }
+
+    _setNeedCount({cards, needCount}) {
+        cards.info = {
+            ...cards.info,
+            needCount: needCount,
         }
     }
 }
@@ -517,14 +774,20 @@ function changeCards(cards) {
                 disabled = true;
             }
 
+            else if (card.tradeLock === "trophy") {
+                text = "Your card is locked";
+                disabled = true;
+            }
+
             else if (card.lock === "trade") {
                 text = "This card is in trade";
                 disabled = true;
             }
-            else if (card.lock === "lock") {
+            else if (card.lock === "lock" || card.lock === "trophy") {
                 text = "This card is locked";
                 disabled = true;
             }
+
             else {
                 text = `${card.tradeLock === "lock" ? "Unlock and " : ""}Trade`
             }
@@ -544,3 +807,20 @@ function changeCards(cards) {
         })
     })
 }
+
+async function tradeHelper(wantedCardId, tradedCardsIds) {
+    try {
+        const dom = await Fetch.parseFetch(UrlConstructor.tradeLink(wantedCardId));
+        const container = dom.querySelector(".cards--container");
+        const receiverId = container.getAttribute("data-receiver-id");
+        const cardId = container.getAttribute("data-original-id");
+        const response = await Fetch.trade({ receiverId, cardId, tradeId: wantedCardId, ids: tradedCardsIds });
+        if (response.error) return {...response, success: false};
+        if (response.html) return {...response, success: true};
+        return {success: false, error: "Without html"}
+    }
+    catch (error) {
+        console.log(error);
+        return { error: "Error in trade", success: false };
+    }
+} 

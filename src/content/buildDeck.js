@@ -1,0 +1,474 @@
+class DeckService {
+    constructor(config = {}) {
+        this.config = {
+            ...config
+        };
+    }
+
+    async getCardsList() {
+        const container = document.querySelector("#cards-carousel");
+        const nodesContainer = container.querySelector(".anime-cards");
+
+        if (!nodesContainer) {
+            await this.setDesk();
+        }
+
+        return this._extractCardsFromDOM(container);
+    }
+
+    async setDesk() {
+        const container = document.querySelector("#cards-carousel");
+        const html = await this._getHtmlDesk();
+
+        if (html) {
+            container.innerHTML = html;
+        }
+    }
+
+    async _getHtmlDesk() {
+        const animeId = UrlConstructor.getAnimeId(window.location.href);
+        let response = await Fetch.getDeck(animeId);
+
+        while (response.error) {
+            await new Promise(resolve => setTimeout(resolve, 3000));
+            response = await Fetch.getDeck(animeId);
+        }
+
+        return response.html;
+    }
+
+    _extractCardsFromDOM(container) {
+        const nodes = container.querySelectorAll(".anime-cards__item-wrapper");
+
+        return new CardsArray(...Array.from(nodes).map(node => {
+            const card = new Card(node);
+            card.setSrc();
+            card.fixImage();
+            card.setCardId();
+            card.setDubles();
+            card.setRank();
+            return card;
+        }));
+    }
+}
+
+// TradeService.js - Handles card trading
+class TradeService {
+    constructor(config = {}) {
+        this.config = {
+            cardsRanks: ['a', 'b', 'c', 'd', 'e'],
+            ...config
+        };
+        this.cardSearchService = new CardSearchService(config);
+    }
+
+    async buildDeck(deckCards) {
+        // Filter cards that need trading
+        const validCards = deckCards.filter(
+            card => !card.dubles &&
+                this.config.cardsRanks.includes(card.rank) &&
+                !card.hasClass("success")
+        );
+
+        await this.tradingCards(validCards);
+    }
+
+    async tradingCards(deckCards) {
+        for (let i = 0; i < deckCards.length; i++) {
+            const deckCard = deckCards[i];
+            deckCard.pulsing(true);
+
+            try {
+                const cardForTrade = await this.cardSearchService.searchCard(deckCard);
+
+                if (!cardForTrade) {
+                    this._setCardResult(deckCard, false);
+                    continue;
+                }
+
+                const success = await this._executeTradeTransaction(cardForTrade, deckCard);
+                this._setCardResult(deckCard, success);
+            } catch (error) {
+                console.error("Trade error:", error);
+                this._setCardResult(deckCard, false);
+            }
+        }
+    }
+
+    _setCardResult(card, success) {
+        card.pulsing(false);
+
+        if (success) {
+            card.addClass("success");
+            card.setColor(globalColors.darkGreen);
+        } else {
+            card.removeClass("success");
+            card.setColor(globalColors.red);
+        }
+    }
+
+    async _executeTradeTransaction(card, deckCard) {
+        console.log(`Trading card: rank: ${deckCard.rank}, cardId: ${card.cardId}${card.needCount ? `, popularity: ${card.needCount}` : ""
+            }`);
+
+        const response = await tradeHelper(card.id, card.tradeId);
+
+        if (response.success) {
+            // Update cache
+            GetCards.deleteFromCash({
+                id: card.tradeId,
+                method: "getInventory",
+                rank: deckCard.rank,
+                userName: UrlConstructor.getMyName()
+            });
+
+            GetCards.deleteFromCash({
+                cardId: deckCard.cardId,
+                method: "getNeed",
+                rank: deckCard.rank,
+                userName: card.userName
+            });
+        }
+
+        return response.success;
+    }
+}
+
+class CardLockService {
+    constructor() {
+        this.lockedCount = 0;
+        this.deckService = new DeckService();
+        this.ranks = ["a", "b", "c", "d", "e"];
+    }
+
+    async lockCards() {
+        this.lockedCount = 0;
+        const deckCards = await this.deckService.getCardsList();
+
+        // Filter cards to lock
+        deckCards.filter(card => card.dubles && this.ranks.includes(card.rank));
+
+        // Process each rank in parallel
+        const promises = this.ranks.map(async rank => {
+            const cards = deckCards.Filter(card => card.rank === rank);
+            await this._lockCardsRank(cards);
+        });
+
+        await Promise.all(promises);
+        DLEPush.info(`${this.lockedCount} cards have been locked`);
+    }
+
+    async _lockCardsRank(deckCards) {
+        if (deckCards.length <= 0) return;
+
+        const rank = deckCards[0].rank;
+        const getCards = new GetCards({
+            user: new User({
+                userName: UrlConstructor.getMyName(),
+                userUrl: UrlConstructor.getMyUrl()
+            }),
+            rank: rank
+        });
+
+        let cards = await getCards.getInventory();
+        cards = cards.reverse();
+
+        const results = await Promise.all(
+            deckCards.map(deckCard => this._lockCard(cards, deckCard))
+        );
+
+        // Count successful locks
+        const lockedCount = results.filter(Boolean).length;
+        console.log(`Successfully locked ${lockedCount} cards of rank ${rank}`);
+    }
+
+    async _lockCard(cards, deckCard) {
+        const card = cards.find(card => card.cardId == deckCard.cardId);
+
+        if (card && card.lock !== "lock") {
+            try {
+                await card.lockCard();
+                this.lockedCount++;
+                return true;
+            } catch (error) {
+                console.error(`Failed to lock card ${deckCard.cardId}:`, error);
+                return false;
+            }
+        }
+
+        return false;
+    }
+}
+
+// CardSearchService.js - Handles card searching
+class CardSearchService {
+    constructor(config = {}) {
+        this.config = {
+            popularityMargin: 15,
+            specialRanks: ['a'],
+            ...config
+        };
+    }
+
+    async searchCard(card) {
+        // Determine if this card needs special popularity margin
+        const needCountDiff = this.config.specialRanks.includes(card.rank)
+            ? this.config.popularityMargin
+            : 0;
+
+        // Define search strategies in order of preference
+        const searchStrategies = [
+            { method: "trade", online: true },
+            { method: "users", online: true },
+            { method: "trade", online: false },
+            { method: "users", online: false }
+        ];
+
+        // Try each strategy in order
+        for (const strategy of searchStrategies) {
+            const { method, online } = strategy;
+            const cardForTrade = await this._searchCardForTrade({
+                id: card.cardId,
+                method,
+                online,
+                needCountDiff
+            });
+
+            console.log(`Cards Array (${online ? 'Online ' : ''}${method})`, cardForTrade);
+
+            if (cardForTrade) return cardForTrade;
+        }
+
+        return null;
+    }
+
+    async _searchCardForTrade({ id, method, online, needCountDiff }) {
+        const cards = await this._getCards({ id, method, online, needCountDiff });
+        return this._resolve({ cards, needCountDiff });
+    }
+
+    async _getCards({ id, method, online, needCountDiff }) {
+        const cardsFinder = new CardsFinder({
+            id,
+            userName: UrlConstructor.getMyName()
+        });
+
+        let cards = await cardsFinder[method]({
+            filter: true,
+            cash: true,
+            online,
+            needCount: !!needCountDiff,
+            limit: 200,
+            page: 7
+        });
+
+        if (cards.error) cards = new CardsArray();
+        return cards;
+    }
+
+    _resolve({ cards, needCountDiff }) {
+        if (cards.length <= 0) return null;
+
+        if (needCountDiff) {
+            console.log("Target card popularity:", cards.info.needCount);
+            // Return card with minimum popularity within acceptable range
+            return cards
+                .filter(card => card.needCount - cards.info.needCount < this.config.popularityMargin)
+                .min("needCount");
+        } else {
+            // Get random card if popularity doesn't matter
+            return cards.random();
+        }
+    }
+}
+
+class TradeSearchService {
+    constructor() {
+        this.ranks = ["a", "b", "c", "d", "e"];
+    }
+
+    async getActiveCardsIds(cards) {
+        cards.filter(card => this.ranks.includes(card.rank));
+        const tradesIds = await this._getSentTrades();
+        const ids = this._getCardsIds(cards, tradesIds);
+        return ids;
+    }
+
+
+    async getActiveTradesIds(cards) {
+        cards.filter(card => this.ranks.includes(card.rank));
+        const trades = await this._getSentTrades();
+        const ids = this._getTradesIds(cards, trades);
+        return ids;
+    }
+
+    async _getSentTrades() {
+        return await TradeMonitorService.getSent();
+    }
+
+    _getCardsIds(cards, trades) {
+        const arr = [];
+        cards.forEach(card => {
+            if (trades.find(trade => trade?.userCards[0]?.id === card.cardId)) arr.push(card.cardId);
+        });
+        return arr;
+    }
+
+    _getTradesIds(cards, trades) {
+        const arr = [];
+        trades.forEach(trade => {
+            if (cards.find(card => trade?.userCards[0]?.id === card.cardId)) arr.push(trade.tradeId);
+        });
+        return arr;
+    }
+}
+
+class DeckUpdateService {
+    constructor() {
+        this.ranks = ["a", "b", "c", "d", "e"];
+    }
+
+    updateDesk(cards, ids) {
+        cards.filter(card => this.ranks.includes(card.rank));
+
+        this._proccess(cards, ids);
+
+        const count = cards.filter(card => ids.includes(card.cardId)).length;
+        DLEPush.info("Update success! " + count + " cards have been updated");
+    }
+
+    _proccess(cards, ids) {
+        cards.forEach(card => {
+            const tempBool = ids.find(id => id === card.cardId);
+            if (tempBool) {
+                card.addClass("success");
+                card.setColor(globalColors.darkGreen);
+            } else {
+                card.removeClass("success");
+                card.setColor("");
+            }
+        });
+    }
+}
+
+class TradeRejectionService {
+    async rejectTrades(ids) {
+        await Promise.all(ids.map(id => Fetch.cancelTradeBySended(id)));
+    }
+}
+
+// ButtonManager.js - Manages deck-related buttons
+class ButtonManager {
+    constructor() {
+        this.buttons = [];
+    }
+
+    initialize() {
+        if (!document.querySelector("#cards-carousel")) return;
+
+        this._createButtons();
+        this._styleButtons();
+    }
+
+    _createButtons() {
+        // Build Deck button
+        const buildDeckButton = new Button({
+            text: "Build Deck",
+            onClick: () => this._handleButtonClick(async () => {
+                const deckService = new DeckService();
+                const tradeService = new TradeService();
+
+                const cards = await deckService.getCardsList();
+                await tradeService.buildDeck(cards);
+            }),
+            place: ".sect__header.sect__title"
+        });
+
+        // Lock Deck button
+        const lockDeckButton = new Button({
+            text: "Lock Deck",
+            onClick: () => this._handleButtonClick(async () => {
+                const lockService = new CardLockService();
+                await lockService.lockCards();
+            }),
+            place: ".sect__header.sect__title"
+        });
+
+        // Cancel Trades button
+        const cancelTradesButton = new Button({
+            text: "Cancel Trades",
+            onClick: () => this._handleButtonClick(async () => {
+                const deckService = new DeckService();
+                const tradeSearchService = new TradeSearchService();
+                const tradeRejectionService = new TradeRejectionService();
+
+                const cards = await deckService.getCardsList();
+
+                const ids = await tradeSearchService.getActiveTradesIds(cards);
+
+                // Update cards info
+                await tradeRejectionService.rejectTrades(ids);
+
+                DLEPush.info(`${ids.length} trades have been canceled`);
+            }),
+            place: ".sect__header.sect__title"
+        });
+
+        // Update deck info button
+        const updateDeckButton = new Button({
+            text: "Update deck info",
+            onClick: () => this._handleButtonClick(async () => {
+                const deckService = new DeckService();
+                const tradeSearchService = new TradeSearchService();
+                const deckUpdateService = new DeckUpdateService();
+
+                // Refresh deck
+                await deckService.setDesk();
+
+                const cards = await deckService.getCardsList();
+
+                const ids = await tradeSearchService.getActiveCardsIds(cards);
+
+                // Update cards info
+                deckUpdateService.updateDesk(cards, ids);
+            }),
+            place: ".sect__header.sect__title"
+        });
+
+        this.buttons.push(buildDeckButton, lockDeckButton, cancelTradesButton, updateDeckButton);
+    }
+
+    async _handleButtonClick(callback) {
+        // Lock all buttons
+        this.buttons.forEach(button => button.disable());
+
+        try {
+            await callback();
+        } catch (error) {
+            DLEPush.error("Something went wrong");
+            console.error("Error in button action:", error);
+        } finally {
+            // Re-enable all buttons
+            this.buttons.forEach(button => button.enable());
+        }
+    }
+
+    _styleButtons() {
+        const options = {
+            marginTop: "1em"
+        }
+
+        this.buttons.forEach(button => {
+            button.style(options);
+        });
+    }
+}
+
+async function init() {
+    // Initialize UI
+    const buttonManager = new ButtonManager();
+    buttonManager.initialize();
+}
+
+// Start the application
+init();

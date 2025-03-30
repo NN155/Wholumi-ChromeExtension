@@ -58,7 +58,7 @@ async function getSiteInventory() {
     const baseUrl = "https://animestars.org/cards/?rank=";
 
     const cardsPromises = ranks.map(rank => {
-        const cardInstance = new GetCards({ rank, userUrl: `${baseUrl}${rank}` });
+        const cardInstance = new GetCards({ rank, user: new User({userUrl: `${baseUrl}${rank}` })});
         return cardInstance.getAllCards(cardInstance.userUrl);
     });
 
@@ -73,8 +73,8 @@ async function updateOpenedInventory() {
     const cards = new CardsArray();
     await Promise.all(
         ranks.map(async (rank) => {
-            const my = new GetCards({ userUrl: myUrl, rank });
-            const myCards = await my.getInventory(true);
+            const my = new GetCards({ user: new User({userUrl: myUrl}), rank });
+            const myCards = await my.getInventory({unlock: true});
             cards.push(...myCards);
         })
     );
@@ -103,17 +103,16 @@ class GraphInfo {
     }
 
     async getCardsList() {
-        const baseUrl = "https://animestars.org/cards/?rank=";
+        const baseUrl = "/cards/?rank=";
         const cardInstance = new GetCards();
-        const cards = (await cardInstance.getAllCards(`${baseUrl}${this.rank}`)).cards;
+        const cards = await cardInstance.getAllCards(`${baseUrl}${this.rank}`);
         this.cardsList = cards;
     }
 
     async getCardInfo(id) {
         const urls = [UrlConstructor.getCardNeedUrl(id), UrlConstructor.getCardTradeUrl(id)];
         const [need, trade] = await Promise.all(urls.map(async url => {
-            const dom = await Fetch.parseFetch(url);
-            return await getUsersList(dom, { limit: 10000, pageLimit: 30 });
+            return await getUsersList(url, { limit: 10000, pageLimit: 30 });
         }));
         return { need: need, trade: trade };
     }

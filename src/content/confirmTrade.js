@@ -37,26 +37,22 @@ async function checkPage() {
                     else if (autoMoreWanted && tradeCards.length === 1) {
                         const myCardUrl = UrlConstructor.getCardNeedUrl(myCard.id);
                         const offerCardUrl = UrlConstructor.getCardNeedUrl(tradeCards[0].id);
-                        const [myCardDom, offerCardDom] = await Promise.all([
-                            Fetch.parseFetch(myCardUrl),
-                            Fetch.parseFetch(offerCardUrl)
-                        ]);
                         const [myUserList, offerUserList] = await Promise.all([
-                            getUsersList(myCardDom, {
+                            getUsersList(myCardUrl, {
                                 limit:10000, 
                                 pageLimit:10,
                             }),
-                            getUsersList(offerCardDom, {
+                            getUsersList(offerCardUrl, {
                                 limit:10000, 
                                 pageLimit:10,
                             })
                         ]);
 
-                        if (myUserList.length > offerUserList.length) {
-                            await Fetch.cancelTradeByRecieved(tradeId);
+                        if (myUserList.length <= offerUserList.length) {
+                            await Fetch.confirmTrade(tradeId);
                         }
                         else {
-                            await Fetch.confirmTrade(tradeId);
+                            await Fetch.cancelTradeByRecieved(tradeId);
                         }
                         return;
                     }

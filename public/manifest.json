@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "AnimeStars Alpha",
-  "version": "1.2.22",
+  "version": "1.2.27",
   "author": "MrKoMi",
   "description": "Press INSERT to open the menu",
   "permissions": [
@@ -43,7 +43,8 @@
       ],
       "css": [
         "css/button.css",
-        "css/switcher.css"
+        "css/switcher.css",
+        "css/cards.css"
       ],
       "js": [
         "content/libs/getUserHash.js",
@@ -56,6 +57,7 @@
         "content/libs/container.js",
         "content/libs/cardsFinder.js",
         "content/libs/graphSearch.js",
+        "content/libs/TradeMonitor.js",
         "content/dataConfig.js"
       ]
     },
@@ -127,14 +129,6 @@
     },
     {
       "matches": [
-        "https://animestars.org/cards/?rank=s"
-      ],
-      "js": [
-        "content/add-colodes.js"
-      ]
-    },
-    {
-      "matches": [
         "https://animestars.org/cards/pack/"
       ],
       "js": [
@@ -154,6 +148,18 @@
       ],
       "js": [
         "content/myProfile.js"
+      ]
+    },
+    {
+      "matches": [
+        "https://animestars.org/aniserials/video/*/*"
+      ],
+      "js": [
+        "content/libs/external/Jquery.js",
+        "content/libs/external/JqueryUI.js",
+        "content/libs/external/AnimeStarsJquery.js",
+        "content/libs/JQueryHTML.js",
+        "content/buildDeck.js"
       ]
     }
   ]

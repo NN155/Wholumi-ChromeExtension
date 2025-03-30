@@ -85,6 +85,12 @@ class Button extends Element {
         this.button.style.opacity = '1';
         this.button.style.pointerEvents = 'auto';
     }
+    
+    style(options) {
+        Object.entries(options).forEach(([property, value]) => {
+            this.button.style[property] = value;
+        });
+    }
 }
 
 class ShowBar {
@@ -367,15 +373,15 @@ function getCardInfo(dom) {
         const src = card.getAttribute("src");
         return { type: "img", rank, src };
     }
-    card = dom .querySelector("video")
+    card = dom.querySelector("video")
     if (card) {
         const sources = card.querySelectorAll("source");
         let webm, mp4;
-        
+
         sources.forEach(source => {
             const type = source.getAttribute("type");
             const src = source.getAttribute("src");
-            
+
             if (type === "video/webm") {
                 webm = src;
             } else if (type === "video/mp4") {
@@ -388,7 +394,7 @@ function getCardInfo(dom) {
 }
 
 function getUsers(dom) {
-    const usersList = [];
+    const usersList = new UsersArray();
     const users = dom.querySelector('.profile__friends.profile__friends--full') || dom.querySelector('.card-show__owners');
     const children = users.children;
     Array.from(children).forEach(element => {
@@ -397,20 +403,16 @@ function getUsers(dom) {
         const userUrl = match ? match[0] : "";
         const div = element.querySelector('.profile__friends-name') || element.querySelector('.card-show__owner-name');
         const userName = div.textContent;
-        const lockIcon = element.querySelector('.fa-lock') || element.querySelector('.fa-exchange') || element.querySelector('.fa-arrow-right-arrow-left');
+        const lockIcon = element.querySelector('.card-show__owner-icon');
         const lock = lockIcon ? "lock" : "unlock";
         const online = element.classList.contains("card-show__owner--online")
-        usersList.push({
-            userUrl,
-            userName,
-            lock,
-            online,
-        });
+        usersList.push(new User({userName, userUrl, lock, online}));
     });
     return usersList;
 }
 
-async function getUsersList(dom, { filterLock, filterOnline, limit = 200, pageLimit = 5 } = {}) {
+async function getUsersList(url, { filterLock, filterOnline, limit = 200, pageLimit = 5 } = {}) {
+    const dom = await Fetch.parseFetch(url);
     let usersList = getUsers(dom);
     let pageUrls = findPanel(dom)
     if (pageUrls) {
@@ -428,11 +430,11 @@ async function getUsersList(dom, { filterLock, filterOnline, limit = 200, pageLi
     }
 
     if (filterLock) {
-        usersList = usersList.filter(user => user.lock !== "lock");
+        usersList = usersList.getUnlockedUsers();
     }
 
     if (filterOnline) {
-        usersList = usersList.filter(user => user.online);
+        usersList = usersList.getOnlineUsers();
     }
 
     if (usersList.length >= limit) {
@@ -500,14 +502,56 @@ function diamondFalls() {
     var count = 0;
     var interval = setInterval(function () {
         if (count++ >= 20) return clearInterval(interval);
-    
+
         var diamond = document.createElement("div");
         diamond.className = "diamond-rating";
         diamond.style.left = (10 + Math.random() * 80) + "vw";
         document.body.appendChild(diamond);
-    
+
         setTimeout(function () {
             diamond.remove();
         }, 5000);
     }, 100);
 }
+
+function createCard({ rank, name, animeName, src, id, lock, cardId, animeLink, author, mp4, webm }) {
+    const card = document.createElement("div");
+    card.classList = "anime-cards__item-wrapper";
+    let lockDiv;
+    switch (lock) {
+        case "lock":
+            lockDiv = `<div class="lock-trade-btn"><i class="fal fa-lock"></i></div>`;
+            break;
+        case "trade":
+            lockDiv = `<div class="lock-trade-btn"><i class="fal fa-exchange"></i></div>`;
+            break;
+        case "trophy": 
+            lockDiv = `<div class="lock-trade-btn"><i class="fal fa-trophy-alt"></i></div>`;
+        default:
+            lockDiv = "";
+            break;
+    }
+    card.innerHTML = `
+	<div class="anime-cards__item" 
+        data-name="${name}" 
+        data-id="${cardId}" 
+        data-rank="${rank}" 
+        data-anime-name="${animeName ? animeName : "Unknown"}" 
+        data-anime-link="${animeLink ? animeLink : "/"}" 
+        data-author="${author ? author : "Unknown"}" 
+        data-image="${src ? src : ""}" 
+        data-mp4="${mp4 ? mp4 : ""}"
+        data-webm="${webm ? webm : ""}" 
+        data-owner-id="${id}"
+        data-can-trade="${lock === "unlock" ? "1" : "0"}"
+        >
+        
+		<div class="anime-cards__image">
+            <img loading="lazy" src="${src}" data-src="${src}" alt="Карточка персонажа ${name}" class="lazy-loaded">
+        </div>
+        ${lockDiv}
+	</div>
+`
+    return card;
+}
+

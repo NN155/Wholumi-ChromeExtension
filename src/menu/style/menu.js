@@ -30,13 +30,13 @@ menuWindowStyle.textContent = `
     height: auto;
     min-width: 350px;
     min-height: auto;
-    background: var(--main-menu-color); /* Темно-синій колір фону */
-    border: 1px solid var(--border-menu-color); /* Темно-сірий бордер */
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3); /* Тінь */
+    background: var(--main-menu-color); 
+    border: 1px solid var(--border-menu-color);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
     z-index: 10000;
     cursor: default;
     display: none;
-    border-radius: 8px; /* Заокруглені краї */
+    border-radius: 8px;
     font-family: 'Arial', sans-serif;
     color: var(--text-color);
 }
@@ -46,10 +46,10 @@ menuStyle.textContent = `
 
 .drag-bar {
     padding: 10px;
-    background: var(--bg-color); /* Темно-сірий колір фону */
+    background: var(--bg-color);
     color: var(--text-color);
     cursor: move;
-    user-select: none; /* Забороняє виділення тексту */
+    user-select: none;
     border-top-left-radius: 8px;
     border-top-right-radius: 8px;
     font-size: 14px;
@@ -85,13 +85,13 @@ menuStyle.textContent = `
 }
 
 .drag-bar:hover {
-    background: var(--main-color); /* Світло-бірюзовий при наведенні */
+    background: var(--main-color);
 }
 
 .tab-container {
     display: flex;
-    background: var(--bg-color); /* Темно-сірий фон для вкладок */
-    border-top: 2px solid var(--main-color); /* Бірюзова лінія для вкладок */
+    background: var(--bg-color);
+    border-top: 2px solid var(--main-color);
 }
 
 .tab {
@@ -106,11 +106,11 @@ menuStyle.textContent = `
 }
 
 .tab:hover {
-    background: var(--main-color); /* Світло-бірюзовий при наведенні */
+    background: var(--main-color);
 }
 
 .tab.active {
-    background: var(--main-color); /* Активна вкладка */
+    background: var(--main-color);
     font-weight: bold;
 }
 
@@ -122,9 +122,9 @@ menuStyle.textContent = `
     font-size: 16px;
     line-height: 1.5;
     text-align: left;
-    border-top: 1px solid var(--main-color); /* Лінія між вкладками і вмістом */
-    height: 13rem; /* Висота контенту: загальна висота мінус заголовок і вкладки */
-    overflow-y: auto; /* Додає вертикальну прокрутку при надлишковому контенті */
+    border-top: 1px solid var(--main-color);
+    height: 13rem;
+    overflow-y: auto;
     border-radius: 0px 0px 8px 8px;
 }
 
@@ -133,13 +133,13 @@ menuStyle.textContent = `
 }
 
 .window-content::-webkit-scrollbar-thumb {
-    background-color: var(--main-color); /* Колір кнопки скролбару */
-    border-radius: 10px; /* Заокруглені краї скролбару */
-    border: 2px solid var(--bg-color); /* Контур для скролбару */
+    background-color: var(--main-color);
+    border-radius: 10px;
+    border: 2px solid var(--bg-color);
 }
 
 .window-content::-webkit-scrollbar-track {
-    background: var(--second-bg-color); /* Колір фону для сліду скролбару */
+    background: var(--second-bg-color);
     border-radius: 10px;
 }
 

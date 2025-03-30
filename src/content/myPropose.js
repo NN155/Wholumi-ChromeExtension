@@ -49,7 +49,7 @@ async function proposeData(rank, myUrl) {
         const cardInstance = new GetCards({ rank, userUrl: myUrl, userName: null });
     
         const [myCards, myTradeCards] = await Promise.all([
-            cardInstance.getInventory(true),
+            cardInstance.getInventory({unlock: true}),
             cardInstance.getTrade()
         ]);
     

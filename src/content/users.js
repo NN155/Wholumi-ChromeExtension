@@ -12,7 +12,6 @@ async function showCards({ input }) {
     }
 
     changeCards(cards);
-
     ShowBar.addElementsToBar(cards.getCardsArray());
 }
 
