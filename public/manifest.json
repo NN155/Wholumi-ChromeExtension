@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "AnimeStars Alpha",
-  "version": "1.2.27",
+  "version": "1.3.1",
   "author": "MrKoMi",
   "description": "Press INSERT to open the menu",
   "permissions": [
@@ -26,7 +26,7 @@
         "https://animestars.org/*"
       ],
       "js": [
-        "content/libs/config.js",
+        "content/services/config.js",
         "menu/style/menu.js",
         "menu/components.js",
         "menu/tab.js",
@@ -47,18 +47,53 @@
         "css/cards.css"
       ],
       "js": [
-        "content/libs/getUserHash.js",
-        "content/libs/localStorage.js",
-        "content/libs/util.js",
-        "content/libs/fetchApi.js",
-        "content/getCard.js",
+        "content/services/external/Jquery.js",
+        "content/services/external/JqueryUI.js",
+        "content/services/external/AnimeStarsJquery.js",
+
         "content/theme/globalColors.js",
-        "content/libs/CardClasses.js",
-        "content/libs/container.js",
-        "content/libs/cardsFinder.js",
-        "content/libs/graphSearch.js",
-        "content/libs/TradeMonitor.js",
-        "content/dataConfig.js"
+
+        "content/services/getUserHash.js",
+        "content/services/localStorage.js",
+        "content/services/SaveFetch.js",
+        "content/services/FetchService.js",
+
+        "content/models/card/Card.js",
+        "content/models/card/CardsArray.js",
+        "content/models/card/CardsHash.js",
+        "content/models/user/User.js",
+        "content/models/user/UsersArray.js",
+
+        "content/services/container.js",
+        "content/components/ui/Element.js",
+        "content/components/ui/Button.js",
+        "content/components/ui/ShowBar.js",
+        "content/components/ui/Switcher.js",
+        "content/components/ui/Input.js",
+        "content/components/ui/Li.js",
+        
+        "content/services/urls/UrlService.js",
+        "content/services/urls/AnimeUrlService.js",
+        "content/services/urls/CardUrlService.js",
+        "content/services/urls/TradeUrlService.js",
+        "content/services/urls/UserUrlService.js",
+        "content/services/urls/InventoryUrlService.js",
+        "content/services/urls/UrlConstructor.js",
+
+        "content/services/cards/CacheService.js",
+        "content/services/cards/GetCards.js",
+        "content/services/cards/CardsHelper.js",
+        "content/services/cards/CardsFinder.js",
+
+        "content/services/graph/GraphPaths.js",
+        "content/services/graph/GraphSearch.js",
+
+        "content/services/trades/TradeHelper.js",
+        "content/services/trades/TradeMonitor.js",
+        "content/services/trades/TradeHistory.js",
+
+        "content/DataConfig.js",
+        "content/ReceiveCard.js"
       ]
     },
     {
@@ -66,7 +101,7 @@
         "https://animestars.org/cards/*/users/need/"
       ],
       "js": [
-        "content/need.js"
+        "content/Need.js"
       ]
     },
     {
@@ -74,7 +109,7 @@
         "https://animestars.org/cards/*/users/trade/"
       ],
       "js": [
-        "content/trade.js"
+        "content/Trade.js"
       ]
     },
     {
@@ -82,7 +117,7 @@
         "https://animestars.org/cards/*/users/"
       ],
       "js": [
-        "content/users.js"
+        "content/Users.js"
       ]
     },
     {
@@ -90,7 +125,7 @@
         "https://animestars.org/cards_remelt/*"
       ],
       "js": [
-        "content/remelt.js"
+        "content/Remelt.js"
       ]
     },
     {
@@ -98,7 +133,7 @@
         "https://animestars.org/cards/*/trade?mycard=*"
       ],
       "js": [
-        "content/tradeUser.js"
+        "content/TradeUser.js"
       ]
     },
     {
@@ -106,9 +141,9 @@
         "https://animestars.org/clubs/*/boost/*"
       ],
       "js": [
-        "content/libs/external/socketIo.js",
-        "content/clubs.js",
-        "content/clubsBoostServer.js"
+        "content/services/external/socketIo.js",
+        "content/Clubs.js",
+        "content/ClubsBoostServer.js"
       ]
     },
     {
@@ -116,7 +151,7 @@
         "https://animestars.org/user/*/cards/trade/*"
       ],
       "js": [
-        "content/myPropose.js"
+        "content/Propose.js"
       ]
     },
     {
@@ -124,7 +159,7 @@
         "https://animestars.org/trades/"
       ],
       "js": [
-        "content/confirmTrade.js"
+        "content/ConfirmTrade.js"
       ]
     },
     {
@@ -132,11 +167,8 @@
         "https://animestars.org/cards/pack/"
       ],
       "js": [
-        "content/libs/external/Jquery.js",
-        "content/libs/external/JqueryUI.js",
-        "content/libs/external/AnimeStarsJquery.js",
-        "content/libs/JQueryHTML.js",
-        "content/packs.js"
+        "content/services/external/JQueryHTML.js",
+        "content/Packs.js"
       ],
       "css": [
         "css/packs.css"
@@ -147,7 +179,7 @@
         "https://animestars.org/user/*/"
       ],
       "js": [
-        "content/myProfile.js"
+        "content/Profile.js"
       ]
     },
     {
@@ -155,11 +187,7 @@
         "https://animestars.org/aniserials/video/*/*"
       ],
       "js": [
-        "content/libs/external/Jquery.js",
-        "content/libs/external/JqueryUI.js",
-        "content/libs/external/AnimeStarsJquery.js",
-        "content/libs/JQueryHTML.js",
-        "content/buildDeck.js"
+        "content/Deck.js"
       ]
     }
   ]

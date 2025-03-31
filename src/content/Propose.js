@@ -24,17 +24,17 @@ async function propose(type) {
 
 async function proposeAll(ids) {
     for (let id of ids) {
-        await Fetch.proposeCard(id);
+        await FetchService.proposeCard(id);
         await new Promise(resolve => setTimeout(resolve, 1000));
     }
 }
 
 async function proposeId(id) {
     let response;
-    response = await Fetch.proposeCard(id);
+    response = await FetchService.proposeCard(id);
     while (response.error) {
         await new Promise(resolve => setTimeout(resolve, 1000));
-        response = await Fetch.proposeCard(id);
+        response = await FetchService.proposeCard(id);
     }
 }
 

@@ -68,7 +68,7 @@ class ServerBoostCard {
     }
 
     async Boost(cardId, clubId) {
-        await Fetch.boostCard(cardId, clubId)
+        await FetchService.boostCard(cardId, clubId)
             .then((data) => {
                 if (data.boost_html) {
                     const event = new CustomEvent("boost-success");

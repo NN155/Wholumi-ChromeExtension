@@ -27,11 +27,11 @@ class DeckService {
 
     async _getHtmlDesk() {
         const animeId = UrlConstructor.getAnimeId(window.location.href);
-        let response = await Fetch.getDeck(animeId);
+        let response = await FetchService.getDeck(animeId);
 
         while (response.error) {
             await new Promise(resolve => setTimeout(resolve, 3000));
-            response = await Fetch.getDeck(animeId);
+            response = await FetchService.getDeck(animeId);
         }
 
         return response.html;
@@ -115,14 +115,14 @@ class TradeService {
 
         if (response.success) {
             // Update cache
-            GetCards.deleteFromCash({
+            GetCards.cacheService.delete({
                 id: card.tradeId,
                 method: "getInventory",
                 rank: deckCard.rank,
                 userName: UrlConstructor.getMyName()
             });
 
-            GetCards.deleteFromCash({
+            GetCards.cacheService.delete({
                 cardId: deckCard.cardId,
                 method: "getNeed",
                 rank: deckCard.rank,
@@ -255,7 +255,7 @@ class CardSearchService {
 
         let cards = await cardsFinder[method]({
             filter: true,
-            cash: true,
+            cache: true,
             online,
             needCount: !!needCountDiff,
             limit: 200,
@@ -353,7 +353,7 @@ class DeckUpdateService {
 
 class TradeRejectionService {
     async rejectTrades(ids) {
-        await Promise.all(ids.map(id => Fetch.cancelTradeBySended(id)));
+        await Promise.all(ids.map(id => FetchService.cancelTradeBySended(id)));
     }
 }
 

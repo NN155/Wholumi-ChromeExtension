@@ -48,7 +48,7 @@ async function autoUpdatePageInfo() {
 async function updateCardInfo() {
     const clubRefreshBtn = document.querySelector(".club__boost__refresh-btn")
     const cardId = clubRefreshBtn ? clubRefreshBtn.getAttribute("data-card-id") : 0;
-    return { res: await Fetch.updateCardInfo(cardId), badData: !clubRefreshBtn };
+    return { res: await FetchService.updateCardInfo(cardId), badData: !clubRefreshBtn };
 }
 
 function updatePageInfo(html, boostCount = null, top = null) {
@@ -100,7 +100,7 @@ class BoostCard {
             const event = new CustomEvent('boost-card', { detail: { cardId: this.cardId, clubId: this.clubId } });
             window.dispatchEvent(event);
             
-            const res = await Fetch.boostCard(this.cardId, this.clubId)
+            const res = await FetchService.boostCard(this.cardId, this.clubId)
             return await this._responceController(res)
         }
     }
@@ -176,7 +176,7 @@ function checkAutoOff(countBoost, topBoost) {
 
 async function setOpenedCards() {
     const hash = (await ExtensionConfig.loadConfig("dataConfig", ["openedInventory"])).openedInventory;
-    const cards = new HashCards();
+    const cards = new CardsHash();
     cards.hash = hash;
     clubData.openCards = cards
 }

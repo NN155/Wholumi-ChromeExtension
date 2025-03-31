@@ -202,13 +202,13 @@ class Card {
     }
     async unlockCard() {
         if (this.lock === "lock") {
-            await Fetch.unlockCard(this.id);
+            await FetchService.unlockCard(this.id);
         }
     }
 
     async lockCard() {
         if (this.lock !== "lock") {
-            await Fetch.unlockCard(this.id);
+            await FetchService.unlockCard(this.id);
         }
     }
     addEventListener(event, callBack) {
@@ -292,119 +292,5 @@ class Card {
     }
     hasClass(className) {
         return this.card.classList.contains(className);
-    }
-}
-
-class CardsArray extends Array {
-    sort(sortByNeedCountAsc = false) {
-        super.sort((a, b) => {
-            if (b.sortPriority !== a.sortPriority) {
-                return b.sortPriority - a.sortPriority;
-            }
-            if (b.rate !== a.rate) {
-                return b.rate - a.rate;
-            }
-            if (b.cardId !== a.cardId) {
-                return b.cardId - a.cardId;
-            }
-            return sortByNeedCountAsc ? a.needCount - b.needCount : b.needCount - a.needCount;
-        });
-    }
-
-    getLockedCards() {
-        return new CardsArray(...super.filter(card => card.lock === "lock"));
-    }
-
-    getCardsArray() {
-        const arr = [];
-        this.forEach(card => arr.push(card.card));
-        return arr;
-    }
-
-    filter(callback) {
-        const filtered = super.filter(callback);
-        
-        this.length = 0;
-        
-        for (let i = 0; i < filtered.length; i++) {
-            this[i] = filtered[i];
-        }
-        
-        return this
-    }
-    clone() {
-        return new CardsArray(...this);
-    }
-
-    random() {
-        return this[Math.floor(Math.random() * this.length)];
-    }
-
-    min(field) {
-        return this.reduce((min, card) => (card[field] < min[field] ? card : min), this[0]);
-    }
-
-    max(field) {
-        return this.reduce((max, card) => (card[field] > max[field] ? card : max), this[0]);
-    }
-    
-    Filter(callback) {
-        const filtered = super.filter(callback);
-        const newCardsArray = new CardsArray(...filtered);
-        return newCardsArray;
-    }
-}
-
-class HashCards {
-    constructor() {
-        this.hash = {};
-    }
-
-    add(card) {
-        this.hash[card.src] = (this.hash[card.src] || 0) + 1;
-    }
-
-    remove(card) {
-        this.removeBySrc(card.src);
-    }
-
-    removeBySrc(src) {
-        if (this.hash[src]) {
-            this.hash[src]--;
-            if (this.hash[src] === 0) {
-                delete this.hash[src];
-            }
-        }
-    }
-
-    has(card) {
-        return this.hasBySrc(card.src);
-    }
-
-    hasBySrc(src) {
-        return this.hash[src] > 0;
-    }
-
-    get length() {
-        return Object.keys(this.hash).length;
-    }
-}
-
-class User {
-    constructor({userName, userUrl, online, lock } = {}) {
-        this.userName = userName;
-        this.userUrl = userUrl;
-        this.online = online;
-        this.lock = lock;
-    }
-}
-
-class UsersArray extends Array {
-    getOnlineUsers() {
-        return this.filter(user => user.online);
-    }
-
-    getUnlockedUsers() {
-        return this.filter(user => user.lock === "unlock");
     }
 }

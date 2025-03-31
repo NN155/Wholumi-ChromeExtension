@@ -25,7 +25,7 @@ class TradeMonitorService {
     }
 
     static async _getAllTrades(url) {
-        const dom = await Fetch.parseFetch(url);
+        const dom = await FetchService.parseFetch(url);
         const tradeList = dom.querySelector('.trade__list');
 
         const links = tradeList ? tradeList.querySelectorAll('a') : [];
@@ -48,7 +48,7 @@ class TradeMonitorService {
     
     static async tradeInfo(tradeId, isOffer) {
         const url = isOffer ? UrlConstructor.getOfferLink(tradeId) : UrlConstructor.getSentLink(tradeId);
-        const dom = await Fetch.parseFetch(url)
+        const dom = await FetchService.parseFetch(url)
         const tradeMainItems = dom.querySelectorAll('.trade__main-items');
 
         if (tradeMainItems.length >= 2) {

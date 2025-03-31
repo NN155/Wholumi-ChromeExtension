@@ -30,7 +30,7 @@ async function graphSearch({ input }) {
     const userUrl = UrlConstructor.getUserUrl(userName);
     const id = UrlConstructor.getCardId(window.location.href);
     const cardUrl = UrlConstructor.getCardUrl(id);
-    const dom = await Fetch.parseFetch(cardUrl);
+    const dom = await FetchService.parseFetch(cardUrl);
     const { rank } = getCardInfo(dom);
     if (rank !== "s") return;
 

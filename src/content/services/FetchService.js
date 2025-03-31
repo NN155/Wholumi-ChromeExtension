@@ -1,4 +1,4 @@
-class Fetch {
+class FetchService {
     // get dom from url
     static async parseFetch(url) {
         const response = await saveFetch(url);

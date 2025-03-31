@@ -27,11 +27,11 @@ async function checkPage() {
                     const { tradeId, tradeCards, myCard } = trade;
                     if (myCard.rank === "s") return;
                     if (autoConfirm && tradeCards.length >= 2) {
-                        await Fetch.confirmTrade(tradeId);
+                        await FetchService.confirmTrade(tradeId);
                         return;
                     }
                     else if (autoCancel && tradeCards.length === 1 && tradeCards.every(card => card.dubles)) {
-                        await Fetch.cancelTradeByRecieved(tradeId);
+                        await FetchService.cancelTradeByRecieved(tradeId);
                         return;
                     }
                     else if (autoMoreWanted && tradeCards.length === 1) {
@@ -49,10 +49,10 @@ async function checkPage() {
                         ]);
 
                         if (myUserList.length <= offerUserList.length) {
-                            await Fetch.confirmTrade(tradeId);
+                            await FetchService.confirmTrade(tradeId);
                         }
                         else {
-                            await Fetch.cancelTradeByRecieved(tradeId);
+                            await FetchService.cancelTradeByRecieved(tradeId);
                         }
                         return;
                     }
@@ -70,7 +70,7 @@ async function checkPage() {
 }
 
 async function getAllTrades() {
-    const dom = await Fetch.parseFetch(window.location.href);
+    const dom = await FetchService.parseFetch(window.location.href);
     const tradeList = dom.querySelector('.trade__list');
 
     const links = tradeList ? tradeList.querySelectorAll('a') : [];
@@ -85,7 +85,7 @@ async function getAllTrades() {
 }
 
 async function tradeInfo(tradeId) {
-    const dom = await Fetch.parseFetch(`/trades/${tradeId}/`)
+    const dom = await FetchService.parseFetch(`/trades/${tradeId}/`)
     const tradeMainItems = dom.querySelectorAll('.trade__main-items');
 
     if (tradeMainItems.length >= 2) {
@@ -101,7 +101,7 @@ async function tradeInfo(tradeId) {
         const link = tradeMainItems[1].querySelector('a');
         const href = link.getAttribute('href');
         const id = href.match(/^\/cards\/(\d+)\/users\/$/)[1];
-        const dom = await Fetch.parseFetch(href);
+        const dom = await FetchService.parseFetch(href);
         const { rank } = await getCardInfo(dom);
         const myCard = { id, rank };
         return { tradeId, tradeCards, myCard };

@@ -25,7 +25,7 @@ window.addEventListener("update-data-config", async (event) => {
 });
 
 async function updateInventoryInfo() {
-    const dom = await Fetch.parseFetch("/cards_showcase/");
+    const dom = await FetchService.parseFetch("/cards_showcase/");
 
     const container = dom.querySelector('.card-filter-list__items');
 
@@ -79,9 +79,9 @@ async function updateOpenedInventory() {
         })
     );
     cards.filter(card => card.lock !== "trade");
-    const hashCards = new HashCards();
-    cards.forEach(card => hashCards.add(card));
-    return hashCards.hash;
+    const cardsHash = new CardsHash();
+    cards.forEach(card => cardsHash.add(card));
+    return cardsHash.hash;
 }
 
 class GraphInfo {
