@@ -9,6 +9,7 @@ class UrlConstructor extends InventoryUrlService {
     static getMyUrl = UserUrlService.getMyUrl;
     static getMyName = UserUrlService.getMyName;
     static getUserUrl = UserUrlService.getUserUrl;
+    static getUsername = UserUrlService.getUsername;
     static isMyPage = UserUrlService.isMyPage;
     static getClubId = UserUrlService.getClubId;
     static validateUser = UserUrlService.validateUser;
@@ -26,6 +27,9 @@ class UrlConstructor extends InventoryUrlService {
     // static methods from TradeUrlService
     static getSentLink = TradeUrlService.getSentLink;
     static getOfferLink = TradeUrlService.getOfferLink;
+    static getAcceptedHistoryLink = TradeUrlService.getAcceptedHistoryLink;
+    static getCancelSentHistoryLink = TradeUrlService.getCancelSentHistoryLink;
+    static getCancelOfferHistoryLink = TradeUrlService.getCancelOfferHistoryLink;
 
     // static methods from AnimeUrlService
     static getAnimeId = AnimeUrlService.getAnimeId;

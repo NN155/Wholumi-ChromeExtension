@@ -1,7 +1,7 @@
 class CardsFinder {
-    constructor({ id, userName, limit = 3000, pageLimit = 15 }) {
+    constructor({ id, username, limit = 3000, pageLimit = 15 }) {
         this.id = id;
-        this.userName = userName;
+        this.username = username;
         this.userUrl;
         this.limit = limit;
         this.pageLimit = pageLimit;
@@ -24,9 +24,9 @@ class CardsFinder {
         } catch (error) { }
     }
     async checkUserExistence() {
-        this.userName = await UrlConstructor.validateUser(this.userName);
-        this.userUrl = UrlConstructor.getUserUrl(this.userName);
-        this.userExist = this.userName !== null
+        this.username = await UrlConstructor.validateUser(this.username);
+        this.userUrl = UrlConstructor.getUserUrl(this.username);
+        this.userExist = this.username !== null
     }
 
     async setData() {
@@ -66,7 +66,7 @@ class CardsFinder {
     }
 
     async getNeededCards({ filter = false, cache = false } = { filter: false, cache: false }) {
-        const getCards = new GetCards({ user: new User({ userUrl: this.userUrl, userName: this.userName }), rank: this.rank });
+        const getCards = new GetCards({ user: new User({ userUrl: this.userUrl, username: this.username }), rank: this.rank });
         let [userInventoryCards, userNeededCards] = await Promise.all([
             getCards.getInventory({ unlock: filter ? true : null, cache }),
             getCards.getNeed({ cache }),
@@ -78,8 +78,8 @@ class CardsFinder {
         const usersList = await getUsersList(url, { limit: this.limit, pageLimit: this.pageLimit });
 
         const usersCards = await findUsersCards(usersList, async user => {
-            const { userUrl, userName } = user;
-            const getCard = new GetCards({ user: new User({ userUrl, userName }), rank: this.rank });
+            const { userUrl, username } = user;
+            const getCard = new GetCards({ user: new User({ userUrl, username }), rank: this.rank });
             const unlock = filter ? true : (usersList.length > 75 ? true : null);
             const cards = await getCard.getInventoryTrade({ unlock, cache });
             return cards;
@@ -87,7 +87,7 @@ class CardsFinder {
 
         this._processCards(usersCards);
 
-        this._addOrangeBorder(usersCards, userInventoryCards);
+        addOrangeBorder(usersCards, userInventoryCards);
         this._upPriority(usersCards, userNeededCards);
 
         this._filterCards(usersCards, 200, 0);
@@ -114,7 +114,7 @@ class CardsFinder {
     }
 
     async getTradeUsersCards(mode, { filter = false, cache = false, online = false, needCount = false } = { filter: false, cache: false, online: false, needCount: false }) {
-        const getCards = new GetCards({ user: new User({ userUrl: this.userUrl, userName: this.userName }), rank: this.rank });
+        const getCards = new GetCards({ user: new User({ userUrl: this.userUrl, username: this.username }), rank: this.rank });
         const userCards = await getCards.getInventory({ unlock: filter ? true : null, cache });
         let url;
         switch (mode) {
@@ -134,8 +134,8 @@ class CardsFinder {
         });
 
         const usersCards = await findUsersCards(usersList, async user => {
-            const { userUrl, userName } = user;
-            const getCards = new GetCards({ user: new User({ userUrl, userName }), rank: this.rank });
+            const { userUrl, username } = user;
+            const getCards = new GetCards({ user: new User({ userUrl, username }), rank: this.rank });
             const cards = await getCards.getNeed({ cache });
             return cards;
         });
@@ -174,16 +174,6 @@ class CardsFinder {
             if (userNeededCards.find(userCard => userCard.cardId === otherCard.cardId)) {
                 otherCard.sortPriority = 1;
                 otherCard.setBorder(globalColors.purple);
-            }
-        })
-    }
-
-    _addOrangeBorder(otherCards, userCards) {
-        otherCards.forEach(otherCard => {
-            otherCard.removeBorderds();
-            if (userCards.find(userCard => userCard.cardId === otherCard.cardId)) {
-                otherCard.dubles = 1;
-                otherCard.setBorder(globalColors.orange);
             }
         })
     }

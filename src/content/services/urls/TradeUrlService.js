@@ -20,10 +20,17 @@ class TradeUrlService {
         return id ? `/trades/${id}/` : '/trades/';
     }
     
-    /**
-     * Extract anime ID from URL
-     * @param {string} url - Anime URL
-     * @returns {string|null} - Anime ID
-     */
 
+    static getAcceptedHistoryLink(username = "") {
+        return `/trades/history/${username ? `?user=${username}` : ""}`;
+    }
+
+    static getCancelSentHistoryLink(username = "") {
+        return `${this.getAcceptedHistoryLink()}?kind=calsel_sender${username ? `&user=${username}` : ""}`;
+    }
+
+    static getCancelOfferHistoryLink(username = "") {
+        return `${this.getAcceptedHistoryLink()}?kind=calsel_reciever${username ? `&user=${username}` : ""}`;
+    }
+ 
 }

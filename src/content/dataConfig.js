@@ -55,11 +55,11 @@ async function updateSiteInventory() {
 
 async function getSiteInventory() {
     const ranks = ["ass", "s", "a", "b", "c", "d", "e"];
-    const baseUrl = "https://animestars.org/cards/?rank=";
+    const baseUrl = "/cards/?rank=";
 
     const cardsPromises = ranks.map(rank => {
-        const cardInstance = new GetCards({ rank, user: new User({userUrl: `${baseUrl}${rank}` })});
-        return cardInstance.getAllCards(cardInstance.userUrl);
+        const cardInstance = new GetCards();
+        return cardInstance.getAllCards(`${baseUrl}${rank}`);
     });
 
     const [ass, s, a, b, c, d, e] = await Promise.all(cardsPromises);
@@ -121,11 +121,11 @@ class GraphInfo {
         this.usersList = new UsersList();
         for (const id in this.data) {
             for (const user of this.data[id].need) {
-                const { userUrl: url, userName: name } = user;
+                const { userUrl: url, username: name } = user;
                 this.usersList.need({ name, url, id });
             }
             for (const user of this.data[id].trade) {
-                const { userUrl: url, userName: name } = user;
+                const { userUrl: url, username: name } = user;
                 this.usersList.trade({ name, url, id });
             }
         }

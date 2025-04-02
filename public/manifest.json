@@ -47,9 +47,9 @@
         "css/cards.css"
       ],
       "js": [
-        "content/services/external/Jquery.js",
-        "content/services/external/JqueryUI.js",
-        "content/services/external/AnimeStarsJquery.js",
+        "content/external/Jquery.js",
+        "content/external/JqueryUI.js",
+        "content/external/AnimeStarsJquery.js",
 
         "content/theme/globalColors.js",
 
@@ -65,6 +65,7 @@
         "content/models/user/UsersArray.js",
 
         "content/services/container.js",
+
         "content/components/ui/Element.js",
         "content/components/ui/Button.js",
         "content/components/ui/ShowBar.js",
@@ -80,7 +81,7 @@
         "content/services/urls/InventoryUrlService.js",
         "content/services/urls/UrlConstructor.js",
 
-        "content/services/cards/CacheService.js",
+        "content/services/cache/CacheService.js",
         "content/services/cards/GetCards.js",
         "content/services/cards/CardsHelper.js",
         "content/services/cards/CardsFinder.js",
@@ -141,7 +142,7 @@
         "https://animestars.org/clubs/*/boost/*"
       ],
       "js": [
-        "content/services/external/socketIo.js",
+        "content/external/socketIo.js",
         "content/Clubs.js",
         "content/ClubsBoostServer.js"
       ]
@@ -167,7 +168,7 @@
         "https://animestars.org/cards/pack/"
       ],
       "js": [
-        "content/services/external/JQueryHTML.js",
+        "content/external/JQueryHTML.js",
         "content/Packs.js"
       ],
       "css": [
@@ -188,6 +189,16 @@
       ],
       "js": [
         "content/Deck.js"
+      ]
+    }, 
+    {
+      "matches": [
+        "https://animestars.org/user/*/cards_progress/*"
+      ],
+      "js": [
+        "content/external/exel.js",
+        "content/services/downloadExel.js",
+        "content/DecksProgressAnalyzer.js"
       ]
     }
   ]

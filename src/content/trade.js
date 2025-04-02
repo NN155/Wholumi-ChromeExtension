@@ -1,10 +1,10 @@
 async function showCards({ input }) {
     ShowBar.createShowBar();
 
-    let userName = input.getValue() || UrlConstructor.getMyName();
+    let username = input.getValue() || UrlConstructor.getMyName();
     let id = UrlConstructor.getCardId(window.location.href);
 
-    const cardsFinder = new CardsFinder({ userName, id });
+    const cardsFinder = new CardsFinder({ username, id });
     const cards = await cardsFinder.trade();
     if (cards.error) {
         ShowBar.text(cards.error);
@@ -19,15 +19,15 @@ async function showCards({ input }) {
 async function graphSearch({ input }) {
     ShowBar.createShowBar();
 
-    const userNameInput = input.getValue() || UrlConstructor.getMyName();
+    const usernameInput = input.getValue() || UrlConstructor.getMyName();
 
-    const userName = await UrlConstructor.validateUser(userNameInput);
-    if (userName === null) {
+    const username = await UrlConstructor.validateUser(usernameInput);
+    if (username === null) {
         ShowBar.text("User not found");
         return;
     }
 
-    const userUrl = UrlConstructor.getUserUrl(userName);
+    const userUrl = UrlConstructor.getUserUrl(username);
     const id = UrlConstructor.getCardId(window.location.href);
     const cardUrl = UrlConstructor.getCardUrl(id);
     const dom = await FetchService.parseFetch(cardUrl);

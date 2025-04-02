@@ -133,3 +133,15 @@ async function findUsersCards(usersList, callBack) {
     });
     return usersCards;
 }
+
+function addOrangeBorder(otherCards, userCards) {
+    otherCards.forEach(otherCard => {
+        otherCard.removeBorderds();
+        if (userCards.find(userCard => userCard.cardId === otherCard.cardId)) {
+            otherCard.dubles = 1;
+            otherCard.setBorder(globalColors.orange);
+        } else {
+            otherCard.dubles = 0;
+        }
+    })
+}

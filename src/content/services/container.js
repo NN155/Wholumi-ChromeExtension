@@ -48,11 +48,11 @@ function getUsers(dom) {
         const match = href.match(/^\/user\/[^/]+\/?/);
         const userUrl = match ? match[0] : "";
         const div = element.querySelector('.profile__friends-name') || element.querySelector('.card-show__owner-name');
-        const userName = div.textContent;
+        const username = div.textContent;
         const lockIcon = element.querySelector('.card-show__owner-icon');
         const lock = lockIcon ? "lock" : "unlock";
         const online = element.classList.contains("card-show__owner--online")
-        usersList.push(new User({userName, userUrl, lock, online}));
+        usersList.push(new User({username, userUrl, lock, online}));
     });
     return usersList;
 }

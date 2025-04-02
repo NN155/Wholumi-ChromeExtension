@@ -2,7 +2,7 @@
  * Service for fetching cards from different sources
  */
 class GetCards {
-    constructor({ rank = null, user } = { rank: null, user: new User() }) {
+    constructor({ rank = null, user = new User() } = { rank: null, user: new User() }) {
         this.rank = rank;
         this.user = user;
         this.UrlConstructor = new UrlConstructor({ rank: this.rank, userUrl: this.user.userUrl });
@@ -47,7 +47,7 @@ class GetCards {
             pagesCards.forEach(cards => cardsList.push(...cards));
         }
         cardsList.forEach(card => {
-            card.userName = this.user.userName;
+            card.username = this.user.username;
             card.url = this.user.userUrl;
             card.online = this.user.online;
         });
@@ -57,7 +57,7 @@ class GetCards {
     async getInventory({ unlock = null, cache = false } = { unlock: null, cache: false }) {
         // Check if the cards are in cache
         if (cache) {
-            const cards = GetCards.cacheService.get({ method: "getInventory", rank: this.rank, userName: this.user.userName });
+            const cards = GetCards.cacheService.get({ method: "getInventory", rank: this.rank, username: this.user.username });
             if (cards) return cards;
         }
 
@@ -67,7 +67,7 @@ class GetCards {
                 const cards = await GetCards.getMyCards({ rank: this.rank, unlock });
 
                 // cache results
-                cache && (GetCards.cacheService.save({ method: "getInventory", rank: this.rank, userName: this.user.userName, cards }));
+                cache && (GetCards.cacheService.save({ method: "getInventory", rank: this.rank, username: this.user.username, cards }));
 
                 return cards;
             } catch (error) { }
@@ -77,7 +77,7 @@ class GetCards {
         const cards = await this.getAllCards(cardUrl)
 
         // cache results
-        cache && (GetCards.cacheService.save({ method: "getInventory", rank: this.rank, userName: this.user.userName, cards }));
+        cache && (GetCards.cacheService.save({ method: "getInventory", rank: this.rank, username: this.user.username, cards }));
 
         return cards;
     }
@@ -85,14 +85,14 @@ class GetCards {
     async getNeed({ cache = false } = { cache: false }) {
         // Check if the cards are in cache
         if (cache) {
-            const cards = GetCards.cacheService.get({ method: "getNeed", rank: this.rank, userName: this.user.userName });
+            const cards = GetCards.cacheService.get({ method: "getNeed", rank: this.rank, username: this.user.username });
             if (cards) return cards;
         }
 
         const needCardUrl = this.UrlConstructor.need();
         const cards = await this.getAllCards(needCardUrl);
 
-        cache && (GetCards.cacheService.save({ method: "getNeed", rank: this.rank, userName: this.user.userName, cards }));
+        cache && (GetCards.cacheService.save({ method: "getNeed", rank: this.rank, username: this.user.username, cards }));
 
         return cards;
     }
@@ -100,14 +100,14 @@ class GetCards {
     async getTrade({ cache = false } = { cache: false }) {
         // Check if the cards are in cache
         if (cache) {
-            const cards = GetCards.cacheService.get({ method: "getTrade", rank: this.rank, userName: this.user.userName });
+            const cards = GetCards.cacheService.get({ method: "getTrade", rank: this.rank, username: this.user.username });
             if (cards) return cards;
         }
 
         const tradeCardUrl = this.UrlConstructor.trade();
         const cards = await this.getAllCards(tradeCardUrl);
 
-        cache && (GetCards.cacheService.save({ method: "getTrade", rank: this.rank, userName: this.user.userName, cards }));
+        cache && (GetCards.cacheService.save({ method: "getTrade", rank: this.rank, username: this.user.username, cards }));
 
         return cards;
     }
@@ -145,7 +145,7 @@ class GetCards {
             card.setSrc();
             card.setLock();
             card.setRateByLock();
-            card.userName = UrlConstructor.getMyName();
+            card.username = UrlConstructor.getMyName();
             card.url = UrlConstructor.getMyUrl();
             cards.push(card);
         });
@@ -168,7 +168,7 @@ class GetCards {
             card.setName();
             card.setAnimeName();
             card.setRank();
-            card.userName = UrlConstructor.getMyName();
+            card.username = UrlConstructor.getMyName();
             card.url = UrlConstructor.getMyUrl();
             cards.push(card);
         });

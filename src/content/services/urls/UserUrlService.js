@@ -40,20 +40,31 @@ class UserUrlService {
         }
         
         const myUrl = this.getMyUrl();
-        this.myName = myUrl ? myUrl.match(/\/user\/([^/]+)\//)?.[1] : null;
+        this.myName = this.getUsername(myUrl);
         
         return this.myName;
     }
     
     /**
      * Get URL for specific user
-     * @param {string} userName - Username
+     * @param {string} username - Username
      * @returns {string} - User URL
      */
-    static getUserUrl(userName) {
-        return `/user/${userName}/`;
+    static getUserUrl(username) {
+        return `/user/${username}/`;
     }
     
+
+    /**
+     * Get user ID from URL
+     * @param {string} url - URL to extract ID from
+     * @returns {string|null} - User ID
+     */
+    static getUsername(url) {
+        const match = url.match(/\/user\/([^/]+)\//);
+        return match ? match[1] : null;
+    }
+
     /**
      * Check if current page belongs to current user
      * @param {string} url - URL to check
@@ -94,12 +105,12 @@ class UserUrlService {
     
     /**
      * Validate if user exists
-     * @param {string} userName - Username to validate
+     * @param {string} username - Username to validate
      * @returns {Promise<string|null>} - Validated username or null
      */
-    static async validateUser(userName) {
+    static async validateUser(username) {
         try {
-            const response = await fetch(this.getUserUrl(userName));
+            const response = await fetch(this.getUserUrl(username));
             
             if (response.status === 404) {
                 return null;

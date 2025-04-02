@@ -56,4 +56,20 @@ class CardsArray extends Array {
         const newCardsArray = new CardsArray(...filtered);
         return newCardsArray;
     }
+
+    unique(property = 'cardId') {
+        const seen = new Set();
+        const uniqueCards = this.Filter(card => {
+            if (!card || typeof card[property] === 'undefined') return true;
+            
+            const val = card[property];
+            if (seen.has(val)) {
+                return false;
+            }
+            seen.add(val);
+            return true;
+        });
+        
+        return uniqueCards;
+    }
 }

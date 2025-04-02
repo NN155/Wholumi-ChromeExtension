@@ -4,7 +4,7 @@ class Card {
         this.cardInfo
         this.url;
         this.src;
-        this.userName;
+        this.username;
         this.lock;
         this.rate = 0;
         this.id;
@@ -31,9 +31,8 @@ class Card {
         if (card) {
             this.src = card.getAttribute('data-image');
             return;
-        }
-        if (this.isRemeltCard() || this.card.classList.contains('card-filter-list__card')) {
-            this.src = this.card.querySelector("img").getAttribute('src');
+        } else {
+            this.src = this.card.querySelector("img").getAttribute('data-src');
             return;
         }
     }
@@ -66,12 +65,12 @@ class Card {
     }
 
     addLink() {
-        if (!this.userName || !this.url) {
+        if (!this.username || !this.url) {
             return;
         }
         const linkElement = document.createElement('a');
         linkElement.href = this.url;
-        linkElement.textContent = this.userName;
+        linkElement.textContent = this.username;
         linkElement.style.display = 'block';
         linkElement.style.textAlign = 'center';
         this.card.querySelector('.anime-cards__item').appendChild(linkElement);
@@ -199,6 +198,10 @@ class Card {
     setCardId() {
         const card = this.card.querySelector(".anime-cards__item") || this.card;
         this.cardId = card.getAttribute('data-id');
+        if (!this.cardId) {
+            card.querySelector('a')
+            this.cardId = card.querySelector('a').getAttribute('href').split('/')[2];
+        }
     }
     async unlockCard() {
         if (this.lock === "lock") {

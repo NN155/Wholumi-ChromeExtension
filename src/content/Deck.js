@@ -119,14 +119,14 @@ class TradeService {
                 id: card.tradeId,
                 method: "getInventory",
                 rank: deckCard.rank,
-                userName: UrlConstructor.getMyName()
+                username: UrlConstructor.getMyName()
             });
 
             GetCards.cacheService.delete({
                 cardId: deckCard.cardId,
                 method: "getNeed",
                 rank: deckCard.rank,
-                userName: card.userName
+                username: card.username
             });
         }
 
@@ -164,7 +164,7 @@ class CardLockService {
         const rank = deckCards[0].rank;
         const getCards = new GetCards({
             user: new User({
-                userName: UrlConstructor.getMyName(),
+                username: UrlConstructor.getMyName(),
                 userUrl: UrlConstructor.getMyUrl()
             }),
             rank: rank
@@ -244,13 +244,27 @@ class CardSearchService {
 
     async _searchCardForTrade({ id, method, online, needCountDiff }) {
         const cards = await this._getCards({ id, method, online, needCountDiff });
-        return this._resolve({ cards, needCountDiff });
+        while(true) {
+            const card = this._resolve({ cards, needCountDiff });
+            if (!card) return card;
+            if (await this._checkUserHistory(card)) {
+                cards.filter(c => card.username !== c.username);
+                continue;
+            }
+            return card;
+        }
+    }
+
+    async _checkUserHistory(card) {
+        const data = await TradeHistoryService.cancelSentTrades(card.username, { cache: true });
+        let userCard = data.find(trade => trade?.cardsGained[0]?.cardId === card.cardId);
+        return userCard;
     }
 
     async _getCards({ id, method, online, needCountDiff }) {
         const cardsFinder = new CardsFinder({
             id,
-            userName: UrlConstructor.getMyName()
+            username: UrlConstructor.getMyName()
         });
 
         let cards = await cardsFinder[method]({
@@ -270,7 +284,6 @@ class CardSearchService {
         if (cards.length <= 0) return null;
 
         if (needCountDiff) {
-            console.log("Target card popularity:", cards.info.needCount);
             // Return card with minimum popularity within acceptable range
             return cards
                 .filter(card => card.needCount - cards.info.needCount < this.config.popularityMargin)

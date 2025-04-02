@@ -1,10 +1,10 @@
 async function showCards({ input }) {
     ShowBar.createShowBar();
     
-    let userName = input.getValue() || UrlConstructor.getMyName();
+    let username = input.getValue() || UrlConstructor.getMyName();
     let id = UrlConstructor.getCardId(window.location.href);
 
-    const cardsFinder = new CardsFinder({ userName,  id, limit: 200, pageLimit: 7});
+    const cardsFinder = new CardsFinder({ username,  id, limit: 200, pageLimit: 7});
     const cards = await cardsFinder.users();
     if (cards.error) {
         ShowBar.text(cards.error);
