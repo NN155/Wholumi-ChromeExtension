@@ -78,8 +78,7 @@ class CardsFinder {
         const usersList = await getUsersList(url, { limit: this.limit, pageLimit: this.pageLimit });
 
         const usersCards = await findUsersCards(usersList, async user => {
-            const { userUrl, username } = user;
-            const getCard = new GetCards({ user: new User({ userUrl, username }), rank: this.rank });
+            const getCard = new GetCards({user, rank: this.rank });
             const unlock = filter ? true : (usersList.length > 75 ? true : null);
             const cards = await getCard.getInventoryTrade({ unlock, cache });
             return cards;
@@ -89,6 +88,7 @@ class CardsFinder {
 
         addOrangeBorder(usersCards, userInventoryCards);
         this._upPriority(usersCards, userNeededCards);
+        this._setOnlineBoard(usersCards);
 
         this._filterCards(usersCards, 200, 0);
 
@@ -134,8 +134,7 @@ class CardsFinder {
         });
 
         const usersCards = await findUsersCards(usersList, async user => {
-            const { userUrl, username } = user;
-            const getCards = new GetCards({ user: new User({ userUrl, username }), rank: this.rank });
+            const getCards = new GetCards({ user, rank: this.rank });
             const cards = await getCards.getNeed({ cache });
             return cards;
         });
@@ -164,6 +163,8 @@ class CardsFinder {
 
         this._setCardInfo({ cards, users: usersList} );
         
+        this._setOnlineBoard(cards);
+
         cards.sort();
 
         return cards;
@@ -245,6 +246,12 @@ class CardsFinder {
         cards.forEach(card => {
             const urlConstructor = new UrlConstructor({ rank: this.rank, userUrl: card.url });
             card.searchLink = urlConstructor.search(name || card.name);
+        });
+    }
+
+    _setOnlineBoard(cards) {
+        cards.forEach(card => {
+            if (card.online && !card.sortPriority && !card.dubles && card.rate >= 0) card.setBorder(globalColors.ligthGreen);
         });
     }
 
