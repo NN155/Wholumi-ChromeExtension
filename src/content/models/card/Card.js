@@ -32,7 +32,7 @@ class Card {
             this.src = card.getAttribute('data-image');
             return;
         } else {
-            this.src = this.card.querySelector("img").getAttribute('data-src');
+            this.src = this.card.querySelector("img").getAttribute('data-src') || this.card.querySelector("img").getAttribute('src');
             return;
         }
     }
