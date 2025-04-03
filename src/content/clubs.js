@@ -25,11 +25,15 @@ async function autoUpdatePageInfo() {
                 clubData.firstBoost = false;
                 clubData.newDay = !badData;
                 updatePageInfo(res.boost_html, res.boost_count, res.top_html)
-                await boostCard.firstBoost()
+
+                const event = new CustomEvent('update-page-info', { detail: { html: res.boost_html, count: res.boost_count, top: res.top_html } });
+                window.dispatchEvent(event);
+
+                await boostCard.boosting()
             }
             else if (clubData.firstBoost) {
                 clubData.firstBoost = false;
-                await boostCard.firstBoost()
+                await boostCard.boosting()
             }
             checkAutoOff(res.boost_count, res.top_html);
         } catch (error) {
@@ -44,7 +48,7 @@ async function autoUpdatePageInfo() {
 async function updateCardInfo() {
     const clubRefreshBtn = document.querySelector(".club__boost__refresh-btn")
     const cardId = clubRefreshBtn ? clubRefreshBtn.getAttribute("data-card-id") : 0;
-    return { res: await Fetch.updateCardInfo(cardId), badData: !clubRefreshBtn };
+    return { res: await FetchService.updateCardInfo(cardId), badData: !clubRefreshBtn };
 }
 
 function updatePageInfo(html, boostCount = null, top = null) {
@@ -80,17 +84,24 @@ class BoostCard {
         return false;
     }
 
-    async firstBoost() {
-        if (this.isBoostable()) {
-            this.time = Date.now();
-            await this.Boost()
+    async boosting() {
+        let res = {isFirstBoost: true, stop: false};
+        while (true) {
+            if (res.stop) return;
+            if (!this.isBoostable()) return;
+            if (res.isFirstBoost) {
+                this.time = Date.now();
+            }
+            res = await this.Boost()
         }
     }
-
     async Boost() {
         if (clubData.autoBoost) {
-            const res = await Fetch.boostCard(this.cardId, this.clubId)
-            await this._responceController(res)
+            const event = new CustomEvent('boost-card', { detail: { cardId: this.cardId, clubId: this.clubId } });
+            window.dispatchEvent(event);
+            
+            const res = await FetchService.boostCard(this.cardId, this.clubId)
+            return await this._responceController(res)
         }
     }
 
@@ -104,47 +115,45 @@ class BoostCard {
     async _responceController(res) {
         console.log("Boost Response:", res)
         if (res.error) {
-            switch (res.error) {
-                case "Ваша карта заблокирована, для пожертвования клубу разблокируйте её":
-                case "У вас нет карты для пожертвования клубу, обновите страницу и попробуйте снова":
-                case "Достигнут дневной лимит пожертвований в клуб, подождите до завтра":
-                case "Вклады в клуб временно отключены и находятся на обновлении":
-                case "Взносы отключены с 20:55 до 21:01":
-                    break;
-                default:
-                    const regex = /через\s*(-?\d+)\s*секунд/;
+            const regex = /через\s*(-?\d+)\s*секунд/;
+            const match = res.error.match(regex);
 
-                    const match = res.error.match(regex);
-                    if (match) {
-                        const delay = Math.abs(parseInt(match[1])) * 1000 - 1000;
-                        if (delay > 0) {
-                            await new Promise(resolve => setTimeout(resolve, delay));
-                            this.time = Date.now();
-                        }
-                    }
+            if (match) {
+                const delay = Math.abs(parseInt(match[1])) * 1000 - 1000;
+                if (delay > 0) {
+                    await new Promise(resolve => setTimeout(resolve, delay));
+                    this.time = Date.now();
+                }
 
-                    await new Promise(async resolve => setTimeout(resolve, await this._calculateDelay()));
-
-                    await this.Boost()
+                await new Promise(async resolve => setTimeout(resolve, await this._calculateDelay()));
+                return { stop: false, isFirstBoost: false };
+            } else {
+                return { stop: true, isFirstBoost: false };
             }
-            return;
         }
         if (res.boost_html_changed) {
             updatePageInfo(res.boost_html_changed)
-            await this.firstBoost()
+            const event = new CustomEvent('update-page-info', { detail: { html: res.boost_html_changed} });
+            window.dispatchEvent(event);
+            return { stop: false, isFirstBoost: true };
         }
         else if (res.boost_html) {
-            clubData.countBoost++
-            switcherAutoBoost.text(`Auto Boost Card (${clubData.countBoost})`)
+            let event;
+            event = new CustomEvent('boost-success');
+            window.dispatchEvent(event);
+
+            event = new CustomEvent('update-page-info', { detail: { html: res.boost_html} });
+            window.dispatchEvent(event);
+
             clubData.openCards && clubData.openCards.removeBySrc(this.src)
             updatePageInfo(res.boost_html)
-            await this.firstBoost()
-        }       
+            return { stop: false, isFirstBoost: true };
+        }
     }
 
 
     async _calculateDelay() {
-        const {autoBoostDelay, customBoostTime, customBoostDelay} = (await ExtensionConfig.getConfig("miscConfig")).clubBoost;
+        const { autoBoostDelay, customBoostTime, customBoostDelay } = (await ExtensionConfig.getConfig("miscConfig")).clubBoost;
         if ((await ExtensionConfig.getConfig("functionConfig")).customBoostMode) {
             const dif = Date.now() - this.time;
             if (dif > customBoostTime) {
@@ -167,19 +176,24 @@ function checkAutoOff(countBoost, topBoost) {
 
 async function setOpenedCards() {
     const hash = (await ExtensionConfig.loadConfig("dataConfig", ["openedInventory"])).openedInventory;
-    const cards = new HashCards();
+    const cards = new CardsHash();
     cards.hash = hash;
     clubData.openCards = cards
 }
 
-async function init() {
-    const { clubBoost } = await ExtensionConfig.getConfig("functionConfig");
-    const array = [switcherUpdatePage, switcherAutoBoost];
+async function setConfig(place = false) {
+    const { clubBoost, openCards } = await ExtensionConfig.getConfig("functionConfig");
+    const array = [{switcher: switcherUpdatePage, config: clubBoost}, {switcher: switcherAutoBoost, config: clubBoost}];
     array.forEach(item => {
-        item.display(clubBoost)
-        item.place(".secondary-title.text-center")
+        item.switcher.display(clubBoost && item.config)
+        place && item.switcher.place(".secondary-title.text-center")
     });
-    clubData.openCardsBoostOnly = (await ExtensionConfig.getConfig("functionConfig")).openCards;
+
+    clubData.openCardsBoostOnly = openCards;
+}
+
+async function init() {
+    await setConfig(true);
     await setOpenedCards();
 }
 
@@ -220,13 +234,15 @@ init();
 window.addEventListener('config-updated', async (event) => {
     switch (event.detail.key) {
         case "functionConfig":
-            const { clubBoost } = await ExtensionConfig.getConfig("functionConfig");
-            switcherUpdatePage.display(clubBoost);
-            switcherAutoBoost.display(clubBoost);
-            clubData.openCardsBoostOnly = (await ExtensionConfig.getConfig("functionConfig")).openCards;
+            await setConfig();
             break;
         case "lastUpdate":
             await setOpenedCards();
             break;
     }
-});
+});    
+
+window.addEventListener('boost-success', () => {
+    clubData.countBoost++
+    switcherAutoBoost.text(`Auto Boost Card (${clubData.countBoost})`)
+})

@@ -1,10 +1,10 @@
 async function showCards({ input }) {
     ShowBar.createShowBar();
 
-    let userName = input.getValue() || UrlConstructor.getMyName();
+    let username = input.getValue() || UrlConstructor.getMyName();
     let id = UrlConstructor.getCardId(window.location.href);
 
-    const cardsFinder = new CardsFinder({ userName, id });
+    const cardsFinder = new CardsFinder({ username, id });
     const cards = await cardsFinder.trade();
     if (cards.error) {
         ShowBar.text(cards.error);
@@ -19,24 +19,24 @@ async function showCards({ input }) {
 async function graphSearch({ input }) {
     ShowBar.createShowBar();
 
-    const userNameInput = input.getValue() || UrlConstructor.getMyName();
+    const usernameInput = input.getValue() || UrlConstructor.getMyName();
 
-    const userName = await UrlConstructor.validateUser(userNameInput);
-    if (userName === null) {
+    const username = await UrlConstructor.validateUser(usernameInput);
+    if (username === null) {
         ShowBar.text("User not found");
         return;
     }
 
-    const userUrl = UrlConstructor.getUserUrl(userName);
+    const userUrl = UrlConstructor.getUserUrl(username);
     const id = UrlConstructor.getCardId(window.location.href);
     const cardUrl = UrlConstructor.getCardUrl(id);
-    const dom = await Fetch.parseFetch(cardUrl);
+    const dom = await FetchService.parseFetch(cardUrl);
     const { rank } = getCardInfo(dom);
     if (rank !== "s") return;
 
-    const getCards = new GetCards({ userUrl: userUrl, rank: rank });
+    const getCards = new GetCards({ user: new User({userUrl}), rank: rank });
     const userCards = await getCards.getInventory();
-    const cardsIds = userCards.cards.map(card => card.cardId);
+    const cardsIds = userCards.map(card => card.cardId);
 
     const graph = new GraphSearch();
     await graph.loadData(rank);
@@ -62,14 +62,14 @@ async function init() {
         text: `Compare Cards`,
         onClick: () => showCards({ input }),
         place: ".tabs.tabs--center.mb-2",
-        display: searchCards,
+        display: searchCards && searchCards,
     });
 
     const buttonGraphSearch = new Button({
         text: `Graph Search`,
         onClick: () => graphSearch({ input }),
         place: ".tabs.tabs--center.mb-2",
-        display: graph,
+        display: searchCards && graph,
     });
 
     input.place(".tabs.tabs--center.mb-2");
@@ -78,8 +78,8 @@ async function init() {
         const { searchCards, anotherUserMode, graphSearch: graph } = await ExtensionConfig.getConfig("functionConfig");
 
         buttonSearchCards.display(searchCards);
-        buttonGraphSearch.display(graph);
-        input.display(anotherUserMode);
+        buttonGraphSearch.display(searchCards && graph);
+        input.display(searchCards && anotherUserMode);
     });
 
 }

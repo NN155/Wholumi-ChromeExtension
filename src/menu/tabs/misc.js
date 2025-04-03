@@ -14,10 +14,12 @@ async function miscTab() {
         {config: "functionConfig", html: "Switcher", id: 'openCards', label: 'Boost Opened Cards Only', data: 'openCards', group: 'Club'},
         {config: "lastUpdate", html: "Button", id: 'openedInventory', label: 'Update opened cards info', onEvent: { key: "openedInventory", event: "update-data-config" }, group: 'Club', data: "openedInventory" },
         {config: "functionConfig", html: "Switcher", id: 'customBoostMode', label: 'Custom Boost Mode', data: 'customBoostMode', group: 'Club'},
+        {config: "functionConfig", html: "Switcher", id: 'serverBoost', label: 'Server Boost', data: 'serverBoost', group: 'Club'},
         {config: "miscConfig", html: "Input", type:"Number", min: 0, max: 3000, id: 'autoUpdateDelay',label: 'Auto Update Delay (ms)', data: "clubBoost", subkey: "autoUpdateDelay", group: 'Club'},
         {config: "miscConfig", html: "Input", type:"Number", min: 0, max: 1000, id: 'autoBoostDelay', label: 'Auto Boost Delay (ms)', data: "clubBoost", subkey: "autoBoostDelay", group: 'Club'},
         {config: "miscConfig", html: "Input", type:"Number", min: 0, max: 1000, id: 'customBoostTime', label: 'Custom Delay Trigger Time (ms)', data: "clubBoost", subkey: "customBoostTime", group: 'Club'},
         {config: "miscConfig", html: "Input", type:"Number", min: 0, max: 1000, id: 'customBoostDelay', label: 'Custom Boost Delay (ms)', data: "clubBoost", subkey: "customBoostDelay", group: 'Club'},
+        {config: "miscConfig", html: "Input", type:"Number", min: 1, max: 10, id: 'multiply', label: 'Multiply', data: "clubBoost", subkey: "multiply", group: 'Club'},
         { html: "Button", id: 'submitClub', text: 'Save Changes', onclick: () => tab.saveInputData("miscConfig", "clubBoost"), group: 'Club' },
     ];
 

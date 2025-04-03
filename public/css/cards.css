@@ -1,0 +1,8 @@
+@keyframes card-pulse {
+    0% { transform: scale(0.7); }
+    100% { transform: scale(0.8); }
+}
+  
+.pulsing {
+    animation: card-pulse 0.5s infinite alternate ease-in-out;
+}

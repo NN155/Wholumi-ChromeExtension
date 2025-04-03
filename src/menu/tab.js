@@ -12,7 +12,6 @@ class Tab {
         tabElement.className = `tab ${this.isActive ? 'active' : ''}`;
         tabElement.textContent = this.tabName;
 
-        // Обробник натискання на вкладку
         tabElement.addEventListener('click', () => {
             this.toggleActive();
         });

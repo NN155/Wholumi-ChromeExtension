@@ -1,4 +1,4 @@
-class Fetch {
+class FetchService {
     // get dom from url
     static async parseFetch(url) {
         const response = await saveFetch(url);
@@ -68,14 +68,16 @@ class Fetch {
     }
 
     // trade with user
-    static async tradeFetch(info, ids) {
+    static async trade({receiverId, cardId, tradeId, ids}) {
         const url = "/engine/ajax/controller.php?mod=trade_ajax";
 
         const creatorIds = Array.isArray(ids) ? ids : [ids];
         const body = new URLSearchParams({
             user_hash: dle_login_hash,
             action: "trade_card",
-            ...info,
+            receiver_id: receiverId,
+            trade_id: tradeId,
+            original_card: cardId,
         });
 
         creatorIds.forEach((id) => {
@@ -251,5 +253,37 @@ class Fetch {
             }),
         });
         return await response.json();
-      }
+    }
+
+    static async getDeck(news_id) {
+        const response = await saveFetch("/engine/ajax/controller.php?mod=cards_ajax", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded",
+            },
+            body: new URLSearchParams({
+                user_hash: dle_login_hash,
+                action: "anime_cards",
+                news_id: news_id,
+            }),
+        });
+        return await response.json();
+    }
+
+    static async showcase({ rank = "", locked = "", search = "" }) {
+        const response = await saveFetch("/engine/ajax/controller.php?mod=cards_ajax", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded",
+            },
+            body: new URLSearchParams({
+                user_hash: dle_login_hash,
+                action: "search",
+                rank: rank,
+                locked: locked,
+                search: search,
+            }),
+        });
+        return await response.text();
+    }
 }

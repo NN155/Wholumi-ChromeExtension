@@ -86,23 +86,3 @@ class GraphSearch {
         return results;
     }
 }
-
-(async () => {
-
-    const graph = new GraphSearch();
-    await graph.loadData("s");
-
-    const finishNode = "7554";
-    const startNodes = ['5967'];
-
-
-    const paths = graph.need(startNodes, finishNode);
-    
-
-    console.log(paths);
-    const {ids, names} = paths[0];
-    for (let index = 0; index < ids.length; index++) {
-        console.log("https://animestars.org/" + UrlConstructor.getCardUrl(ids[index]), UrlConstructor.getUserUrl(names[index]));
-
-    }
-});

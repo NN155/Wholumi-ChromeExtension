@@ -11,6 +11,7 @@ chrome.runtime.onInstalled.addListener(() => {
             customBoostMode: false,
             openCards: false,
             graphSearch: false,
+            serverBoost: false,
         }
         if (config) {
             defaultConfig = { ...defaultConfig, ...config };
@@ -37,6 +38,7 @@ chrome.runtime.onInstalled.addListener(() => {
                 autoBoostDelay: 75,
                 customBoostTime: 700,
                 customBoostDelay: 25,
+                multiply: 1,
             },
             packs: {
                 balance: 10000,

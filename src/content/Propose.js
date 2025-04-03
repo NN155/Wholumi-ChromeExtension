@@ -24,17 +24,17 @@ async function propose(type) {
 
 async function proposeAll(ids) {
     for (let id of ids) {
-        await Fetch.proposeCard(id);
+        await FetchService.proposeCard(id);
         await new Promise(resolve => setTimeout(resolve, 1000));
     }
 }
 
 async function proposeId(id) {
     let response;
-    response = await Fetch.proposeCard(id);
+    response = await FetchService.proposeCard(id);
     while (response.error) {
         await new Promise(resolve => setTimeout(resolve, 1000));
-        response = await Fetch.proposeCard(id);
+        response = await FetchService.proposeCard(id);
     }
 }
 
@@ -46,10 +46,10 @@ async function proposeData(rank, myUrl) {
     const inventory = [];
     const trade = [];
     for (const rank of ranks) {
-        const cardInstance = new GetCards({ rank, userUrl: myUrl, userName: null });
+        const cardInstance = new GetCards({ rank, userUrl: myUrl, username: null });
     
         const [myCards, myTradeCards] = await Promise.all([
-            cardInstance.getInventory(true),
+            cardInstance.getInventory({unlock: true}),
             cardInstance.getTrade()
         ]);
     

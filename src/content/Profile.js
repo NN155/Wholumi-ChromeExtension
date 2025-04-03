@@ -32,7 +32,7 @@ async function findGift(url) {
     if (gift) {
         console.log(gift)
         const code = gift.getAttribute("data-code")
-        const response = await Fetch.giftCode(code)
+        const response = await FetchService.giftCode(code)
         if (response.status == "ok") {
             diamondFalls()
         }

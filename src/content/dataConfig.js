@@ -25,7 +25,7 @@ window.addEventListener("update-data-config", async (event) => {
 });
 
 async function updateInventoryInfo() {
-    const dom = await Fetch.parseFetch("/cards_showcase/");
+    const dom = await FetchService.parseFetch("/cards_showcase/");
 
     const container = dom.querySelector('.card-filter-list__items');
 
@@ -55,11 +55,11 @@ async function updateSiteInventory() {
 
 async function getSiteInventory() {
     const ranks = ["ass", "s", "a", "b", "c", "d", "e"];
-    const baseUrl = "https://animestars.org/cards/?rank=";
+    const baseUrl = "/cards/?rank=";
 
     const cardsPromises = ranks.map(rank => {
-        const cardInstance = new GetCards({ rank, userUrl: `${baseUrl}${rank}` });
-        return cardInstance.getAllCards(cardInstance.userUrl);
+        const cardInstance = new GetCards();
+        return cardInstance.getAllCards(`${baseUrl}${rank}`);
     });
 
     const [ass, s, a, b, c, d, e] = await Promise.all(cardsPromises);
@@ -73,15 +73,15 @@ async function updateOpenedInventory() {
     const cards = new CardsArray();
     await Promise.all(
         ranks.map(async (rank) => {
-            const my = new GetCards({ userUrl: myUrl, rank });
-            const myCards = await my.getInventory(true);
+            const my = new GetCards({ user: new User({userUrl: myUrl}), rank });
+            const myCards = await my.getInventory({unlock: true});
             cards.push(...myCards);
         })
     );
     cards.filter(card => card.lock !== "trade");
-    const hashCards = new HashCards();
-    cards.forEach(card => hashCards.add(card));
-    return hashCards.hash;
+    const cardsHash = new CardsHash();
+    cards.forEach(card => cardsHash.add(card));
+    return cardsHash.hash;
 }
 
 class GraphInfo {
@@ -103,17 +103,16 @@ class GraphInfo {
     }
 
     async getCardsList() {
-        const baseUrl = "https://animestars.org/cards/?rank=";
+        const baseUrl = "/cards/?rank=";
         const cardInstance = new GetCards();
-        const cards = (await cardInstance.getAllCards(`${baseUrl}${this.rank}`)).cards;
+        const cards = await cardInstance.getAllCards(`${baseUrl}${this.rank}`);
         this.cardsList = cards;
     }
 
     async getCardInfo(id) {
         const urls = [UrlConstructor.getCardNeedUrl(id), UrlConstructor.getCardTradeUrl(id)];
         const [need, trade] = await Promise.all(urls.map(async url => {
-            const dom = await Fetch.parseFetch(url);
-            return await getUsersList(dom, { limit: 10000, pageLimit: 30 });
+            return await getUsersList(url, { limit: 10000, pageLimit: 30 });
         }));
         return { need: need, trade: trade };
     }
@@ -122,11 +121,11 @@ class GraphInfo {
         this.usersList = new UsersList();
         for (const id in this.data) {
             for (const user of this.data[id].need) {
-                const { userUrl: url, userName: name } = user;
+                const { userUrl: url, username: name } = user;
                 this.usersList.need({ name, url, id });
             }
             for (const user of this.data[id].trade) {
-                const { userUrl: url, userName: name } = user;
+                const { userUrl: url, username: name } = user;
                 this.usersList.trade({ name, url, id });
             }
         }
