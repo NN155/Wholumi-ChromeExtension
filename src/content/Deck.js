@@ -247,7 +247,7 @@ class CardSearchService {
         while(true) {
             const card = this._resolve({ cards, needCountDiff });
             if (!card) return card;
-            if (await this._checkUserHistory(card)) {
+            if (await this._checkUserHistory({cardId: id, username: card.username})) {
                 cards.filter(c => card.username !== c.username);
                 continue;
             }
@@ -255,9 +255,9 @@ class CardSearchService {
         }
     }
 
-    async _checkUserHistory(card) {
-        const data = await TradeHistoryService.cancelSentTrades(card.username, { cache: true });
-        let userCard = data.find(trade => trade?.cardsGained[0]?.cardId === card.cardId);
+    async _checkUserHistory({cardId, username}) {
+        const data = await TradeHistoryService.cancelSentTrades(username, { cache: true });
+        let userCard = data.find(trade => trade?.cardsGained[0]?.cardId === cardId);
         return userCard;
     }
 
