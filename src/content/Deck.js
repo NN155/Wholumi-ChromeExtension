@@ -205,7 +205,7 @@ class CardSearchService {
     constructor(config = {}) {
         this.config = {
             popularityMargin: 15,
-            specialRanks: ['a'],
+            specialRanks: ['a', 'b'],
             ...config
         };
     }
