@@ -7,10 +7,10 @@ socket.on("connect", () => {
 socket.on("searchCards", async (data) => {
     console.log("📩 Received message:", data);
 
-    let userName = data.name;
+    let username = data.name;
     let id = data.id;
 
-    const cardsFinder = new CardsFinder({ userName, id });
+    const cardsFinder = new CardsFinder({ username, id });
 
     try {
         let cards;
@@ -41,7 +41,7 @@ socket.on("searchCards", async (data) => {
             body: JSON.stringify({
                 action: data.action,
                 userId: id,
-                userName: userName,
+                username: username,
                 result: cards,
                 status: "success",
             }),
@@ -56,7 +56,7 @@ socket.on("searchCards", async (data) => {
             body: JSON.stringify({
                 action: data.action,
                 userId: id,
-                userName: userName,
+                username: username,
                 result: {error: "Something went wrong", taskId: data.taskId},
                 status: "success",
             }),
