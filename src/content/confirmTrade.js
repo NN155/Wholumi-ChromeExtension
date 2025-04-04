@@ -4,6 +4,8 @@ let autoMoreWanted = false;
 let working = false;
 let memory = [];
 
+const ranks = ['a', 'b', 'c', 'd', 'e'];
+
 async function checkPage() {
     if (working) {
         memory = [];
@@ -25,7 +27,7 @@ async function checkPage() {
             await Promise.all(
                 tradesInfo.map(async trade => {
                     const { tradeId, tradeCards, myCard } = trade;
-                    if (myCard.rank === "s") return;
+                    if (!ranks.includes(myCard.rank)) return;
                     if (autoConfirm && tradeCards.length >= 2) {
                         await FetchService.confirmTrade(tradeId);
                         return;

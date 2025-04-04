@@ -41,7 +41,7 @@ async function proposeId(id) {
 async function proposeData(rank, myUrl) {
     let ranks = [rank];
     if (!rank) {
-        ranks = ["s", "a", "b", "c", "d", "e"];
+        ranks = ["a", "b", "c", "d", "e"];
     }
     const inventory = [];
     const trade = [];

@@ -44,7 +44,7 @@ class Card {
     fixImage() {
         const card = this.card.querySelector('.anime-cards__item');
         if (card) {
-            this.card.querySelector("img").setAttribute('src', this.src);
+            this.card.querySelector("img")?.setAttribute('src', this.src);
         }
     }
     fixLockIcon() {
