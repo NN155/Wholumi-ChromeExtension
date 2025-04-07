@@ -215,10 +215,37 @@ class GetCards {
         }
 
         const url = UrlConstructor.getCardNeedUrl(id);
-        const usersList = await getUsersList(url);
-        const count = usersList.length;
+        const count = await getUsersCount(url);
 
         cache && (GetCards.cacheService.save({ method: "getNeedCount", id, count }));
+
+        return count;
+    }
+
+    static async getTradeCount({ id, cache = false }) {
+        if (cache) {
+            const count = GetCards.cacheService.get({ method: "getTradeCount", id });
+            if (count !== null) return count;
+        }
+
+        const url = UrlConstructor.getCardTradeUrl(id);
+        const count = await getUsersCount(url);
+
+        cache && (GetCards.cacheService.save({ method: "getTradeCount", id, count }));
+
+        return count;
+    }
+
+    static async getUsersCount({ id, unlock = false, cache = false }) {
+        if (cache) {
+            const count = GetCards.cacheService.get({ method: `getUsersCount${unlock ? "Unlock": ""}`, id });
+            if (count !== null) return count;
+        }
+
+        const url = UrlConstructor.getCardUrl(id, unlock);
+        const count = await getUsersCount(url);
+
+        cache && (GetCards.cacheService.save({ method: `getUsersCount${unlock ? "Unlock": ""}`, id, count }));
 
         return count;
     }

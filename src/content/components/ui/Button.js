@@ -52,4 +52,8 @@ class Button extends Element {
             this.button.style[property] = value;
         });
     }
+
+    display(display) {
+        this.button.style.display = display ? 'block' : 'none';
+    }
 }

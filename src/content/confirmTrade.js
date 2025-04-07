@@ -110,59 +110,94 @@ async function tradeInfo(tradeId) {
     }
 }
 
-function createContainer(querySelector) {
-    const parentElement = document.querySelector(querySelector);
-    const container = document.createElement("div");
-    container.classList.add("div-for-extension");
-    parentElement.appendChild(container);
-    return container;
+class ButtonManager {
+    constructor() {
+        this.buttons = [];
+    }
+
+    async initialize() {
+        this._createButtons();
+        await this._displayButtons();
+        this._eventListener();
+    }
+
+    _eventListener() {
+        window.addEventListener('config-updated', async (event) => {
+            switch (event.detail.key) {
+                case "functionConfig":
+                    await this._displayButtons();
+                    break;
+            }
+        });
+    }
+
+    async _createButtons() {
+        this.container = this._createContainer(".justify-center");
+
+        const switcherAutoConfirm = new Switcher(
+            {
+                checked: false,
+                onChange: (isChecked) => {
+                    autoConfirm = isChecked;
+                    if (autoConfirm) {
+                        checkPage();
+                    }
+                },
+                text: "Auto Confirm 2/3-to-1",
+                place: ".div-for-extension",
+            }
+        )
+    
+        const switcherAutoCancel = new Switcher(
+            {
+                checked: false,
+                onChange: (isChecked) => {
+                    autoCancel = isChecked;
+                    if (autoCancel) {
+                        checkPage();
+                    }
+                },
+                text: "Auto Cancel 1-to-1 dubles",
+                place: ".div-for-extension",
+            }
+        )
+    
+    
+        const switcherAutoMoreWanted = new Switcher(
+            {
+                checked: false,
+                onChange: (isChecked) => {
+                    autoMoreWanted = isChecked;
+                    if (autoMoreWanted) {
+                        checkPage();
+                    }
+                },
+                text: "Auto Confirm/Cancel 1-to-1 by priority",
+                place: ".div-for-extension",
+            }
+        )
+    }
+
+    async _displayButtons() {
+        const { offersResolver } = await ExtensionConfig.getConfig("functionConfig");
+        this.container.style.display = offersResolver ? "block" : "none";
+    }
+
+    _createContainer(querySelector) {
+        const parentElement = document.querySelector(querySelector);
+        const container = document.createElement("div");
+        container.classList.add("div-for-extension");
+        container.style.display = "none";
+        parentElement.appendChild(container);
+        return container;
+    }
 }
+
 
 async function init() {
-    createContainer(".justify-center");
-
-    const switcherAutoConfirm = new Switcher(
-        {
-            checked: false,
-            onChange: (isChecked) => {
-                autoConfirm = isChecked;
-                if (autoConfirm) {
-                    checkPage();
-                }
-            },
-            text: "Auto Confirm 2/3-to-1",
-            place: ".div-for-extension"
-        }
-    )
-
-    const switcherAutoCancel = new Switcher(
-        {
-            checked: false,
-            onChange: (isChecked) => {
-                autoCancel = isChecked;
-                if (autoCancel) {
-                    checkPage();
-                }
-            },
-            text: "Auto Cancel 1-to-1 dubles",
-            place: ".div-for-extension"
-        }
-    )
-
-
-    const switcherAutoMoreWanted = new Switcher(
-        {
-            checked: false,
-            onChange: (isChecked) => {
-                autoMoreWanted = isChecked;
-                if (autoMoreWanted) {
-                    checkPage();
-                }
-            },
-            text: "Auto Confirm/Cancel 1-to-1 by priority",
-            place: ".div-for-extension"
-        }
-    )
+    // Initialize UI
+    const buttonManager = new ButtonManager();
+    await buttonManager.initialize();
 }
 
-init();
+init()

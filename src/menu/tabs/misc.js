@@ -21,6 +21,14 @@ async function miscTab() {
         {config: "miscConfig", html: "Input", type:"Number", min: 0, max: 1000, id: 'customBoostDelay', label: 'Custom Boost Delay (ms)', data: "clubBoost", subkey: "customBoostDelay", group: 'Club'},
         {config: "miscConfig", html: "Input", type:"Number", min: 1, max: 10, id: 'multiply', label: 'Multiply', data: "clubBoost", subkey: "multiply", group: 'Club'},
         { html: "Button", id: 'submitClub', text: 'Save Changes', onclick: () => tab.saveInputData("miscConfig", "clubBoost"), group: 'Club' },
+
+        {config: "functionConfig", html: "Switcher", id: 'decksProgress', label: 'Decks Progress Analyzer', data: 'decksProgress', group: 'Decks'},
+        {config: "functionConfig", html: "Switcher", id: 'decksProgressDeep', label: 'Deep Analyzing', data: 'decksProgressDeep', containerStyle: 'margin-left: 2rem', group: 'Decks'},
+        {config: "functionConfig", html: "Switcher", id: 'deckBuilder', label: 'Build Deck', data: 'deckBuilder', group: 'Decks'},
+
+        {config: "functionConfig", html: "Switcher", id: 'offersResolver', label: 'Resolve offers', data: 'offersResolver', group: 'Offers'},
+
+        {config: "functionConfig", html: "Switcher", id: 'propose', label: 'Propose Cards', data: 'propose', group: 'Propose'},
     ];
 
     const content = Tab.createContent(elementsConfig);

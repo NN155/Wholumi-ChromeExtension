@@ -12,6 +12,11 @@ chrome.runtime.onInstalled.addListener(() => {
             openCards: false,
             graphSearch: false,
             serverBoost: false,
+            decksProgress: true,
+            decksProgressDeep: false,
+            deckBuilder: true,
+            offersResolver: false,
+            propose: true,
         }
         if (config) {
             defaultConfig = { ...defaultConfig, ...config };

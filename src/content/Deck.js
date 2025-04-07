@@ -244,10 +244,10 @@ class CardSearchService {
 
     async _searchCardForTrade({ id, method, online, needCountDiff }) {
         const cards = await this._getCards({ id, method, online, needCountDiff });
-        while(true) {
+        while (true) {
             const card = this._resolve({ cards, needCountDiff });
             if (!card) return card;
-            if (await this._checkUserHistory({cardId: id, username: card.username})) {
+            if (await this._checkUserHistory({ cardId: id, username: card.username })) {
                 cards.filter(c => card.username !== c.username);
                 continue;
             }
@@ -255,7 +255,7 @@ class CardSearchService {
         }
     }
 
-    async _checkUserHistory({cardId, username}) {
+    async _checkUserHistory({ cardId, username }) {
         const data = await TradeHistoryService.cancelSentTrades(username, { cache: true });
         let userCard = data.find(trade => trade?.cardsGained[0]?.cardId === cardId);
         return userCard;
@@ -376,11 +376,13 @@ class ButtonManager {
         this.buttons = [];
     }
 
-    initialize() {
+    async initialize() {
         if (!document.querySelector("#cards-carousel")) return;
 
         this._createButtons();
+        await this._displayButtons();
         this._styleButtons();
+        this._eventListener();
     }
 
     _createButtons() {
@@ -394,7 +396,8 @@ class ButtonManager {
                 const cards = await deckService.getCardsList();
                 await tradeService.buildDeck(cards);
             }),
-            place: ".sect__header.sect__title"
+            place: ".sect__header.sect__title",
+            display: false,
         });
 
         // Lock Deck button
@@ -404,7 +407,8 @@ class ButtonManager {
                 const lockService = new CardLockService();
                 await lockService.lockCards();
             }),
-            place: ".sect__header.sect__title"
+            place: ".sect__header.sect__title",
+            display: false,
         });
 
         // Cancel Trades button
@@ -424,7 +428,8 @@ class ButtonManager {
 
                 DLEPush.info(`${ids.length} trades have been canceled`);
             }),
-            place: ".sect__header.sect__title"
+            place: ".sect__header.sect__title",
+            display: false,
         });
 
         // Update deck info button
@@ -445,7 +450,8 @@ class ButtonManager {
                 // Update cards info
                 deckUpdateService.updateDesk(cards, ids);
             }),
-            place: ".sect__header.sect__title"
+            place: ".sect__header.sect__title",
+            display: false
         });
 
         this.buttons.push(buildDeckButton, lockDeckButton, cancelTradesButton, updateDeckButton);
@@ -466,6 +472,23 @@ class ButtonManager {
         }
     }
 
+    async _displayButtons() {
+        const { deckBuilder } = await ExtensionConfig.getConfig("functionConfig");
+        this.buttons.forEach(item => {
+            item.display(deckBuilder)
+        });
+    }
+
+    _eventListener() {
+        window.addEventListener('config-updated', async (event) => {
+            switch (event.detail.key) {
+                case "functionConfig":
+                    await this._displayButtons();
+                    break;
+            }
+        });
+    }
+
     _styleButtons() {
         const options = {
             marginTop: "1em"
@@ -480,7 +503,7 @@ class ButtonManager {
 async function init() {
     // Initialize UI
     const buttonManager = new ButtonManager();
-    buttonManager.initialize();
+    await buttonManager.initialize();
 }
 
 // Start the application

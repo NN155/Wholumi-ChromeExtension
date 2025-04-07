@@ -90,6 +90,20 @@ async function getUsersList(url, { filterLock, filterOnline, limit = 200, pageLi
     return usersList;
 }
 
+async function getUsersCount(url) {
+    const dom = await FetchService.parseFetch(url);
+    let userCount = getUsers(dom).length;
+    let pageUrls = findPanel(dom);
+    if (pageUrls) {
+        pageLastUrl = pageUrls[pageUrls.length - 1];
+        const lastPageDom = await FetchService.parseFetch(pageLastUrl);
+        let count = getUsers(lastPageDom).length;
+        userCount = pageUrls.length * userCount + count;
+    }
+    return userCount;
+    
+}
+
 function findPanel(dom) {
     const panel = dom.querySelector('.pagination__pages')
     if (panel) {
