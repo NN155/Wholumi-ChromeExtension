@@ -167,6 +167,8 @@ class CardsFinder {
 
         cards.sort();
 
+        cards.filter(card => card.id)
+
         return cards;
     }
 

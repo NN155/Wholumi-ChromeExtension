@@ -108,8 +108,7 @@ class TradeService {
     }
 
     async _executeTradeTransaction(card, deckCard) {
-        console.log(`Trading card: rank: ${deckCard.rank}, cardId: ${card.cardId}${card.needCount ? `, popularity: ${card.needCount}` : ""
-            }`);
+        console.log(`Trading card: rank: ${deckCard.rank}, cardId: ${card.cardId}${card.needCount ? `, popularity: ${card.needCount}` : ""}`);
 
         const response = await tradeHelper(card.id, card.tradeId);
 
@@ -244,6 +243,7 @@ class CardSearchService {
 
     async _searchCardForTrade({ id, method, online, needCountDiff }) {
         const cards = await this._getCards({ id, method, online, needCountDiff });
+
         while (true) {
             const card = this._resolve({ cards, needCountDiff });
             if (!card) return card;
