@@ -1,7 +1,13 @@
 class FetchService {
     // get dom from url
     static async parseFetch(url) {
-        const response = await saveFetch(url);
+        let response;
+        while (true) {
+            response = await saveFetch(url);
+            if (response.status !== 403) {
+                break;
+            }
+        }
         const text = await response.text();
         const parser = new DOMParser();
         const htmlDocument = parser.parseFromString(text, 'text/html');
