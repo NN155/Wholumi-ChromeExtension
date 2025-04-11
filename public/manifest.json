@@ -56,7 +56,9 @@
         "content/services/getUserHash.js",
         "content/services/localStorage.js",
         "content/services/SaveFetch.js",
-        "content/services/FetchService.js",
+
+        "content/services/fetch/FetchService.js",
+        "content/services/fetch/ProtectedFetchService.js",
 
         "content/models/card/Card.js",
         "content/models/card/CardsArray.js",

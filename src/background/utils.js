@@ -1,4 +1,3 @@
-const TargetDomain = "https://animestars.org";
 function createLogger(name = null) {
     return function(...args) {
         const time = new Date().toLocaleTimeString();

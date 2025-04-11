@@ -370,6 +370,73 @@ class TradeRejectionService {
     }
 }
 
+class WishListService {
+    constructor() {
+        this.ranks = ["a", "b", "c", "d", "e"];
+        this.count = 0;
+    }
+    async add(cards) {
+        cards.filter(card => this.ranks.includes(card.rank) && !card.dubles);
+
+        await this._addCache(cards);
+
+        await this._proposeAll(cards, true);
+
+        this._clearCache()
+    }
+
+    async remove(cards) {
+        cards.filter(card => this.ranks.includes(card.rank));
+
+        await this._addCache(cards);
+
+        await this._proposeAll(cards, false);
+        
+        this._clearCache()
+    }
+
+    async _getMyWishlist(rank) {
+        const myUrl = UrlConstructor.getMyUrl();
+        const cards = new GetCards({ user: new User({ userUrl: myUrl }), rank });
+        const myCards = await cards.getNeed({ cache: true });
+        return myCards;
+    }
+
+
+    async _proposeAll(cards, type) {
+        const ids = [];
+        for (let i = 0; i < cards.length; i++) {
+            const card = cards[i];
+            const rank = card.rank;
+            const myCards = await this._getMyWishlist(rank);
+            const myCard = myCards.find(c => c.cardId === card.cardId);
+            if (type ? !myCard : myCard) {
+                ids.push(card.cardId);
+            }
+        }
+        await ProtectedFetchService.proposeCards(ids, 0);
+        this.count = ids.length;
+    }
+
+    async _clearCache() {
+        this.ranks.forEach(rank => {
+            GetCards.cacheService.delete({ method: "getNeed", rank, username: UrlConstructor.getMyName()})
+        });
+    }
+
+    async _addCache(cards) {
+        const ranks = new Set();
+        cards.forEach(card => {
+            ranks.add(card.rank);
+        });
+        await Promise.all([...ranks].map(async rank => {
+            const myUrl = UrlConstructor.getMyUrl();
+            const cards = new GetCards({ user: new User({ userUrl: myUrl }), rank });
+            const myCards = await cards.getNeed({ cache: true });
+        }));
+    }
+}
+
 // ButtonManager.js - Manages deck-related buttons
 class ButtonManager {
     constructor() {
@@ -454,7 +521,37 @@ class ButtonManager {
             display: false
         });
 
-        this.buttons.push(buildDeckButton, lockDeckButton, cancelTradesButton, updateDeckButton);
+        const addToWishlistButton = new Button({
+            text: "Add to wishlist",
+            onClick: () => this._handleButtonClick(async () => {
+                const deckService = new DeckService();
+                const cards = await deckService.getCardsList();
+
+                const wishListService = new WishListService();
+                await wishListService.add(cards);
+
+                DLEPush.info(`${wishListService.count} cards have been added to wishlist`);
+            }),
+            place: ".sect__header.sect__title",
+            display: false
+        });
+
+        const removeFromWishlistButton = new Button({
+            text: "Remove from wishlist",
+            onClick: () => this._handleButtonClick(async () => {
+                const deckService = new DeckService();
+                const cards = await deckService.getCardsList();
+
+                const wishListService = new WishListService();
+                await wishListService.remove(cards);
+                
+                DLEPush.info(`${wishListService.count} cards have been removed from wishlist`);
+            }),
+            place: ".sect__header.sect__title",
+            display: false
+        });
+
+        this.buttons.push(buildDeckButton, lockDeckButton, cancelTradesButton, updateDeckButton, addToWishlistButton, removeFromWishlistButton);
     }
 
     async _handleButtonClick(callback) {

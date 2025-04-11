@@ -213,11 +213,11 @@ class FetchService {
             body: body,
         });
     }
-    static async proposeCard(cardId) {
+    static async proposeCard(cardId, type = 1) {
         const body = new URLSearchParams({
             user_hash: dle_login_hash,
             action: "propose_add",
-            type: 1,
+            type: type,
             card_id: cardId,
         });
 
