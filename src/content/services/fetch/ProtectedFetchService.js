@@ -10,15 +10,19 @@ class ProtectedFetchService {
     }
 
     static async proposeCards(cardIds, type = 1) {
+        const cardIdsSet = Array.isArray(cardIds) ? new Set(cardIds) : cardIds;
         const responses = [];
-        for (let i = 0; i < cardIds.length; i++) {
-            const cardId = cardIds[i];
+        let i = 0;
+        for (const cardId of cardIdsSet) {
             const response = await this.proposeCard(cardId, type);
             responses.push(response);
-            if (i === cardIds.length - 1) break; // Break after the last card
-            await new Promise((resolve) => setTimeout(resolve, 1000));
+            
+            if (i < cardIdsSet.size - 1) {
+                await new Promise((resolve) => setTimeout(resolve, 1000));
+            }
+            i++;
         }
-
+    
         return responses;
     }
 }

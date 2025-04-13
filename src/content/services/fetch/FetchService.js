@@ -19,7 +19,7 @@ class FetchService {
         await saveFetch('/engine/ajax/controller.php?mod=cards_ajax', {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
+                'Content-Type': "application/x-www-form-urlencoded; charset=UTF-8",
             },
             body: new URLSearchParams({
                 mod: "cards_ajax",
@@ -31,11 +31,19 @@ class FetchService {
 
     // recieve card from server
     static async recieveCard() {
-        const responce = await saveFetch('/engine/ajax/controller.php?mod=reward_card&action=check_reward&user_hash=' + dle_login_hash);
-        const data = await responce.text();
-        const parsedData = JSON.parse(data);
-        console.log(parsedData.reason || parsedData)
-        return parsedData;
+        const response = await fetch('/engine/ajax/controller.php?mod=reward_card', {
+            method: 'POST',
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+            },
+            body: new URLSearchParams({
+                action: 'check_reward',
+                user_hash: dle_login_hash
+            })
+        });
+        const result = await response.json();
+        console.log(result);
+        return result;
     }
 
     // report card viewed
@@ -43,7 +51,7 @@ class FetchService {
         const response = await saveFetch('/engine/ajax/controller.php?mod=cards_ajax', {
             method: 'POST',
             headers: {
-                "Content-Type": "application/x-www-form-urlencoded",
+                "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
             },
             body: new URLSearchParams({
                 mod: "cards_ajax",
@@ -61,7 +69,7 @@ class FetchService {
         const response = await saveFetch("/engine/ajax/controller.php?mod=cards_ajax", {
             method: "POST",
             headers: {
-                "Content-Type": "application/x-www-form-urlencoded",
+                "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
             },
             body: new URLSearchParams({
                 mod: "cards_ajax",
@@ -93,7 +101,7 @@ class FetchService {
         const response = await saveFetch(url, {
             method: "POST",
             headers: {
-                "Content-Type": "application/x-www-form-urlencoded",
+                "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
             },
             body: body,
         });
@@ -107,7 +115,7 @@ class FetchService {
         const response = await saveFetch(url, {
             method: "POST",
             headers: {
-                "Content-Type": "application/x-www-form-urlencoded",
+                "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
             },
             body: new URLSearchParams({
                 user_hash: dle_login_hash,
@@ -134,7 +142,7 @@ class FetchService {
         const response = await saveFetch(url, {
             method: "POST",
             headers: {
-                "Content-Type": "application/x-www-form-urlencoded",
+                "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
             },
             body: new URLSearchParams({
                 user_hash: dle_login_hash,
@@ -151,7 +159,7 @@ class FetchService {
         const response = await saveFetch(url, {
             method: "POST",
             headers: {
-                "Content-Type": "application/x-www-form-urlencoded",
+                "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
             },
             body: new URLSearchParams({
                 user_hash: dle_login_hash,
@@ -208,7 +216,7 @@ class FetchService {
         await saveFetch('/engine/ajax/controller.php?mod=cards_ajax', {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
+                'Content-Type': "application/x-www-form-urlencoded; charset=UTF-8",
             },
             body: body,
         });
@@ -224,7 +232,7 @@ class FetchService {
         const response = await saveFetch('/engine/ajax/controller.php?mod=trade_ajax', {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
+                'Content-Type': "application/x-www-form-urlencoded; charset=UTF-8",
             },
             body: body,
         });
@@ -241,7 +249,7 @@ class FetchService {
         await saveFetch('/engine/ajax/controller.php?mod=trade_ajax', {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
+                'Content-Type': "application/x-www-form-urlencoded; charset=UTF-8",
             },
             body: body,
         });
@@ -251,7 +259,7 @@ class FetchService {
         const response = await saveFetch("/engine/ajax/controller.php?mod=gift_code_game", {
             method: "POST",
             headers: {
-                "Content-Type": "application/x-www-form-urlencoded",
+                "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
             },
             body: new URLSearchParams({
                 user_hash: dle_login_hash,
@@ -265,7 +273,7 @@ class FetchService {
         const response = await saveFetch("/engine/ajax/controller.php?mod=cards_ajax", {
             method: "POST",
             headers: {
-                "Content-Type": "application/x-www-form-urlencoded",
+                "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
             },
             body: new URLSearchParams({
                 user_hash: dle_login_hash,
@@ -280,7 +288,7 @@ class FetchService {
         const response = await saveFetch("/engine/ajax/controller.php?mod=cards_ajax", {
             method: "POST",
             headers: {
-                "Content-Type": "application/x-www-form-urlencoded",
+                "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
             },
             body: new URLSearchParams({
                 user_hash: dle_login_hash,

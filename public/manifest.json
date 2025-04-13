@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "AnimeStars Alpha",
-  "version": "1.3.4",
+  "version": "1.3.5",
   "author": "MrKoMi",
   "description": "Press INSERT to open the menu",
   "permissions": [
@@ -15,7 +15,8 @@
     "128": "icons/icon128.png"
   },
   "host_permissions": [
-    "https://animestars.org/*"
+    "https://animestars.org/*",
+    "https://asstars.tv/*"
   ],
   "background": {
     "service_worker": "background/worker.js"
@@ -23,7 +24,8 @@
   "content_scripts": [
     {
       "matches": [
-        "https://animestars.org/*"
+        "https://animestars.org/*",
+        "https://asstars.tv/*"
       ],
       "js": [
         "content/services/config.js",
@@ -39,7 +41,8 @@
     },
     {
       "matches": [
-        "https://animestars.org/*"
+        "https://animestars.org/*",
+        "https://asstars.tv/*"
       ],
       "css": [
         "css/button.css",
@@ -101,7 +104,8 @@
     },
     {
       "matches": [
-        "https://animestars.org/cards/*/users/need/"
+        "https://animestars.org/cards/*/users/need/",
+        "https://asstars.tv/cards/*/users/need/"
       ],
       "js": [
         "content/Need.js"
@@ -109,7 +113,8 @@
     },
     {
       "matches": [
-        "https://animestars.org/cards/*/users/trade/"
+        "https://animestars.org/cards/*/users/trade/",
+        "https://asstars.tv/cards/*/users/trade/"
       ],
       "js": [
         "content/Trade.js"
@@ -117,7 +122,8 @@
     },
     {
       "matches": [
-        "https://animestars.org/cards/*/users/"
+        "https://animestars.org/cards/*/users/",
+        "https://asstars.tv/cards/*/users/"
       ],
       "js": [
         "content/Users.js"
@@ -125,7 +131,8 @@
     },
     {
       "matches": [
-        "https://animestars.org/cards_remelt/*"
+        "https://animestars.org/cards_remelt/*",
+        "https://asstars.tv/cards_remelt/*"
       ],
       "js": [
         "content/Remelt.js"
@@ -133,7 +140,8 @@
     },
     {
       "matches": [
-        "https://animestars.org/cards/*/trade?mycard=*"
+        "https://animestars.org/cards/*/trade?mycard=*",
+        "https://asstars.tv/cards/*/trade?mycard=*"
       ],
       "js": [
         "content/TradeUser.js"
@@ -141,7 +149,8 @@
     },
     {
       "matches": [
-        "https://animestars.org/clubs/*/boost/*"
+        "https://animestars.org/clubs/*/boost/*",
+        "https://asstars.tv/clubs/*/boost/*"
       ],
       "js": [
         "content/external/socketIo.js",
@@ -151,7 +160,8 @@
     },
     {
       "matches": [
-        "https://animestars.org/user/*/cards/trade/*"
+        "https://animestars.org/user/*/cards/trade/*",
+        "https://asstars.tv/user/*/cards/trade/*"
       ],
       "js": [
         "content/Propose.js"
@@ -159,7 +169,8 @@
     },
     {
       "matches": [
-        "https://animestars.org/trades/"
+        "https://animestars.org/trades/",
+        "https://asstars.tv/trades/"
       ],
       "js": [
         "content/ConfirmTrade.js"
@@ -167,7 +178,8 @@
     },
     {
       "matches": [
-        "https://animestars.org/cards/pack/"
+        "https://animestars.org/cards/pack/",
+        "https://asstars.tv/cards/pack/"
       ],
       "js": [
         "content/external/JQueryHTML.js",
@@ -179,7 +191,8 @@
     },
     {
       "matches": [
-        "https://animestars.org/user/*/"
+        "https://animestars.org/user/*/",
+        "https://asstars.tv/user/*/"
       ],
       "js": [
         "content/Profile.js"
@@ -187,7 +200,8 @@
     },
     {
       "matches": [
-        "https://animestars.org/aniserials/video/*/*"
+        "https://animestars.org/aniserials/video/*/*",
+        "https://asstars.tv/aniserials/video/*/*"
       ],
       "js": [
         "content/Deck.js"
@@ -195,7 +209,8 @@
     }, 
     {
       "matches": [
-        "https://animestars.org/user/*/cards_progress/*"
+        "https://animestars.org/user/*/cards_progress/*",
+        "https://asstars.tv/user/*/cards_progress/*"
       ],
       "js": [
         "content/external/exel.js",

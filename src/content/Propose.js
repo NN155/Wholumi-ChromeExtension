@@ -1,8 +1,7 @@
 async function propose(type) {
-    const myUrl = UrlConstructor.getMyUrl();
     let rank = UrlConstructor.getCardRank();
 
-    const [myCards, myTrade] = await proposeData(rank, myUrl);
+    const [myCards, myTrade] = await proposeData(rank);
     const ids = new Set();
 
     if (type) {
@@ -18,15 +17,11 @@ async function propose(type) {
             ids.add(card.cardId);
         });
     }
-
-    await proposeAll(ids);
-}
-
-async function proposeAll(ids) {
+    
     await ProtectedFetchService.proposeCards(ids, 1);
 }
 
-async function proposeData(rank, myUrl) {
+async function proposeData(rank) {
     let ranks = [rank];
     if (!rank) {
         ranks = ["a", "b", "c", "d", "e"];
@@ -34,7 +29,7 @@ async function proposeData(rank, myUrl) {
     const inventory = [];
     const trade = [];
     for (const rank of ranks) {
-        const cardInstance = new GetCards({ rank, userUrl: myUrl, username: null });
+        const cardInstance = new GetCards({ rank, user: new User({userUrl: UrlConstructor.getMyUrl()})});
 
         const [myCards, myTradeCards] = await Promise.all([
             cardInstance.getInventory({ unlock: true }),
