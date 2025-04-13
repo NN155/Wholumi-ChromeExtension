@@ -9,4 +9,15 @@ function createLogger(name = null) {
     };
 }
 
+targetDomains = [
+    "https://animestars.org/",
+    "https://asstars.tv/",
+    "https://as1.astars.club/",
+    "https://asstars1.astars.club/",
+]
+
+isTargetDomain = (url) => {
+    return targetDomains.some(domain => url.startsWith(domain));
+}
+
 const logger = createLogger();

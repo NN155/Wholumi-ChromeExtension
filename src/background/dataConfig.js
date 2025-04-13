@@ -61,7 +61,8 @@ function notifyTabsAboutConfig({key, config, senderTabId = null, info=null}) {
     chrome.tabs.query({}, (tabs) => {
         tabs.forEach((tab) => {
             const url = tab.url || "";
-            if (url.startsWith(TargetDomain)) {
+            console.log(url, isTargetDomain(url), senderTabId, tab.id);
+            if (isTargetDomain(url)) {
                 chrome.tabs.sendMessage(tab.id, { action: "update-config", key, info, config, tabSender: !(senderTabId === null || tab.id !== senderTabId) });
             }
         });

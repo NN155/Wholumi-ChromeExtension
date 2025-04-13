@@ -13,7 +13,7 @@ class TabController {
     async tabExists(tabId) {
         try {
             const tab = await chrome.tabs.get(tabId);
-            if (!tab || !tab.url.startsWith(TargetDomain)) {
+            if (!tab || !isTargetDomain(tab.url)) {
                 return false;
             }
             return true;
@@ -72,21 +72,20 @@ function sendMessageWithTimeout(tabId, timeoutDuration = 5000) {
     return new Promise((resolve) => {
         let timeoutReached = false;
 
-        // Відправляємо повідомлення вкладці
         chrome.tabs.sendMessage(tabId, { action: "get-card", mode: "get-card" }, response => {
             if (!timeoutReached) {
                 if (response) {
-                    resolve(response); // Якщо отримали відповідь, резолвимо проміс
+                    resolve(response);
                 } else {
-                    resolve(null); // Якщо немає відповіді, резолвимо null
+                    resolve(null);
                 }
             }
         });
 
-        // Тайм-аут, якщо немає відповіді протягом заданого часу
+
         setTimeout(() => {
             timeoutReached = true;
-            resolve(null); // Якщо тайм-аут спрацьовує, повертаємо null
+            resolve(null); 
         }, timeoutDuration);
     });
 }
