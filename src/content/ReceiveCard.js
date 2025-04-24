@@ -3,7 +3,7 @@ async function init() {
 }
 
 async function getCard() {
-    const data = await FetchService.recieveCard();
+    const data = await FetchService.receiveCard();
 
     if (data.stop_reward === "yes") {
         return {stop_reward: "yes"};

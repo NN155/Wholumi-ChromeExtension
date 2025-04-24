@@ -30,8 +30,8 @@ class FetchService {
     }
 
     // recieve card from server
-    static async recieveCard() {
-        const response = await fetch('/engine/ajax/controller.php?mod=reward_card', {
+    static async receiveCard() {
+        const response = await saveFetch('/engine/ajax/controller.php?mod=reward_card', {
             method: 'POST',
             headers: {
                 "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
