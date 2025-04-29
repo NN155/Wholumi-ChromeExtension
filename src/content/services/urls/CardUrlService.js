@@ -72,7 +72,7 @@ class CardUrlService {
             const url = this.getCardNeedUrl(id);
             const dom = await FetchService.parseFetch(url);
             
-            const titleElement = dom.querySelector(".secondary-title.text-center a");
+            const titleElement = dom.querySelector(".ncard__main-title a");
             return titleElement ? titleElement.textContent.trim() : null;
         } catch (error) {
             console.error("Error getting card name:", error);

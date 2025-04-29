@@ -53,6 +53,15 @@ async function graphSearch({ input }) {
 async function init() {
     const { searchCards, anotherUserMode, graphSearch: graph } = await ExtensionConfig.getConfig("functionConfig");
 
+
+    const box = new Box({
+        display: searchCards,
+        displayType:"flex",
+        placeAfter: ".ncard__offer-send-btn",
+        className: "extension__box",
+        center: true,
+    })
+
     const input = new Input({
         text: UrlConstructor.getMyName(),
         display: anotherUserMode,
@@ -61,25 +70,24 @@ async function init() {
     const buttonSearchCards = new Button({
         text: `Compare Cards`,
         onClick: () => showCards({ input }),
-        place: ".tabs.tabs--center.mb-2",
-        display: searchCards && searchCards,
+        place: ".extension__box",
     });
 
     const buttonGraphSearch = new Button({
         text: `Graph Search`,
         onClick: () => graphSearch({ input }),
-        place: ".tabs.tabs--center.mb-2",
-        display: searchCards && graph,
+        place: ".extension__box",
+        display: graph,
     });
 
-    input.place(".tabs.tabs--center.mb-2");
+    input.place(".extension__box");
 
     window.addEventListener('config-updated', async () => {
         const { searchCards, anotherUserMode, graphSearch: graph } = await ExtensionConfig.getConfig("functionConfig");
 
-        buttonSearchCards.display(searchCards);
-        buttonGraphSearch.display(searchCards && graph);
-        input.display(searchCards && anotherUserMode);
+        box.display(searchCards);
+        buttonGraphSearch.display(graph);
+        input.display(anotherUserMode);
     });
 
 }

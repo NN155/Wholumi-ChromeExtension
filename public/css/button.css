@@ -1,7 +1,9 @@
 button.extension {
     position: relative;
-    margin: 0 auto;
-    padding: 10px 20px;
+    display: flex;
+    justify-content: center;   
+    align-items: center;       
+    padding: 5px 20px;
     text-align: center;
     color: aliceblue;
     background-color: #772ce8;

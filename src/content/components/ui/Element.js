@@ -1,20 +1,53 @@
 class Element {
-    constructor(type = "div") {
+    constructor(type = "div", displayType= "block") {
         this.element = document.createElement(type);
+        this.displayType = displayType;
     }
 
     place(querySelector) {
         const container = document.querySelector(querySelector);
-        container.appendChild(this.element);
+        this._place(container);
     }
 
     async asyncPlace(querySelector) {
         const container = await this._waitDiv(querySelector);
+        this._place(container);
+    }
+
+    _place(container) {
         container.appendChild(this.element);
     }
 
+    placeAfter(selector) {
+        const container = document.querySelector(selector);
+        this._placeAfter(container);
+    }
+
+    async asyncPlaceAfter(querySelector) {
+        const container = await this._waitDiv(querySelector);
+        this._placeAfter(container);
+    }
+
+    _placeAfter(container) {
+        container.parentNode.insertBefore(this.element, container.nextSibling);
+    }
+
+    placeBefore(selector) {
+        const container = document.querySelector(selector);
+        this._placeBefore(container);
+    }
+
+    async asyncPlaceBefore(querySelector) {
+        const container = await this._waitDiv(querySelector);
+        this._placeBefore(container);
+    }
+
+    _placeBefore(container) {
+        container.parentNode.insertBefore(this.element, container);
+    }
+
     display(bool) {
-        this.element.style.display = bool ? "flex" : "none";
+        this.element.style.display = bool ? this.displayType : "none";
     }
 
     _waitDiv(querySelector, timeout = 5000) {

@@ -189,7 +189,6 @@ class Tab {
                 `;
             });
 
-            // Додаємо роздільник, якщо це не остання група
             if (index !== groupKeys.length - 1) {
                 content += '<hr>';
             }

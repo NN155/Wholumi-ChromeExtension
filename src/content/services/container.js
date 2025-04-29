@@ -6,19 +6,17 @@ async function getDomCardRank() {
 }
 
 function getCardInfo(dom) {
-    const cardRank = dom.querySelector(".anime-cards__rank");
-
+    const cardRank = dom.querySelector(".ncard__rank");
     const classList = Array.from(cardRank.classList);
-
     const rankClass = classList.find(cls => cls.startsWith('rank-'));
-
-    const rankLetter = rankClass.split('-')[1];
-    const rank = rankLetter;
-    let card = dom.querySelector(".card-show__image")
+    const rank = rankClass.split('-')[1];
+    
+    let card = dom.querySelector(".ncard__img img")
     if (card) {
         const src = card.getAttribute("src");
         return { type: "img", rank, src };
     }
+    
     card = dom.querySelector("video")
     if (card) {
         const sources = card.querySelectorAll("source");
@@ -36,14 +34,17 @@ function getCardInfo(dom) {
         });
         return { type: "video", rank, webm, mp4 };
     }
-
 }
 
 function getUsers(dom) {
     const usersList = new UsersArray();
-    const users = dom.querySelector('.profile__friends.profile__friends--full') || dom.querySelector('.card-show__owners');
-    const children = users.children;
-    Array.from(children).forEach(element => {
+
+    let users = dom.querySelectorAll('.card-show__owner')
+    if (users.length === 0) {
+        users = dom.querySelectorAll(".profile__friends-item");
+    };
+
+    users.forEach(element => {
         const href = element.getAttribute("href");
         const match = href.match(/^\/user\/[^/]+\/?/);
         const userUrl = match ? match[0] : "";
@@ -92,16 +93,10 @@ async function getUsersList(url, { filterLock, filterOnline, limit = 200, pageLi
 
 async function getUsersCount(url) {
     const dom = await FetchService.parseFetch(url);
-    let userCount = getUsers(dom).length;
-    let pageUrls = findPanel(dom);
-    if (pageUrls) {
-        pageLastUrl = pageUrls[pageUrls.length - 1];
-        const lastPageDom = await FetchService.parseFetch(pageLastUrl);
-        let count = getUsers(lastPageDom).length;
-        userCount = pageUrls.length * userCount + count;
-    }
-    return userCount;
-    
+    const ownerCount = Number(dom.querySelector("#owners-count").textContent);
+    const tradeCount = Number(dom.querySelector("#owners-trade").textContent);
+    const needCount = Number(dom.querySelector("#owners-need").textContent);
+    return {ownerCount, tradeCount, needCount};
 }
 
 function findPanel(dom) {

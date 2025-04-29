@@ -20,25 +20,33 @@ async function init() {
     
     const text = `Compare Cards`;
 
+
+    const box = new Box({
+        display: searchCards,
+        displayType:"flex",
+        placeAfter: ".ncard__tabs",
+        className: "extension__box",
+        center: true,
+    })
+
     const input = new Input({
         text: UrlConstructor.getMyName(),
-        display: searchCards && anotherUserMode,
+        display: anotherUserMode,
     });
 
     const button = new Button({
         text: text,
         onClick: () => showCards({ input }),
-        place: ".tabs.tabs--center",
-        display: searchCards,
+        place: ".extension__box",
     });
 
-    input.place(".tabs.tabs--center");
+    input.place(".extension__box");
 
     window.addEventListener('config-updated' , async () => {
         const {searchCards, anotherUserMode} = await ExtensionConfig.getConfig("functionConfig");
     
-        button.display(searchCards);
-        input.display(searchCards && anotherUserMode);
+        box.display(searchCards);
+        input.display(anotherUserMode);
     });
 }
 

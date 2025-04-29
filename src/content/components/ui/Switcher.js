@@ -1,7 +1,25 @@
 class Switcher extends Element {
-    constructor({ checked = false, onChange = null, place = null, text = "", disabled = false, display = true } = { checked: false, onChange: null, place: null, text: "", disabled: false, display: true }) {
+    constructor({ 
+        checked = false, 
+        onChange = null, 
+        place = null,
+        placeAfter=null,
+        placeBefore=null,
+        text = "", 
+        disabled = false, 
+        display = true 
+    } = { 
+        checked: false, 
+        onChange: null, 
+        place: null,
+        placeAfter:null,
+        placeBefore:null,
+        text: "", 
+        disabled: false, 
+        display: true 
+    }) {
         super();
-
+        this.displayType = "flex"
         this.checked = checked;
         this.onChange = onChange;
 
@@ -11,6 +29,8 @@ class Switcher extends Element {
         disabled && this.disable();
         this.display(display);
         place && this.place(place);
+        placeAfter && this.placeAfter(placeAfter);
+        placeBefore && this.placeBefore(placeBefore);
     }
 
     createSwitch() {

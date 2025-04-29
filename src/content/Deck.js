@@ -446,8 +446,9 @@ class ButtonManager {
     async initialize() {
         if (!document.querySelector("#cards-carousel")) return;
 
+        this._createBox();
         this._createButtons();
-        await this._displayButtons();
+        await this._display();
         this._styleButtons();
         this._eventListener();
     }
@@ -463,8 +464,7 @@ class ButtonManager {
                 const cards = await deckService.getCardsList();
                 await tradeService.buildDeck(cards);
             }),
-            place: ".sect__header.sect__title",
-            display: false,
+            place: ".extension__box2",
         });
 
         // Lock Deck button
@@ -474,8 +474,7 @@ class ButtonManager {
                 const lockService = new CardLockService();
                 await lockService.lockCards();
             }),
-            place: ".sect__header.sect__title",
-            display: false,
+            place: ".extension__box2",
         });
 
         // Cancel Trades button
@@ -495,8 +494,7 @@ class ButtonManager {
 
                 DLEPush.info(`${ids.length} trades have been canceled`);
             }),
-            place: ".sect__header.sect__title",
-            display: false,
+            place: ".extension__box2",
         });
 
         // Update deck info button
@@ -517,8 +515,7 @@ class ButtonManager {
                 // Update cards info
                 deckUpdateService.updateDesk(cards, ids);
             }),
-            place: ".sect__header.sect__title",
-            display: false
+            place: ".extension__box2",
         });
 
         const addToWishlistButton = new Button({
@@ -532,8 +529,7 @@ class ButtonManager {
 
                 DLEPush.info(`${wishListService.count} cards have been added to wishlist`);
             }),
-            place: ".sect__header.sect__title",
-            display: false
+            place: ".extension__box2",
         });
 
         const removeFromWishlistButton = new Button({
@@ -547,8 +543,7 @@ class ButtonManager {
                 
                 DLEPush.info(`${wishListService.count} cards have been removed from wishlist`);
             }),
-            place: ".sect__header.sect__title",
-            display: false
+            place: ".extension__box2",
         });
 
         this.buttons.push(buildDeckButton, lockDeckButton, cancelTradesButton, updateDeckButton, addToWishlistButton, removeFromWishlistButton);
@@ -569,18 +564,29 @@ class ButtonManager {
         }
     }
 
-    async _displayButtons() {
+    _createBox() {
+        this.box = new Box({
+            place: ".sect__header.sect__title",
+            display: false,
+            center: true,
+            className: "extension__box1",
+        })
+        new Box({
+            place: ".extension__box1",
+            className: "extension__box2",
+        })
+    }
+
+    async _display() {
         const { deckBuilder } = await ExtensionConfig.getConfig("functionConfig");
-        this.buttons.forEach(item => {
-            item.display(deckBuilder)
-        });
+        this.box.display(deckBuilder);
     }
 
     _eventListener() {
         window.addEventListener('config-updated', async (event) => {
             switch (event.detail.key) {
                 case "functionConfig":
-                    await this._displayButtons();
+                    await this._display();
                     break;
             }
         });

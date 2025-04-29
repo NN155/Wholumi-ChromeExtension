@@ -10,7 +10,7 @@ class ShowBar {
             showBar.style.display = 'flex';
             showBar.style.flexWrap = 'wrap';
             showBar.style.justifyContent = 'space-around';
-            const container = document.querySelector(".container") || document.querySelector('.card-show__name-wrapper');
+            const container = document.querySelector(".ncard") || document.querySelector('.ncard__main');
             if (container) {
                 container.appendChild(showBar);
             } else {

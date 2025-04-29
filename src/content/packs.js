@@ -6,12 +6,12 @@ class Pack {
     lootbox_choose() {
         if (this.init) return;
         this.init = true;
-        $('body').on('click', '.lootbox__card-disabled', (event) => {  // Стрілкова функція
+        $('body').on('click', '.lootbox__card-disabled', (event) => {
             var row = $(event.currentTarget).closest('.lootbox__row');
             var button = $(event.currentTarget);
             var id = $(event.currentTarget).attr('data-id');
             var rank = $(event.currentTarget).attr('data-rank');
-            const data = this._lootbox_choose_fetch(rank, id);  // Викликаємо метод класу
+            const data = this._lootbox_choose_fetch(rank, id);
             if (data.error) {
                 DLEPush.warning(data.error);
                 loadPacks();

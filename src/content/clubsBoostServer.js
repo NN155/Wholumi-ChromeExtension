@@ -28,7 +28,7 @@ function connectSocket() {
 }
 
 function disconnectSocket() {
-    if (!socket) return; // Якщо з'єднання вже відсутнє, нічого не робимо
+    if (!socket) return;
 
     console.log("Disconnecting from WebSocket server...");
     socket.disconnect();
@@ -123,6 +123,7 @@ const switcherHost = new Switcher(
             }
             updateConnectionStatus();
         },
+        place: ".extension__box2",
     }
 )
 
@@ -140,22 +141,22 @@ const switcherWorker = new Switcher(
             }
             updateConnectionStatus();
         },
+        place: ".extension__box2",
     }
 )
 
 const serverBoostCard = new ServerBoostCard();
 
-async function setConfigForServer(place = false) {
-    const { clubBoost, serverBoost } = await ExtensionConfig.getConfig("functionConfig");
+async function setConfigForServer() {
+    const { serverBoost } = await ExtensionConfig.getConfig("functionConfig");
     const array = [{switcher: switcherHost, config: serverBoost}, {switcher: switcherWorker, config: serverBoost}];
     array.forEach(item => {
-        item.switcher.display(clubBoost && item.config)
-        place && item.switcher.place(".secondary-title.text-center")
+        item.switcher.display(item.config)
     });
 }
 
 async function init() {
-    await setConfigForServer(true);
+    await setConfigForServer();
 }
 
 init();

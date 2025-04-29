@@ -1,10 +1,31 @@
 class Li extends Element {
-    constructor(text) {
+    constructor({
+        text="",
+        place = null,
+        placeAfter = null,
+        placeBefore = null,
+        disable = false,
+        onClick = null,
+        display = true,
+    } = {
+        text: "",
+        place: null,
+        placeAfter: null,
+        placeBefore: null,
+        disable: false,
+        onClick: null,
+        display: true,
+    }) {
         super("li")
-        this.onclick = null
+        this.onClick = onClick
         this.element.textContent = text
         this._style()
-        this.element.onclick = this._onclick.bind(this)
+        this.element.onclick = this._onClick.bind(this)
+        disable && this.disable()
+        this.display(display);
+        place && this.place(place)
+        placeAfter && this.placeAfter(placeAfter)
+        placeBefore && this.placeBefore(placeBefore)
     }
 
     _style() {
@@ -14,26 +35,22 @@ class Li extends Element {
 
     disable() {
         this.element.style.cursor = "default"
-        this.element.onclick = () => { }
+        this.element.onClick = () => { }
         this.element.style.color = "#4a2c8f"
     }
+
     enable() {
         this._style()
-        this.element.onclick = this.funk
-    }
-    place(queryParams) {
-        const container = document.querySelector(queryParams)
-        container.appendChild(this.element)
+        this.element.onClick = this.funk
     }
 
-    async _onclick() {
+    async _onClick() {
         this.disable()
         try {
-            this.onclick && await this.onclick();
+            this.onClick && await this.onClick();
         }
         finally {
             this.enable();
         }
-
     }
 }

@@ -68,58 +68,7 @@ function changeCards(cards) {
                     await trade(card, tradeCard);
                 }
             });
-
-            await button.asyncPlace(".anime-cards__controls")
-        })
-    })
-}
-
-function changeCards(cards) {
-    cards.forEach(card => {
-        card.addEventListener('click', async () => {
-            let text;
-            let disabled = false;
-
-            if (!card.tradeId) {
-                text = "Your card is not found";
-                disabled = true;
-            }
-
-            else if (card.tradeLock === "trade") {
-                text = "Your card is in trade";
-                disabled = true;
-            }
-
-            else if (card.tradeLock === "trophy") {
-                text = "Your card is locked";
-                disabled = true;
-            }
-
-            else if (card.lock === "trade") {
-                text = "This card is in trade";
-                disabled = true;
-            }
-            else if (card.lock === "lock" || card.lock === "trophy") {
-                text = "This card is locked";
-                disabled = true;
-            }
-
-            else {
-                text = `${card.tradeLock === "lock" ? "Unlock and " : ""}Trade`
-            }
-            const tradeCard = new Card()
-            tradeCard.id = card.tradeId;
-            tradeCard.lock = card.tradeLock;
-
-            const button = new Button({
-                disabled,
-                text,
-                onClick: async () => {
-                    await trade(card, tradeCard);
-                }
-            });
-
-            await button.asyncPlace(".anime-cards__controls")
+            await button.asyncPlaceAfter(".anime-cards__link")
         })
     })
 }

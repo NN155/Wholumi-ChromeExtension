@@ -18,8 +18,16 @@ async function showCards({ input }) {
 
 async function init() {
     const { searchCards, anotherUserMode} = await ExtensionConfig.getConfig("functionConfig");
-
+    
     const text = `Show Cards`;
+
+    const box = new Box({
+        display: searchCards,
+        displayType:"flex",
+        placeAfter: ".ncard__offer-send-btn",
+        className: "extension__box",
+        center: true,
+    })
 
     const input = new Input({
         text: UrlConstructor.getMyName(),
@@ -29,17 +37,15 @@ async function init() {
     const button = new Button({
         text: text,
         onClick: () => showCards({ input }),
-        place: ".tabs.tabs--center.mb-2",
-        display: searchCards && searchCards,
+        place: ".extension__box",
     });
 
-    input.place(".tabs.tabs--center.mb-2");
+    input.place(".extension__box");
 
     window.addEventListener('config-updated' , async () => {
         const {searchCards, anotherUserMode} = await ExtensionConfig.getConfig("functionConfig");
-    
-        button.display(searchCards);
-        input.display(searchCards && anotherUserMode);
+        box.display(searchCards);
+        input.display(anotherUserMode);
     });
 }
 

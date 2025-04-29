@@ -1,17 +1,33 @@
 class Button extends Element {
-    constructor({ text = "", onClick = null, place = null, display = true, disabled = false } = { text: "", onClick: null, place: null, display: true, disabled: false }) {
-        super();
+    constructor({ 
+        text = "", 
+        onClick = null, 
+        place = null, 
+        placeAfter=null, 
+        placeBefore=null, 
+        display = true, 
+        disabled = false 
+    } = { 
+        text: "", 
+        onClick: null, 
+        place: null,
+        placeAfter:null, 
+        placeBefore:null, 
+        display: true, 
+        disabled: false 
+    }) {
+        super("button", "flex");
+        this.button = this.element;
         this.onClick = onClick;
-        this.button = document.createElement('button');
         this.button.className = 'button--primary extension';
-        this.button.style = 'margin-left: 10px;';
         this.button.style.userSelect = "none";
-        this.element.appendChild(this.button);
         this.button.onclick = this._onclick.bind(this);
         this.text(text);
         disabled && this.disable();
         this.display(display);
         place && this.place(place);
+        placeAfter && this.placeAfter(placeAfter);
+        placeBefore && this.placeBefore(placeBefore);
     }
 
     async _onclick() {

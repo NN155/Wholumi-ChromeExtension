@@ -79,11 +79,9 @@ function openCardGiftModal({image, name, rank, card_webm, card_mp4}) {
 
     $("#unique-card-modal").html(modalContent);
 
-    // Додавання слухача для mouseUp поза модалкою
     $(document).on('mouseup.uniqueModal', function (event) {
         var $modal = $('#unique-card-modal');
         if (!$modal.is(event.target) && $modal.has(event.target).length === 0) {
-            // Якщо клік за межами модального вікна
             $('#unique-card-modal').dialog('close');
         }
     });

@@ -195,7 +195,7 @@ class GetCards {
         });
         return showcase;
     }
-    
+
     static _proccessCards(showcase, remelt) {
         showcase.forEach(card => {
             const remeltCard = remelt.find(remeltCard => remeltCard.id === card.id);
@@ -214,12 +214,9 @@ class GetCards {
             if (count !== null) return count;
         }
 
-        const url = UrlConstructor.getCardNeedUrl(id);
-        const count = await getUsersCount(url);
+        const { needCount } = await this._getInfo({ id, unlock, cache });
 
-        cache && (GetCards.cacheService.save({ method: "getNeedCount", id, count }));
-
-        return count;
+        return needCount;
     }
 
     static async getTradeCount({ id, cache = false }) {
@@ -228,25 +225,28 @@ class GetCards {
             if (count !== null) return count;
         }
 
-        const url = UrlConstructor.getCardTradeUrl(id);
-        const count = await getUsersCount(url);
+        const { tradeCount } = await this._getInfo({ id, unlock, cache });
 
-        cache && (GetCards.cacheService.save({ method: "getTradeCount", id, count }));
-
-        return count;
+        return tradeCount;
     }
 
     static async getUsersCount({ id, unlock = false, cache = false }) {
         if (cache) {
-            const count = GetCards.cacheService.get({ method: `getUsersCount${unlock ? "Unlock": ""}`, id });
+            const count = GetCards.cacheService.get({ method: `getUsersCount${unlock ? "Unlock" : ""}`, id });
             if (count !== null) return count;
         }
 
+        const { ownerCount } = await this._getInfo({ id, unlock, cache });
+
+        return ownerCount;
+    }
+
+    static async _getInfo({ id, unlock = false, cache = false }) {
         const url = UrlConstructor.getCardUrl(id, unlock);
-        const count = await getUsersCount(url);
-
-        cache && (GetCards.cacheService.save({ method: `getUsersCount${unlock ? "Unlock": ""}`, id, count }));
-
-        return count;
+        const { ownerCount, tradeCount, needCount } = await getUsersCount(url);
+        cache && (GetCards.cacheService.save({ method: `getUsersCount${unlock ? "Unlock" : ""}`, id, count: ownerCount }));
+        cache && (GetCards.cacheService.save({ method: `getTradeCount`, id, count: tradeCount }));
+        cache && (GetCards.cacheService.save({ method: `getNeedCount`, id, count: needCount }));
+        return { ownerCount, tradeCount, needCount };
     }
 }

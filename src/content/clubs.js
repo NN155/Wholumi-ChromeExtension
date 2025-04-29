@@ -181,21 +181,30 @@ async function setOpenedCards() {
     clubData.openCards = cards
 }
 
-async function setConfig(place = false) {
+async function setConfig() {
     const { clubBoost, openCards } = await ExtensionConfig.getConfig("functionConfig");
-    const array = [{switcher: switcherUpdatePage, config: clubBoost}, {switcher: switcherAutoBoost, config: clubBoost}];
-    array.forEach(item => {
-        item.switcher.display(clubBoost && item.config)
-        place && item.switcher.place(".secondary-title.text-center")
-    });
+    box1.display(clubBoost);
 
     clubData.openCardsBoostOnly = openCards;
 }
 
 async function init() {
-    await setConfig(true);
+    await setConfig();
     await setOpenedCards();
 }
+
+const box1 = new Box({
+    display: false,
+    displayType: "flex",
+    place: ".secondary-title.text-center",
+    className: "extension__box1",
+    center: true,
+})
+const box2 = new Box({
+    displayType: "block",
+    place: ".extension__box1",
+    className: "extension__box2",
+})
 
 const switcherUpdatePage = new Switcher(
     {
@@ -213,6 +222,7 @@ const switcherUpdatePage = new Switcher(
                 clubData.stopUpdating = true;
             }
         },
+        place: ".extension__box2",
     }
 )
 
@@ -225,6 +235,7 @@ const switcherAutoBoost = new Switcher(
         },
         disabled: true,
         text: `Auto Boost Card (${clubData.countBoost})`,
+        place: ".extension__box2",
     }
 )
 

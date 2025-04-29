@@ -1,7 +1,9 @@
-function createLi(text, onclick) {
-    const li = new Li(text)
-    li.onclick = onclick
-    li.place(".shop__get-coins")
+function createLi(text, onClick) {
+    return new Li({
+        text, 
+        place: ".shop__get-coins",
+        onClick,
+    })
 }
 
 
@@ -18,7 +20,7 @@ function isMyPage() {
 
 function init() {
     if (!isMyPage()) return;
-    createLi("Visit all urls", visitAllUrls)
+    createLi("Receive Gift", visitAllUrls)
 }
 
 init()

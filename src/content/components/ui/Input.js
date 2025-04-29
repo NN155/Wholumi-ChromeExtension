@@ -1,5 +1,17 @@
 class Input extends Element {
-    constructor({ text = "", display = true, place = null } = { text: "", display: true, place: null }) {
+    constructor({ 
+        text = "", 
+        display = true, 
+        place = null,
+        placeAfter=null, 
+        placeBefore=null, 
+    } = { 
+        text: "", 
+        display: true, 
+        place: null,
+        placeAfter:null, 
+        placeBefore:null, 
+    }) {
         super("input")
 
         this.element.className = "input-extension"
@@ -9,6 +21,8 @@ class Input extends Element {
         text && this.text(text);
         this.display(display);
         place && this.place(place);
+        placeAfter && this.placeAfter(placeAfter);
+        placeBefore && this.placeBefore(placeBefore);
     }
     style() {
         this.element.style.width = "200px";

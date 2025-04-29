@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "AnimeStars Alpha",
-  "version": "1.3.6",
+  "version": "1.3.7",
   "author": "MrKoMi",
   "description": "Press INSERT to open the menu",
   "permissions": [
@@ -83,6 +83,7 @@
         "content/components/ui/Switcher.js",
         "content/components/ui/Input.js",
         "content/components/ui/Li.js",
+        "content/components/ui/Box.js",
         
         "content/services/urls/UrlService.js",
         "content/services/urls/AnimeUrlService.js",

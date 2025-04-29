@@ -50,8 +50,9 @@ class ButtonManager {
     async initialize() {
         if (!UrlConstructor.isMyPage()) return;
 
+        this._createBox();
         this._createButtons();
-        await this._displayButtons();
+        await this._display();
         this._eventListener();
     }
 
@@ -59,7 +60,7 @@ class ButtonManager {
         window.addEventListener('config-updated', async (event) => {
             switch (event.detail.key) {
                 case "functionConfig":
-                    await this._displayButtons();
+                    await this._display();
                     break;
             }
         });
@@ -72,25 +73,21 @@ class ButtonManager {
         const proposeOn = new Button({
             text: `Propose ${rank ? rank : "All"}`,
             onClick: () => propose(true),
-            place: ".tabs.tabs--center",
-            display: false,
+            place: ".extension__box",
         });
 
         const proposeOff = new Button({
             text: `Clear ${rank ? rank : "All"}`,
             onClick: () => propose(false),
-            place: ".tabs.tabs--center",
-            display: false,
+            place: ".extension__box",
         });
 
         this.buttons.push(proposeOn, proposeOff);
     }
 
-    async _displayButtons() {
+    async _display() {
         const { propose } = await ExtensionConfig.getConfig("functionConfig");
-        this.buttons.forEach(item => {
-            item.display(propose);
-        });
+        this.box.display(propose);
     }
 
     async _handleButtonClick(callback) {
@@ -106,6 +103,15 @@ class ButtonManager {
             // Re-enable all buttons
             this.buttons.forEach(button => button.enable());
         }
+    }
+
+    _createBox() {
+        this.box = new Box({
+            place: ".tabs.tabs--center",
+            display: false,
+            className: "extension__box",
+            gap: "0.5em",
+        });
     }
 }
 
