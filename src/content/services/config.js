@@ -5,7 +5,7 @@ class Config {
     }
 
     async loadConfig(key, subKeys = null) {
-        const config = await this._getConfig(key, subKeys);
+        const config = await this.get(key, subKeys);
         this.configCache[key] = config;
         return this.configCache[key];
     }
@@ -29,7 +29,7 @@ class Config {
         return subKeys.every((subKey) => config[subKey] !== undefined);
     }
 
-    async _getConfig(key, subKeys = null) {
+    async get(key, subKeys = null) {
         const response = await this._sendMessageAsync({ action: "data-config", mode: "get-config", key, subKeys });
         if (response && response.config) {
             return response.config;

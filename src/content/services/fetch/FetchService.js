@@ -300,4 +300,22 @@ class FetchService {
         });
         return await response.text();
     }
+
+    static async login({username, password}) {
+        const response = await fetch("/", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+            },
+            body: new URLSearchParams({
+                login_name: username,
+                login_password:password,
+                login: "submit",
+            }),
+        });
+        const result = await response.text();
+        const parser = new DOMParser();
+        const htmlDocument = parser.parseFromString(result, 'text/html');
+        return htmlDocument;
+    }
 }

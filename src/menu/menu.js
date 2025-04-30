@@ -37,6 +37,7 @@ class CustomMenu {
         const tabsData = [
             await miscTab(),
             await funTab(),
+            await globalTab(),
             await visualsTab(),
         ];
 
@@ -171,16 +172,23 @@ class CustomMenu {
     }
     _addWheelListener(menuContent) {
         menuContent.addEventListener('wheel', (event) => {
+            event.preventDefault();
+            
             const { scrollTop, scrollHeight, clientHeight } = menuContent;
-    
-            if (scrollTop + clientHeight >= scrollHeight && event.deltaY > 0) {
-                event.preventDefault();
+            
+            const scrollSpeed = 3; 
+            const scrollAmount = event.deltaY / scrollSpeed;
+            
+            if ((scrollTop + clientHeight >= scrollHeight && scrollAmount > 0) || 
+                (scrollTop <= 0 && scrollAmount < 0)) {
+                return;
             }
             
-            if (scrollTop === 0 && event.deltaY < 0) {
-                event.preventDefault();
-            }
-        });
+            menuContent.scrollBy({
+                top: scrollAmount,
+                behavior: 'auto' 
+            });
+        }, { passive: false });
     }
     
     _centerWindow() {

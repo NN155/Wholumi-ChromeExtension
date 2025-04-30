@@ -129,7 +129,7 @@ menuStyle.textContent = `
 }
 
 .window-content::-webkit-scrollbar {
-    width: 6px; /* Товщина скролбару */
+    width: 10px;
 }
 
 .window-content::-webkit-scrollbar-thumb {

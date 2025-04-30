@@ -144,6 +144,7 @@ class CustomMenuInput {
             disabled: false,
             onChange: null,
             placeHolder: '',
+            type: "text",
         };
 
         this.settings = { ...defaults, ...options };
@@ -160,11 +161,12 @@ class CustomMenuInput {
             <input 
                 class="custom-input-extension"
                 autocomplete="off"
-                type="text" 
+                type="${this.settings.type}"
                 id="${this.settings.id}" 
                 value="${this.settings.value}" 
                 ${this.settings.disabled ? 'disabled' : ''}
-                placeholder="${this.settings.placeHolder}">
+                placeholder="${this.settings.placeHolder}"
+                >
             <label for="${this.settings.id}">${this.settings.label}</label>
             </div>
         `;

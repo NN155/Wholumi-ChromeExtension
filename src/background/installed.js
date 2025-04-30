@@ -17,6 +17,7 @@ chrome.runtime.onInstalled.addListener(() => {
             deckBuilder: true,
             offersResolver: false,
             propose: true,
+            autoLogin: false,
         }
         if (config) {
             defaultConfig = { ...defaultConfig, ...config };
@@ -64,7 +65,11 @@ chrome.runtime.onInstalled.addListener(() => {
                 textColor: "#ecf0f1",
                 secondaryTextColor: "#ecf0f1",
                 thirdTextColor: "#000000",
-            }
+            },
+            userConfig: {
+                username: "",
+                password: "",
+            },  
         }
         if (config) {
             for (const key in defaultConfig) {
