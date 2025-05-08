@@ -210,7 +210,7 @@
         "https://asstars1.astars.club/cards/pack/"
       ],
       "js": [
-        "content/external/JQueryHTML.js",
+        "content/external/JqueryHTML.js",
         "content/Packs.js"
       ],
       "css": [
