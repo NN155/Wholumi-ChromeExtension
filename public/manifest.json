@@ -57,9 +57,9 @@
         "css/cards.css"
       ],
       "js": [
-        "content/external/Jquery.js",
-        "content/external/JqueryUI.js",
-        "content/external/AnimeStarsJquery.js",
+        "content/external/jQuery.js",
+        "content/external/jQueryUI.js",
+        "content/external/AnimeStarsjQuery.js",
 
         "content/theme/globalColors.js",
 
@@ -210,7 +210,7 @@
         "https://asstars1.astars.club/cards/pack/"
       ],
       "js": [
-        "content/external/JqueryHTML.js",
+        "content/external/jQueryHTML.js",
         "content/Packs.js"
       ],
       "css": [
