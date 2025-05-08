@@ -18,6 +18,9 @@ class AutoLoginService {
 
     isLogout(dom = document) {
         const element = dom.querySelector(".header__btn.btn.js-show-login");
+        if (!element) {
+            return false;
+        }
         const lock = element.querySelector(".fal.fa-lock");
         return lock;
     }
