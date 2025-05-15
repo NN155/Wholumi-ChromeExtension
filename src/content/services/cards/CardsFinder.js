@@ -69,6 +69,9 @@ class CardsFinder {
             getCards.getNeed({ cache }),
         ]);
 
+
+        userInventoryCards.withoutStars();
+
         const userCard = getCardBySrc(userInventoryCards, this.card.src);
 
         const url = UrlConstructor.getCardNeedUrl(this.card.cardId);
@@ -80,6 +83,8 @@ class CardsFinder {
             const cards = await getCard.getInventoryTrade({ unlock, cache });
             return cards;
         });
+
+        usersCards.withoutStars();
 
         this._processCards(usersCards);
 
@@ -135,6 +140,8 @@ class CardsFinder {
             const cards = await getCards.getNeed({ cache });
             return cards;
         });
+
+        usersCards.withoutStars();
 
         const cards = this._compareCards(userCards, usersCards);
 

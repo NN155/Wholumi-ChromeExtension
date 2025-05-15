@@ -23,6 +23,7 @@ class GetCards {
                 card.setId()
                 card.setCardId()
                 card.setName();
+                card.setStar()
                 return card
             }))
             return cards;
@@ -141,6 +142,7 @@ class GetCards {
             card.setSrc();
             card.setAnimeName();
             card.setRank();
+            card.setStar();
             card.username = UrlConstructor.getMyName();
             card.url = UrlConstructor.getMyUrl();
             cards.push(card);
@@ -169,6 +171,7 @@ class GetCards {
             card.setSrc();
             card.setLock();
             card.setRateByLock();
+            card.setStar();
             card.username = UrlConstructor.getMyName();
             card.url = UrlConstructor.getMyUrl();
             cards.push(card);
@@ -191,6 +194,7 @@ class GetCards {
             card.setName();
             card.setAnimeName();
             card.setRank();
+            card.setStar();
             card.username = UrlConstructor.getMyName();
             card.url = UrlConstructor.getMyUrl();
             cards.push(card);
@@ -226,7 +230,9 @@ class GetCards {
                 card.lock = remeltCard.lock;
                 card.rate = remeltCard.rate;
             } else {
-                card.lock = "trophy";
+                if (card.lock !== "star") {
+                    card.lock = "trophy";
+                }
             }
         });
     }

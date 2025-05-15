@@ -2,24 +2,22 @@ async function propose(type) {
     let rank = UrlConstructor.getCardRank();
 
     const [myCards, myTrade] = await proposeData(rank);
-    const ids = new Set();
-
+    let ids;
     if (type) {
-        myCards.forEach(card => {
-            ids.add(card.cardId);
-        });
-        myTrade.forEach(card => {
-            ids.delete(card.cardId);
-        });
+        const idsArray = myCards.filter(myCard =>
+            !myTrade.some(tradeCard => tradeCard.cardId === myCard.cardId)
+        ).map(myCard => myCard.id);
+        ids = new Set(idsArray);
+    } else {
+        const idsArray = myCards.filter(myCard =>
+            myTrade.some(tradeCard => tradeCard.cardId === myCard.cardId)
+        ).map(myCard => myCard.id);
+        ids = new Set(idsArray);
     }
-    else {
-        myTrade.forEach(card => {
-            ids.add(card.cardId);
-        });
-    }
-    
     await ProtectedFetchService.proposeCards(ids, 1);
 }
+
+
 
 async function proposeData(rank) {
     let ranks = [rank];
@@ -29,12 +27,15 @@ async function proposeData(rank) {
     const inventory = [];
     const trade = [];
     for (const rank of ranks) {
-        const cardInstance = new GetCards({ rank, user: new User({userUrl: UrlConstructor.getMyUrl()})});
+        const cardInstance = new GetCards({ rank, user: new User({ userUrl: UrlConstructor.getMyUrl() }) });
 
         const [myCards, myTradeCards] = await Promise.all([
             cardInstance.getInventory({ unlock: true }),
             cardInstance.getTrade()
         ]);
+
+        myCards.withoutStars();
+        myCards.filter(c => c.lock === "unlock" || c.lock === "trade");
 
         inventory.push(...myCards);
         trade.push(...myTradeCards);

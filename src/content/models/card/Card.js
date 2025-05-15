@@ -22,6 +22,7 @@ class Card {
         this.online;
         this._tradeCard;
         this._htmlType;
+        this.starCount;
     }
     
     get tradeCard() {
@@ -84,6 +85,14 @@ class Card {
                 if (card) {
                     this.card.querySelector("img")?.setAttribute('src', this.src);
                 }
+        }
+    }
+
+    setStar() {
+        !this.src && this.setSrc();
+        this.starCount = CardUrlService.getStarsCount(this.src);
+        if (this.starCount) {
+            this.lock = "star";
         }
     }
 

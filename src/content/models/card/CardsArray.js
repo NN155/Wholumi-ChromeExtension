@@ -73,4 +73,8 @@ class CardsArray extends Array {
         
         return uniqueCards;
     }
+
+    withoutStars() {
+        this.filter(card => card.lock !== "star");
+    }
 }

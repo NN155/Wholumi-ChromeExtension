@@ -9,10 +9,10 @@ class CardUrlService {
      * @returns {string} - Card URL
      */
     static getCardUrl(cardId, unlocked = false) {
-        return UrlService.buildUrl(`/cards/${cardId}/users/`, 
+        return UrlService.buildUrl(`/cards/${cardId}/users/`,
             unlocked ? { unlocked: 1 } : {});
     }
-    
+
     /**
      * Create URL to card need page
      * @param {string|number} cardId - Card ID
@@ -21,7 +21,7 @@ class CardUrlService {
     static getCardNeedUrl(cardId) {
         return `/cards/${cardId}/users/need/`;
     }
-    
+
     /**
      * Create URL to card trade page
      * @param {string|number} cardId - Card ID
@@ -30,7 +30,7 @@ class CardUrlService {
     static getCardTradeUrl(cardId) {
         return `/cards/${cardId}/users/trade/`;
     }
-    
+
     /**
      * Extract card ID from URL
      * @param {string} url - URL containing card ID
@@ -39,7 +39,7 @@ class CardUrlService {
     static getCardId(url) {
         return UrlService.extractParam(url, /\/cards\/(\d+)\//);
     }
-    
+
     /**
      * Get card rank from URL
      * @param {string} url - URL containing rank parameter
@@ -49,7 +49,7 @@ class CardUrlService {
         const rankParam = UrlService.getParams(url).get('rank');
         return rankParam ? rankParam.toLowerCase() : null;
     }
-    
+
     /**
      * Extract rank from card image URL
      * @param {string} src - Card image source URL
@@ -57,11 +57,11 @@ class CardUrlService {
      */
     static getRankBySrc(src) {
         if (!src) return null;
-        
+
         const match = src.match(/\/uploads\/cards_image\/\d+\/([a-z])\/[^/]+$/);
         return match ? match[1].toLowerCase() : null;
     }
-    
+
     /**
      * Get card name by ID
      * @param {string|number} id - Card ID
@@ -71,7 +71,7 @@ class CardUrlService {
         try {
             const url = this.getCardNeedUrl(id);
             const dom = await FetchService.parseFetch(url);
-            
+
             const titleElement = dom.querySelector(".ncard__main-title a");
             return titleElement ? titleElement.textContent.trim() : null;
         } catch (error) {
@@ -79,7 +79,7 @@ class CardUrlService {
             return null;
         }
     }
-    
+
     /**
      * Create URL for trading
      * @param {string|number} wantedCardId - Card to receive
@@ -88,8 +88,20 @@ class CardUrlService {
      */
     static tradeLink(wantedCardId, tradedCardId = null) {
         return UrlService.buildUrl(
-            `/cards/${wantedCardId}/trade`, 
+            `/cards/${wantedCardId}/trade`,
             tradedCardId ? { mycard: tradedCardId } : {}
         );
+    }
+
+    static getStarsCount(url) {
+        if (!url) return 0;
+
+        const starsMatch = url.match(/stars_(\d+)/);
+        if (starsMatch && starsMatch[1]) {
+            const starsCount = parseInt(starsMatch[1], 10);
+            return isNaN(starsCount) ? 0 : starsCount;
+        }
+
+        return 0;
     }
 }

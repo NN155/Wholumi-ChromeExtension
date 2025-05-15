@@ -23,6 +23,7 @@ class UrlConstructor extends InventoryUrlService {
     static getRankBySrc = CardUrlService.getRankBySrc;
     static getCardName = CardUrlService.getCardName;
     static tradeLink = CardUrlService.tradeLink;
+    static getStarsCount = CardUrlService.getStarsCount;
     
     // static methods from TradeUrlService
     static getSentLink = TradeUrlService.getSentLink;
