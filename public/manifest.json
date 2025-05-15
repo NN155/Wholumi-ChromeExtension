@@ -230,10 +230,10 @@
     },
     {
       "matches": [
-        "https://animestars.org/aniserials/video/*/*",
-        "https://asstars.tv/aniserials/video/*/*",
-        "https://as1.astars.club/aniserials/video/*/*",
-        "https://asstars1.astars.club/aniserials/video/*/*"
+        "https://animestars.org/aniserials/videos/*/*",
+        "https://asstars.tv/aniserials/videos/*/*",
+        "https://as1.astars.club/aniserials/videos/*/*",  
+        "https://asstars1.astars.club/aniserials/videos/*/*"
       ],
       "js": [
         "content/Deck.js"

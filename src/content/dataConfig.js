@@ -25,7 +25,7 @@ window.addEventListener("update-data-config", async (event) => {
 });
 
 async function updateInventoryInfo() {
-    const dom = await FetchService.parseFetch("/cards_showcase/");
+    const dom = await FetchService.parseFetch("/decks/create/");
 
     const container = dom.querySelector('.card-filter-list__items');
 

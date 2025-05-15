@@ -20,20 +20,50 @@ class Card {
         this.animeName;
         this.needCount;
         this.online;
-        this.tradeId;
-        this.tradeLock;
-        this.tradeCardId;
+        this._tradeCard;
+        this._htmlType;
+    }
+    
+    get tradeCard() {
+        if (this._tradeCard) return this._tradeCard;
+        this._tradeCard = new Card();
+        return this._tradeCard;
+    }
+
+    get htmlType() {
+        if (this._htmlType) return this._htmlType;
+
+        if (this.card.querySelector('.anime-cards__item')) {
+            this._htmlType = 'normal';
+            return this._htmlType;
+        }
+
+        if (this.card.classList.contains('card-filter-list__card')) {
+            this._htmlType = 'filter';
+            return this._htmlType;
+        }
+
+        if (this.card.classList.contains('remelt__inventory-item')) {
+            this._htmlType = 'remelt';
+            return this.htmlType;
+        }
+
+        if (this.card.classList.contains('trade__inventory-item')) {
+            this._htmlType = 'trade';
+            return this.htmlType;
+        }
     }
 
     setSrc() {
-        let card;
-        card = this.card.querySelector('.anime-cards__item');
-        if (card) {
-            this.src = card.getAttribute('data-image');
-            return;
-        } else {
-            this.src = this.card.querySelector("img").getAttribute('data-src') || this.card.querySelector("img").getAttribute('src');
-            return;
+        switch (this.htmlType) {
+            case 'normal':
+                const card = this.card.querySelector('.anime-cards__item');
+                this.src = card.getAttribute('data-image');
+                break;
+            case 'filter':
+            case 'remelt':
+                this.src = this.card.querySelector("img").getAttribute('data-src') || this.card.querySelector("img").getAttribute('src');
+                break;
         }
     }
 
@@ -41,12 +71,17 @@ class Card {
         this.mp4 = this.card.querySelector('.anime-cards__item').getAttribute('data-mp4') || null;
         this.webm = this.card.querySelector('.anime-cards__item').getAttribute('data-webm') || null;
     }
+
     fixImage() {
-        const card = this.card.querySelector('.anime-cards__item');
-        if (card) {
-            this.card.querySelector("img")?.setAttribute('src', this.src);
+        switch (this.htmlType) {
+            case 'normal':
+                const card = this.card.querySelector('.anime-cards__item');
+                if (card) {
+                    this.card.querySelector("img")?.setAttribute('src', this.src);
+                }
         }
     }
+
     fixLockIcon() {
         const lockIcon = this.card.querySelector('.lock-trade-btn') || this.card.querySelector('.lock-card-btn');
         if (lockIcon) {
@@ -55,10 +90,12 @@ class Card {
             lockIcon.style.right = '10px';
         }
     }
+
     removeBorderds() {
         const cardItem = this.card.querySelector('.anime-cards__item');
         cardItem.classList.remove('anime-cards__owned-by-user');
     }
+
     fixCard() {
         this.fixImage();
         this.fixLockIcon();
@@ -87,7 +124,7 @@ class Card {
                 this.lock = "trophy";
             }
 
-        } else if (this.isRemeltCard()) {
+        } else if (this.htmlType === 'remelt') {
             this.lock = "unlock";
             if (this.card.classList.contains('remelt__inventory-item--lock')) {
                 this.lock = "lock";
@@ -188,19 +225,29 @@ class Card {
     }
 
     setId() {
-        const card = this.card.querySelector(".anime-cards__item") || (this.card.classList.contains('card-filter-list__card') ? this.card : null);
-        if (card) {
-            this.id = card.getAttribute('data-owner-id');
-        } else {
-            this.id = this.card.getAttribute('data-id');
+        switch (this.htmlType) {
+            case 'normal':
+                const card = this.card.querySelector(".anime-cards__item")
+                this.id = card.getAttribute('data-owner-id');
+                break;
+            case 'filter':
+            case 'remelt':
+            case 'trade':
+                this.id = this.card.getAttribute('data-id');
+                break;
         }
     }
+
     setCardId() {
-        const card = this.card.querySelector(".anime-cards__item") || this.card;
-        this.cardId = card.getAttribute('data-id');
-        if (!this.cardId) {
-            card.querySelector('a')
-            this.cardId = card.querySelector('a').getAttribute('href').split('/')[2];
+        switch (this.htmlType) {
+            case 'normal':
+                const card = this.card.querySelector(".anime-cards__item")
+                this.cardId = card.getAttribute('data-id');
+                break;
+            case 'trade':
+                this.cardId = this.card.getAttribute('data-card-id');
+                break;
+
         }
     }
     async unlockCard() {
@@ -229,26 +276,41 @@ class Card {
     }
 
     setName() {
-        const card = this.card.querySelector('.anime-cards__item') || this.card;
-        if (card) {
-            this.name = card.getAttribute('data-name');
-        }
-    }
-    setAnimeName() {
-        const card = this.card.querySelector('.anime-cards__item') || this.card;
-        if (card) {
-            this.animeName = card.getAttribute('data-anime-name');
-        }
-    }
-    setRank() {
-        const card = this.card.querySelector('.anime-cards__item') || this.card;
-        if (card) {
-            this.rank = card.getAttribute('data-rank');
+        switch (this.htmlType) {
+            case 'normal':
+                const card = this.card.querySelector('.anime-cards__item');
+                this.name = card.getAttribute('data-name');
+                break;
+            case 'filter':
+            case 'remelt':
+                this.name = this.card.getAttribute('data-name');
+                break;
         }
     }
 
-    isRemeltCard() {
-        return this.card.classList.contains('remelt__inventory-item');
+    setAnimeName() {
+        switch (this.htmlType) {
+            case 'normal':
+                const card = this.card.querySelector('.anime-cards__item');
+                this.animeName = card.getAttribute('data-anime-name');
+                break;
+            case 'filter':
+            case 'remelt':
+                this.animeName = this.card.getAttribute('data-anime-name');
+                break;
+        }
+    }
+    setRank() {
+        switch (this.htmlType) {
+            case 'normal':
+                const card = this.card.querySelector('.anime-cards__item');
+                this.rank = card.getAttribute('data-rank');
+                break;
+            case 'filter':
+            case 'remelt':
+                this.rank = this.card.getAttribute('data-rank');
+                break;
+        }
     }
 
     transformToCard() {
@@ -262,9 +324,11 @@ class Card {
     }
 
     setDubles() {
-        const card = this.card.querySelector('.anime-cards__item');
-        if (card) {
-            this.dubles = card.classList.contains('anime-cards__owned-by-user') ? 1 : 0;
+        switch (this.htmlType) {
+            case 'normal':
+                const card = this.card.querySelector('.anime-cards__item');
+                this.dubles = card.classList.contains('anime-cards__owned-by-user') ? 1 : 0;
+                break;
         }
     }
 
@@ -295,5 +359,38 @@ class Card {
     }
     hasClass(className) {
         return this.card.classList.contains(className);
+    }
+
+    compare(card) {
+        if (this.cardId && card?.cardId) {
+            return card.cardId === this.cardId;
+        }
+
+        if (this.src && card?.src) {
+            try {
+                const thisCardPattern = this._extractCardPattern(this.src);
+                const otherCardPattern = this._extractCardPattern(card.src);
+                if (thisCardPattern === otherCardPattern) {
+                    if (card.cardId) this.cardId = card.cardId;
+                    else if (this.cardId) card.cardId = this.cardId;
+
+                    return true;
+                }
+                return false;
+            } catch (error) {
+                console.error("Error comparing card images:", error);
+                return card.src === this.src;
+            }
+        }
+
+        return false;
+    }
+
+    _extractCardPattern(src) {
+        const match = src.match(/\/cards_image\/(\d+)\/([a-z]+)\/([^-]+)-/);
+        if (match) {
+            return `${match[1]}/${match[2]}/${match[3]}`;
+        }
+        return src;
     }
 }

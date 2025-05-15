@@ -1,10 +1,10 @@
 async function init() {
     if (!(await ExtensionConfig.getConfig("functionConfig")).tradeHelper) return;
 
-    const myCardId = getMyCardId();
+    const tradeId = getMyCardId();
     const cards = getCards();
     cards.forEach(card => {
-        if (card.id === myCardId) {
+        if (card.id === tradeId) {
             card.card.click();
         }
     })

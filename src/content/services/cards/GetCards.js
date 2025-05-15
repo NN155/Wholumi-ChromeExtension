@@ -27,7 +27,7 @@ class GetCards {
             }))
             return cards;
         } catch (error) {
-            console.log(dom);
+            console.log(dom, error);
             return new CardsArray();
         }
     }
@@ -70,7 +70,7 @@ class GetCards {
                 cache && (GetCards.cacheService.save({ method: "getInventory", rank: this.rank, username: this.user.username, cards }));
 
                 return cards;
-            } catch (error) { }
+            } catch (error) { console.error(error); }
         }
         let cardUrl = this.UrlConstructor.inventory();
         cardUrl = this.UrlConstructor.unlock(cardUrl, unlock);
@@ -119,7 +119,7 @@ class GetCards {
         ]);
         tradeCards.forEach(tradeCard => {
             inventoryCards.forEach(inventoryCard => {
-                if (tradeCard.cardId === inventoryCard.cardId && inventoryCard.lock !== "lock") {
+                if (tradeCard.compare(inventoryCard) && inventoryCard.lock !== "lock") {
                     inventoryCard.rate += 1;
                 }
             });
@@ -214,7 +214,7 @@ class GetCards {
             if (count !== null) return count;
         }
 
-        const { needCount } = await this._getInfo({ id, unlock, cache });
+        const { needCount } = await this._getInfo({ id, cache });
 
         return needCount;
     }
@@ -225,7 +225,7 @@ class GetCards {
             if (count !== null) return count;
         }
 
-        const { tradeCount } = await this._getInfo({ id, unlock, cache });
+        const { tradeCount } = await this._getInfo({ id, cache });
 
         return tradeCount;
     }

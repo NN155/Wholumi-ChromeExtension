@@ -110,12 +110,12 @@ class TradeService {
     async _executeTradeTransaction(card, deckCard) {
         console.log(`Trading card: rank: ${deckCard.rank}, cardId: ${card.cardId}${card.needCount ? `, popularity: ${card.needCount}` : ""}`);
 
-        const response = await tradeHelper(card.id, card.tradeId);
+        const response = await tradeHelper(card.id, card.tradeCard.id);
 
         if (response.success) {
             // Update cache
             GetCards.cacheService.delete({
-                id: card.tradeId,
+                id: card.tradeCard.id,
                 method: "getInventory",
                 rank: deckCard.rank,
                 username: UrlConstructor.getMyName()
@@ -182,7 +182,7 @@ class CardLockService {
     }
 
     async _lockCard(cards, deckCard) {
-        const card = cards.find(card => card.cardId == deckCard.cardId);
+        const card = cards.find(card => card.compare(deckCard));
 
         if (card && card.lock !== "lock") {
             try {
@@ -330,7 +330,7 @@ class TradeSearchService {
     _getTradesIds(cards, trades) {
         const arr = [];
         trades.forEach(trade => {
-            if (cards.find(card => trade?.userCards[0]?.id === card.cardId)) arr.push(trade.tradeId);
+            if (cards.find(card => trade?.userCards[0]?.id === card.cardId)) arr.push(trade.tradeCard.id);
         });
         return arr;
     }
@@ -409,7 +409,7 @@ class WishListService {
             const card = cards[i];
             const rank = card.rank;
             const myCards = await this._getMyWishlist(rank);
-            const myCard = myCards.find(c => c.cardId === card.cardId);
+            const myCard = myCards.find(c => c.compare(card));
             if (type ? !myCard : myCard) {
                 ids.push(card.cardId);
             }

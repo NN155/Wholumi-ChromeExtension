@@ -16,7 +16,7 @@ class CacheService {
             return;
         } else if (id) {
             this.cache[method][id] = count;
-            return;
+            return; 
         }
     }
     

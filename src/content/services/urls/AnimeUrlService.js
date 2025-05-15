@@ -1,5 +1,5 @@
 class AnimeUrlService {
     static getAnimeId(url) {
-        return UrlService.extractParam(url, /\/aniserials\/video\/[^\/]+\/(\d+)-/);
+        return UrlService.extractParam(url, /\/aniserials\/videos\/[^\/]+\/(\d+)-/);
     }
 }

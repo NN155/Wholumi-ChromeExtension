@@ -1,26 +1,23 @@
 class CardsFinder {
     constructor({ id, username, limit = 3000, pageLimit = 15 }) {
-        this.id = id;
         this.username = username;
         this.userUrl;
         this.limit = limit;
         this.pageLimit = pageLimit;
-        this.src = null;
-        this.rank = null;
         this.userExist = false;
-        this.mp4 = null;
-        this.webm = null;
+        this.card = new Card();
+        this.card.cardId = id;
     }
 
     async setCardData() {
-        const cardUrl = UrlConstructor.getCardUrl(this.id);
+        const cardUrl = UrlConstructor.getCardUrl(this.card.cardId);
         const dom = await FetchService.parseFetch(cardUrl);
         try {
             const cardInfo = getCardInfo(dom);
-            this.rank = cardInfo.rank;
-            this.src = cardInfo.src;
-            this.mp4 = cardInfo.mp4;
-            this.webm = cardInfo.webm;
+            this.card.rank = cardInfo.rank;
+            this.card.src = cardInfo.src;
+            this.card.mp4 = cardInfo.mp4;
+            this.card.webm = cardInfo.webm;
         } catch (error) { }
     }
     async checkUserExistence() {
@@ -34,11 +31,11 @@ class CardsFinder {
     }
 
     async setCardName() {
-        this.name = await UrlConstructor.getCardName(this.id);
+        this.card.name = await UrlConstructor.getCardName(this.card.cardId);
     };
     verifyData() {
         if (!this.userExist) return "Wrong user name";
-        if (!this.rank && (!this.src || this.mp4)) return "Wrong card id";
+        if (!this.card.rank && (!this.card.src || this.card.mp4)) return "Wrong card id";
     }
 
     async need({ filter, cache } = {}) {
@@ -66,19 +63,19 @@ class CardsFinder {
     }
 
     async getNeededCards({ filter = false, cache = false } = { filter: false, cache: false }) {
-        const getCards = new GetCards({ user: new User({ userUrl: this.userUrl, username: this.username }), rank: this.rank });
+        const getCards = new GetCards({ user: new User({ userUrl: this.userUrl, username: this.username }), rank: this.card.rank });
         let [userInventoryCards, userNeededCards] = await Promise.all([
             getCards.getInventory({ unlock: filter ? true : null, cache }),
             getCards.getNeed({ cache }),
         ]);
 
-        const userCard = getCardBySrc(userInventoryCards, this.src);
+        const userCard = getCardBySrc(userInventoryCards, this.card.src);
 
-        const url = UrlConstructor.getCardNeedUrl(this.id);
+        const url = UrlConstructor.getCardNeedUrl(this.card.cardId);
         const usersList = await getUsersList(url, { limit: this.limit, pageLimit: this.pageLimit });
 
         const usersCards = await findUsersCards(usersList, async user => {
-            const getCard = new GetCards({user, rank: this.rank });
+            const getCard = new GetCards({user, rank: this.card.rank });
             const unlock = filter ? true : (usersList.length > 75 ? true : null);
             const cards = await getCard.getInventoryTrade({ unlock, cache });
             return cards;
@@ -99,9 +96,9 @@ class CardsFinder {
         if (userCard) {
             usersCards.forEach(card => {
                 card.tradeLink = UrlConstructor.tradeLink(card.id, userCard.id);
-                card.tradeId = userCard.id;
-                card.tradeLock = userCard.lock;
-                card.tradeCardId = userCard.cardId;
+                card.tradeCard.id = userCard.id;
+                card.tradeCard.lock = userCard.lock;
+                card.tradeCard.cardId = userCard.cardId;
             });
         }
 
@@ -114,15 +111,15 @@ class CardsFinder {
     }
 
     async getTradeUsersCards(mode, { filter = false, cache = false, online = false, needCount = false } = { filter: false, cache: false, online: false, needCount: false }) {
-        const getCards = new GetCards({ user: new User({ userUrl: this.userUrl, username: this.username }), rank: this.rank });
+        const getCards = new GetCards({ user: new User({ userUrl: this.userUrl, username: this.username }), rank: this.card.rank });
         const userCards = await getCards.getInventory({ unlock: filter ? true : null, cache });
         let url;
         switch (mode) {
             case "trade":
-                url = UrlConstructor.getCardTradeUrl(this.id);
+                url = UrlConstructor.getCardTradeUrl(this.card.cardId);
                 break;
             case "users":
-                url = UrlConstructor.getCardUrl(this.id, true);
+                url = UrlConstructor.getCardUrl(this.card.cardId, true);
                 break;
         }
 
@@ -134,14 +131,14 @@ class CardsFinder {
         });
 
         const usersCards = await findUsersCards(usersList, async user => {
-            const getCards = new GetCards({ user, rank: this.rank });
+            const getCards = new GetCards({ user, rank: this.card.rank });
             const cards = await getCards.getNeed({ cache });
             return cards;
         });
 
         const cards = this._compareCards(userCards, usersCards);
 
-        this._setSearchLink(cards, this.name);
+        this._setSearchLink(cards, this.card.name);
         await this._setTradeInfo(cards);
         this._setTradeLink(cards);
 
@@ -156,7 +153,7 @@ class CardsFinder {
         if (needCount) {
             const [_, cardNeedCount] = await Promise.all([
                 this._needCount(cards, { cache }),
-                GetCards.getNeedCount({ id: this.id, cache })
+                GetCards.getNeedCount({ id: this.card.cardId, cache })
             ]);
             this._setNeedCount({ cards, needCount: cardNeedCount });
         }
@@ -174,7 +171,7 @@ class CardsFinder {
 
     _upPriority(otherCards, userNeededCards) {
         otherCards.forEach(otherCard => {
-            if (userNeededCards.find(userCard => userCard.cardId === otherCard.cardId)) {
+            if (userNeededCards.find(userCard => userCard.compare(otherCard))) {
                 otherCard.sortPriority = 1;
                 otherCard.setBorder(globalColors.purple);
             }
@@ -184,7 +181,7 @@ class CardsFinder {
     _processCards(cards, addIcon = false) {
         cards.forEach(card => {
             card.fixCard();
-            addIcon && card.addLockIcon(card.tradeLock);
+            addIcon && card.addLockIcon(card.tradeCard.lock);
             card.fixLockIcon();
             card.addLink();
             card.setColorByRate();
@@ -217,7 +214,7 @@ class CardsFinder {
         otherCards.filter(otherCard => {
             const copyCards = new CardsArray();
             copyCards.push(...userCards);
-            copyCards.filter(userCard => userCard.cardId === otherCard.cardId);
+            copyCards.filter(userCard => userCard.compare(otherCard));
 
             let userCard;
             userCard = copyCards.find(userCard => userCard.lock === "unlock");
@@ -226,8 +223,8 @@ class CardsFinder {
             userCard = userCard || copyCards.find(userCard => userCard.lock === "trophy");
             if (userCard) {
                 otherCard.rate = otherCard.rate < 0 ? otherCard.rate : userCard.rate;
-                otherCard.tradeId = userCard.id;
-                otherCard.tradeLock = userCard.lock;
+                otherCard.tradeCard.id = userCard.id;
+                otherCard.tradeCard.lock = userCard.lock;
                 return userCard
             }
         })
@@ -246,7 +243,7 @@ class CardsFinder {
 
     _setSearchLink(cards, name = null) {
         cards.forEach(card => {
-            const urlConstructor = new UrlConstructor({ rank: this.rank, userUrl: card.url });
+            const urlConstructor = new UrlConstructor({ rank: this.card.rank, userUrl: card.url });
             card.searchLink = urlConstructor.search(name || card.name);
         });
     }
@@ -264,7 +261,7 @@ class CardsFinder {
             Array.from(users).map(async searchLink => {
                 const getCards = new GetCards();
                 const cards = await getCards.getAllCards(searchLink);
-                cards.filter(card => card.cardId == this.id);
+                cards.filter(card => card.compare(this.card));
                 let card;
                 card = cards.find(card => card.lock === "unlock");
                 card = card || cards.find(card => card.lock === "trade");
@@ -290,8 +287,8 @@ class CardsFinder {
 
     _setTradeLink(cards) {
         cards.forEach(card => {
-            if (card.id && card.tradeId && card.lock === "unlock") {
-                card.tradeLink = UrlConstructor.tradeLink(card.id, card.tradeId);
+            if (card.id && card.tradeCard.id && card.lock === "unlock") {
+                card.tradeLink = UrlConstructor.tradeLink(card.id, card.tradeCard.id);
             }
         });
     }
@@ -299,12 +296,12 @@ class CardsFinder {
     _setCardInfo({ cards, users }) {
         cards.info = {
             ...cards.info,
-            rank: this.rank,
-            name: this.name,
-            src: this.src,
-            id: this.id,
-            mp4: this.mp4,
-            webm: this.webm,
+            rank: this.card.rank,
+            name: this.card.name,
+            src: this.card.src,
+            id: this.card.cardId,
+            mp4: this.card.mp4,
+            webm: this.card.webm,
             usersLength: users.length,
         }
     }

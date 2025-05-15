@@ -35,6 +35,7 @@ class CardsArray extends Array {
         
         return this
     }
+
     clone() {
         return new CardsArray(...this);
     }

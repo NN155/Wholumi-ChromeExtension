@@ -122,7 +122,7 @@ async function visitAllUrls() {
         "/users_top/?kind=comments",
         "/users_top/?kind=meditation",
         "/?do=lastcomments",
-        "/aniserials/video/action/2745-podnjatie-urovnja-v-odinochku-2-sezon-vosstante-iz-teni.html",
+        "/aniserials/videos/action/2745-podnjatie-urovnja-v-odinochku-2-sezon-vosstante-iz-teni.html",
     ]
     await Promise.all(urls.map(url => findGift(url)))
 }

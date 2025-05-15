@@ -30,17 +30,17 @@ function changeCards(cards) {
             let text;
             let disabled = false;
 
-            if (!card.tradeId) {
+            if (!card.tradeCard.id) {
                 text = "Your card is not found";
                 disabled = true;
             }
 
-            else if (card.tradeLock === "trade") {
+            else if (card.tradeCard.lock === "trade") {
                 text = "Your card is in trade";
                 disabled = true;
             }
 
-            else if (card.tradeLock === "trophy") {
+            else if (card.tradeCard.lock === "trophy") {
                 text = "Your card is locked";
                 disabled = true;
             }
@@ -55,17 +55,14 @@ function changeCards(cards) {
             }
 
             else {
-                text = `${card.tradeLock === "lock" ? "Unlock and " : ""}Trade`
+                text = `${card.tradeCard.lock === "lock" ? "Unlock and " : ""}Trade`
             }
-            const tradeCard = new Card()
-            tradeCard.id = card.tradeId;
-            tradeCard.lock = card.tradeLock;
 
             const button = new Button({
                 disabled,
                 text,
                 onClick: async () => {
-                    await trade(card, tradeCard);
+                    await trade(card, card.tradeCard);
                 }
             });
             await button.asyncPlaceAfter(".anime-cards__link")
@@ -86,7 +83,7 @@ async function findUsersCards(usersList, callBack) {
 function addOrangeBorder(otherCards, userCards) {
     otherCards.forEach(otherCard => {
         otherCard.removeBorderds();
-        if (userCards.find(userCard => userCard.cardId === otherCard.cardId)) {
+        if (userCards.find(userCard => userCard.compare(otherCard))) {
             otherCard.dubles = 1;
             otherCard.setBorder(globalColors.orange);
         } else {

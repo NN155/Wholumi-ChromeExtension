@@ -5,8 +5,6 @@ async function miscTab() {
         {config: "functionConfig", html: "Switcher", id: 'searchCards', label: 'Search Cards in Need/Trade/Users', data: 'searchCards', group: 'Cards Info'},
         {config: "functionConfig", html: "Switcher", id: 'anotherUserMode', label: 'Search on behalf of another user', data: 'anotherUserMode', containerStyle: 'margin-left: 2rem', group: 'Cards Info'},
         {config: "functionConfig", html: "Switcher", id: 'tradeHelper', label: 'Trade Helper', data: 'tradeHelper', containerStyle: 'margin-left: 2rem', group: 'Cards Info'},
-        {config: "functionConfig", html: "Switcher", id: 'graphSearch', label: 'Graph Search', data: 'graphSearch', containerStyle: 'margin-left: 2rem', group: 'Cards Info'},
-        {config: "lastUpdate", html: "Button", id: 'cards-data-s-rank', label: 'Update and Build S Graph ', onEvent: { key: "cards-data", event: "update-data-config", rank: "s", saveAs: "cards-data-s-rank" }, group: 'Cards Info', data: "cards-data-s-rank" },
 
         {config: "functionConfig", html: "Switcher", id: 'remeltDubles', label: 'Show dubles in remelt', data: 'remeltDubles', group: 'Remelt'},
 
