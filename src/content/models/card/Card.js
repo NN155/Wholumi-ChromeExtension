@@ -54,6 +54,10 @@ class Card {
         }
     }
 
+    set htmlType(type) {
+        this._htmlType = type;
+    }
+
     setSrc() {
         switch (this.htmlType) {
             case 'normal':
@@ -62,6 +66,7 @@ class Card {
                 break;
             case 'filter':
             case 'remelt':
+            case 'deck':
                 this.src = this.card.querySelector("img").getAttribute('data-src') || this.card.querySelector("img").getAttribute('src');
                 break;
         }
@@ -235,6 +240,9 @@ class Card {
             case 'trade':
                 this.id = this.card.getAttribute('data-id');
                 break;
+            case 'deck':
+                this.id = this.card.getAttribute('data-owner-id');
+                break;
         }
     }
 
@@ -246,6 +254,9 @@ class Card {
                 break;
             case 'trade':
                 this.cardId = this.card.getAttribute('data-card-id');
+                break;
+            case 'deck':
+                this.cardId = this.card.getAttribute('data-id');
                 break;
 
         }
@@ -283,6 +294,7 @@ class Card {
                 break;
             case 'filter':
             case 'remelt':
+            case 'deck':
                 this.name = this.card.getAttribute('data-name');
                 break;
         }
@@ -296,6 +308,7 @@ class Card {
                 break;
             case 'filter':
             case 'remelt':
+            case 'deck':
                 this.animeName = this.card.getAttribute('data-anime-name');
                 break;
         }
@@ -308,6 +321,7 @@ class Card {
                 break;
             case 'filter':
             case 'remelt':
+            case 'deck':
                 this.rank = this.card.getAttribute('data-rank');
                 break;
         }

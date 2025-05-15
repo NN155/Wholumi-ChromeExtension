@@ -127,6 +127,30 @@ class GetCards {
         return inventoryCards;
     }
 
+    static async getByDeck({ rank = null } = { rank: null }) {
+        const url = "/decks/create/"
+        const dom = await FetchService.parseFetch(url);
+        const nodes = dom.querySelectorAll('.card-filter-list__card');
+
+        const cards = new CardsArray();
+        nodes.forEach(element => {
+            const card = new Card(element);
+            card.htmlType="deck";
+            card.setId();
+            card.setCardId();
+            card.setSrc();
+            card.setAnimeName();
+            card.setRank();
+            card.username = UrlConstructor.getMyName();
+            card.url = UrlConstructor.getMyUrl();
+            cards.push(card);
+        })
+
+        rank && cards.filter(card => card.rank === rank);
+
+        return cards;
+    }
+
     static async getByRemelt({ rank, unlock = null }) {
         const url = "/cards_remelt/" + UrlConstructor.params(rank, unlock);
         const dom = await FetchService.parseFetch(url);
@@ -163,7 +187,6 @@ class GetCards {
         nodes.forEach(element => {
             const card = new Card(element);
             card.setId();
-            card.setCardId();
             card.setSrc();
             card.setName();
             card.setAnimeName();
@@ -185,19 +208,19 @@ class GetCards {
     }
 
     static async _getMyCards(rank, unlock = null) {
-        const [showcase, remelt] = await Promise.all([
-            this.getByShowcase({ rank, unlock }),
-            this.getByRemelt({ rank, unlock })
+        const [remelt, deck] = await Promise.all([
+            this.getByRemelt({ rank, unlock }),
+            this.getByDeck({ rank })
         ]);
-        this._proccessCards(showcase, remelt);
-        showcase.forEach(card => {
+        this._proccessCards(remelt, deck);
+        deck.forEach(card => {
             card.transformToCard();
         });
-        return showcase;
+        return deck;
     }
 
-    static _proccessCards(showcase, remelt) {
-        showcase.forEach(card => {
+    static _proccessCards(remelt, deck) {
+        deck.forEach(card => {
             const remeltCard = remelt.find(remeltCard => remeltCard.id === card.id);
             if (remeltCard) {
                 card.lock = remeltCard.lock;
