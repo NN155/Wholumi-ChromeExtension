@@ -37,7 +37,7 @@ button.extension::after, button.extension::before {
     transition: background-image 0.3s ease;
 }
 
-button.extension:disabled::after, button.extension:disabled::before {
+button.extension:::after, button.extension:disabled::before {
     animation: 1s extension-spin linear infinite;
 }
 

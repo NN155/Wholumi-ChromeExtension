@@ -114,10 +114,14 @@ class GetCards {
     }
 
     async getInventoryTrade({ unlock = null, cache = false } = { unlock: null, cache: false }) {
-        const [inventoryCards, tradeCards] = await Promise.all([
+        let [inventoryCards, tradeCards] = await Promise.all([
             this.getInventory({ unlock, cache }),
             this.getTrade({ cache }),
         ]);
+
+        
+        tradeCards = tradeCards.unique();
+
         tradeCards.forEach(tradeCard => {
             inventoryCards.forEach(inventoryCard => {
                 if (tradeCard.compare(inventoryCard) && inventoryCard.lock !== "lock") {

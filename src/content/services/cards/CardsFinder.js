@@ -142,7 +142,8 @@ class CardsFinder {
         });
 
         usersCards.withoutStars();
-
+        console.log(usersCards.Filter(card => card.name === "Рудеус Грейрат"));
+        return
         const cards = this._compareCards(userCards, usersCards);
 
         this._setSearchLink(cards, this.card.name);

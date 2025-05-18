@@ -7,6 +7,10 @@ class Pack {
         if (this.init) return;
         this.init = true;
         $('body').on('click', '.lootbox__card-disabled', (event) => {
+            if (lastPackTime > Date.now() - packConfig.info.cooldown) {
+                DLEPush.warning('Слишком часто, подождите пару секунд и повторите действие');
+                return;
+            }
             var row = $(event.currentTarget).closest('.lootbox__row');
             var button = $(event.currentTarget);
             var id = $(event.currentTarget).attr('data-id');
@@ -27,10 +31,13 @@ class Pack {
                 $('.lootbox__card-disabled img').attr('src', '/templates/New/cards_system/empty-card.png');
                 const checkbox = $('#disable_pack_card').prop('checked');
                 if (!checkbox) {
-                    openCardGiftModal({...data.card});
+                    openCardGiftModal({ ...data.card });
                 }
                 row.removeClass('loot-lock');
             }
+
+            lastPackTime = Date.now();
+
             PacksPromise();
         });
     }
@@ -55,23 +62,47 @@ class Packs {
         }
         this.garant = null;
     }
+
+    isGarant(rank = "s") {
+        if (this.garantS <= 0) {
+            const card = this._genericRandomCard(rank);
+            card.rank = rank;
+
+            openCardGiftModal({
+                image: card.image,
+                name: card.name,
+                rank: card.rank,
+                card_mp4: card.video_mp4,
+                card_webm: card.video_webm
+            });
+
+            packConfig.packInventory.add(card.id);
+        }
+    }
+
     async createPacks() {
         for (let i = 0; i < this.count; i++) {
             this.counter -= 1;
             this.genericData(this.counter === 0);
             this.pack.cards = this.data.cards;
             processLootboxData(this.data);
+
             await new Promise(resolve => PacksPromise = resolve);
             await new Promise(resolve => setTimeout(resolve, 100));
         }
     }
+
     async button_click() {
         this.balance = Number($('.lootbox__balance').text());
         this.counter = Number($('.lootbox__counter').text());
+        this.garantS = Number($('.lootbox__counter__s').text());
         await new Promise(resolve => setTimeout(resolve, 100));
         if (this.balance >= this.price[this.count]) {
             $('.lootbox__balance').text(this.balance - this.price[this.count]);
             $('.lootbox__counter').text((this.counter - this.count + 39) % 39 || 39);
+            $('.lootbox__counter__s').text((this.garantS - this.count + 1800) % 1800 || 1800);
+            this.garantS -= this.count;
+            this.isGarant();
             await this.createPacks();
         }
         else {
@@ -95,11 +126,11 @@ class Packs {
     }
 
     genericCard(garant) {
-            const rank = garant ? "a" : this._genericRandomRank();
-            const card = this._genericRandomCard(rank);
-            card.rank = rank;
-            card.owned = packConfig.packInventory.has(card.id) ? 1 : 0;
-            return card;
+        const rank = garant ? "a" : this._genericRandomRank();
+        const card = this._genericRandomCard(rank);
+        card.rank = rank;
+        card.owned = packConfig.packInventory.has(card.id) ? 1 : 0;
+        return card;
     }
     _genericRandomCard(rank) {
         const cards = packConfig.siteInventory[rank];
@@ -114,7 +145,7 @@ class Packs {
         const totalChance = chances.reduce((sum, item) => sum + item.chance, 0);
 
         const randomValue = Math.random() * totalChance;
-    
+
         let cumulative = 0;
         for (const item of chances) {
             cumulative += item.chance;
@@ -156,7 +187,7 @@ function firstLoad() {
 
 async function loadData() {
     let data = await ExtensionConfig.loadConfig("dataConfig", ["packInventory", "siteInventory"]);
-    data = {...data, ...await ExtensionConfig.loadConfig("miscConfig", ["packs"])};
+    data = { ...data, ...await ExtensionConfig.loadConfig("miscConfig", ["packs"]) };
     return data;
 }
 
@@ -165,8 +196,10 @@ function loadNewConfig(data) {
     if (data.siteInventory) packConfig.siteInventory = data.siteInventory;
     packConfig.info.balance = data.packs.balance;
     packConfig.info.counter = data.packs.counter;
+    packConfig.info.garantS = data.packs.garantS;
+    packConfig.info.cooldown = data.packs.cooldown;
     packConfig.chances = [
-        { rank: "ass", chance: data.packs.assChance},
+        { rank: "ass", chance: data.packs.assChance },
         { rank: "s", chance: data.packs.sChance },
         { rank: "a", chance: data.packs.aChance },
         { rank: "b", chance: data.packs.bChance },
@@ -179,18 +212,23 @@ function loadNewConfig(data) {
 function submitChanges() {
     $('.lootbox__balance').text(packConfig.info.balance);
     $('.lootbox__counter').text(packConfig.info.counter);
+    $('.lootbox__counter__s').text(packConfig.info.garantS);
 }
 
 let injected = false;
 let packs;
 let PacksPromise = null;
+let lastPackTime = null;
+
 
 let packConfig = {
     packInventory: new Set(),
     siteInventory: {},
-    info : {
+    info: {
         balance: 10000,
         counter: 20,
+        garantS: 500,
+        cooldown: 2000,
     },
     chances: [
         { rank: "ass", chance: 1 },
