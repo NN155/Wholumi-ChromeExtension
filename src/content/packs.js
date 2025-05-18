@@ -65,8 +65,7 @@ class Packs {
 
     isGarant(rank = "s") {
         if (this.garantS <= 0) {
-            const card = this._genericRandomCard(rank);
-            card.rank = rank;
+            const card = this.genericCard({rank});
 
             openCardGiftModal({
                 image: card.image,
@@ -117,16 +116,25 @@ class Packs {
             "cards": [...this.genericCards(garant)],
         }
     }
+
     genericCards(garant = false) {
-        const cards = []
+        const cards = [];
         for (let i = 0; i < 3; i++) {
-            cards.push(this.genericCard(garant));
+            cards.push(this.genericCard({garant}));
         }
+
+        if (!garant && sPack) {
+            const card = this.genericCard({rank: "s"});
+            const c = Math.floor(Math.random() * 3);
+            cards[c] = card;
+            sPack = false;
+        }
+
         return cards;
     }
 
-    genericCard(garant) {
-        const rank = garant ? "a" : this._genericRandomRank();
+    genericCard({garant=null, rank = null}) {
+        rank = rank ? rank : (garant ? "a" : this._genericRandomRank());
         const card = this._genericRandomCard(rank);
         card.rank = rank;
         card.owned = packConfig.packInventory.has(card.id) ? 1 : 0;
@@ -219,7 +227,7 @@ let injected = false;
 let packs;
 let PacksPromise = null;
 let lastPackTime = null;
-
+let sPack = false;
 
 let packConfig = {
     packInventory: new Set(),
@@ -241,6 +249,16 @@ let packConfig = {
     ]
 }
 
+
+function handleKeyPress(event) {
+    if (!injected || !packs) return;
+    if (event.code === 'KeyS') {
+        event.preventDefault();
+        sPack = !sPack;
+    }
+}
+
+
 function init() {
     window.addEventListener('packs', async (event) => {
         switch (event.detail.key) {
@@ -260,6 +278,8 @@ function init() {
                 window.dispatchEvent(newEvent);
         }
     });
+
+    document.addEventListener('keydown', handleKeyPress);
 }
 
 init()
