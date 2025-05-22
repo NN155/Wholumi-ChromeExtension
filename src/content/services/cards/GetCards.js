@@ -71,7 +71,11 @@ class GetCards {
                 cache && (GetCards.cacheService.save({ method: "getInventory", rank: this.rank, username: this.user.username, cards }));
 
                 return cards;
-            } catch (error) { console.error(error); }
+            } catch (error) { 
+                if (!(error instanceof InvalidRankError)) {
+                    console.error(error); 
+                }
+            }
         }
         let cardUrl = this.UrlConstructor.inventory();
         cardUrl = this.UrlConstructor.unlock(cardUrl, unlock);
@@ -119,7 +123,7 @@ class GetCards {
             this.getTrade({ cache }),
         ]);
 
-        
+
         tradeCards = tradeCards.unique();
 
         tradeCards.forEach(tradeCard => {
@@ -140,7 +144,7 @@ class GetCards {
         const cards = new CardsArray();
         nodes.forEach(element => {
             const card = new Card(element);
-            card.htmlType="deck";
+            card.htmlType = "deck";
             card.setId();
             card.setCardId();
             card.setSrc();
@@ -211,7 +215,7 @@ class GetCards {
         if (ranks.includes(rank.toLowerCase())) {
             return await this._getMyCards(rank, unlock);
         } else {
-            throw new Error("Wrong rank");
+            throw new InvalidRankError(rank);
         }
     }
 
@@ -220,16 +224,24 @@ class GetCards {
             this.getByRemelt({ rank, unlock }),
             this.getByDeck({ rank })
         ]);
-        this._proccessCards(remelt, deck);
+        this._proccessCards({ remelt, deck });
         deck.forEach(card => {
             card.transformToCard();
         });
         return deck;
     }
 
-    static _proccessCards(remelt, deck) {
-        deck.forEach(card => {
-            const remeltCard = remelt.find(remeltCard => remeltCard.id === card.id);
+    static _proccessCards({ remelt, deck }) {
+
+        const remeltMap = new Map();
+        for (let i = 0; i < remelt.length; i++) {
+            remeltMap.set(remelt[i].id, remelt[i]);
+        }
+
+        for (let i = 0; i < deck.length; i++) {
+            const card = deck[i];
+            const remeltCard = remeltMap.get(card.id);
+
             if (remeltCard) {
                 card.lock = remeltCard.lock;
                 card.rate = remeltCard.rate;
@@ -238,7 +250,7 @@ class GetCards {
                     card.lock = "trophy";
                 }
             }
-        });
+        }
     }
 
     static async getNeedCount({ id, cache = false }) {
@@ -281,5 +293,13 @@ class GetCards {
         cache && (GetCards.cacheService.save({ method: `getTradeCount`, id, count: tradeCount }));
         cache && (GetCards.cacheService.save({ method: `getNeedCount`, id, count: needCount }));
         return { ownerCount, tradeCount, needCount };
+    }
+}
+
+class InvalidRankError extends Error {
+    constructor(rank) {
+        super(`Invalid rank: ${rank}. Allowed ranks are: a, b, c, d, e`);
+        this.name = 'InvalidRankError';
+        this.rank = rank;
     }
 }

@@ -86,10 +86,19 @@ class CardUrlService {
      * @param {string|number|null} tradedCardId - Card to give
      * @returns {string} - Trade URL
      */
-    static tradeLink(wantedCardId, tradedCardId = null) {
+    static tradeLink(wantedCardId, tradedCardId = null, unlock = null) {
+        const params = {};
+
+        if (tradedCardId) {
+            params.mycard = tradedCardId;
+            if (unlock) {
+                params.unlock = 1;
+            }
+        }
+
         return UrlService.buildUrl(
             `/cards/${wantedCardId}/trade`,
-            tradedCardId ? { mycard: tradedCardId } : {}
+            params
         );
     }
 

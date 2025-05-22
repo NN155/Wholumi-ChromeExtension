@@ -13,6 +13,15 @@ async function funTab() {
         { html: "Input", id: 'packC', type:"Number", min: 0, max: 10000, label: 'C chance', config: "miscConfig", data: "packs", subkey: "cChance", group: 'Packs' },
         { html: "Input", id: 'packD', type:"Number", min: 0, max: 10000, label: 'D chance', config: "miscConfig", data: "packs", subkey: "dChance", group: 'Packs' },
         { html: "Input", id: 'packE', type:"Number", min: 0, max: 10000, label: 'E chance', config: "miscConfig", data: "packs", subkey: "eChance", group: 'Packs' },
+        { html: "Input", id: 'card1', type:"Number", min: 1, label: 'Card id in Z', config: "miscConfig", data: "packs", subkey: "card1", group: 'Packs' },
+        { html: "Input", id: 'card2', type:"Number", min: 1, label: 'Card id in X', config: "miscConfig", data: "packs", subkey: "card2", group: 'Packs' },
+        { html: "Input", id: 'card3', type:"Number", min: 1, label: 'Card id in C', config: "miscConfig", data: "packs", subkey: "card3", group: 'Packs' },
+        { html: "Input", id: 'card4', type:"Number", min: 1, label: 'Card id in V', config: "miscConfig", data: "packs", subkey: "card4", group: 'Packs' },
+        { html: "Input", id: 'card5', type:"Number", min: 1, label: 'Card id in B', config: "miscConfig", data: "packs", subkey: "card5", group: 'Packs' },
+        { html: "Input", id: 'card6', type:"Number", min: 1, label: 'Card id in A', config: "miscConfig", data: "packs", subkey: "card6", group: 'Packs' },
+        { html: "Input", id: 'card7', type:"Number", min: 1, label: 'Card id in S', config: "miscConfig", data: "packs", subkey: "card7", group: 'Packs' },
+        { html: "Input", id: 'card8', type:"Number", min: 1, label: 'Card id in D', config: "miscConfig", data: "packs", subkey: "card8", group: 'Packs' },
+        { html: "Input", id: 'card9', type:"Number", min: 1, label: 'Card id in F', config: "miscConfig", data: "packs", subkey: "card9", group: 'Packs' },
         { html: "Button", id: 'injectPack', text: 'Inject', onEvent: { key: "inject", event: "packs" }, onclick: () => tab.saveInputData("miscConfig", "packs"), group: 'Packs' },
     ];
 

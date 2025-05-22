@@ -29,6 +29,7 @@ function changeCards(cards) {
         card.addEventListener('click', async () => {
             let text;
             let disabled = false;
+            let isLocked = card.tradeCard.lock === "lock";
 
             if (!card.tradeCard.id) {
                 text = "Your card is not found";
@@ -57,15 +58,16 @@ function changeCards(cards) {
             else {
                 text = `${card.tradeCard.lock === "lock" ? "Unlock and " : ""}Trade`
             }
-
-            const button = new Button({
+            
+            const link = new Link({
                 disabled,
                 text,
-                onClick: async () => {
-                    await trade(card, card.tradeCard);
-                }
+                className: "all-owners",
+                href: disabled ? "" : UrlConstructor.tradeLink(card.id, card.tradeCard.id, isLocked),
+
             });
-            await button.asyncPlaceAfter(".anime-cards__link")
+            
+            await link.asyncPlaceAfter(".anime-cards__link")
         })
     })
 }

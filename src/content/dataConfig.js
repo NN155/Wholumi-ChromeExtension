@@ -10,9 +10,6 @@ window.addEventListener("update-data-config", async (event) => {
         case "openedInventory":
             data = await updateOpenedInventory();
             break;
-        case "cards-data":
-            data = await getCardsGraphInfo(event.detail.rank);
-            break;
     }
     await ExtensionConfig.setConfig("dataConfig", { [event.detail.saveAs || event.detail.key]: data });
     const newEvent = new CustomEvent(event.detail.event, {
@@ -84,75 +81,6 @@ async function updateOpenedInventory() {
     return cardsHash.hash;
 }
 
-class GraphInfo {
-    constructor(rank) {
-        this.cardsList;
-        this.data;
-        this.rank = rank;
-        this.usersList;
-        this.adjList = {};
-    }
-
-
-    async getData() {
-        await this.getCardsList();
-        this.data = {};
-        await Promise.all(this.cardsList.map(async card => {
-            this.data[card.cardId] = {...await this.getCardInfo(card.cardId), src: card.src};
-        }));
-    }
-
-    async getCardsList() {
-        const baseUrl = "/cards/?rank=";
-        const cardInstance = new GetCards();
-        const cards = await cardInstance.getAllCards(`${baseUrl}${this.rank}`);
-        this.cardsList = cards;
-    }
-
-    async getCardInfo(id) {
-        const urls = [UrlConstructor.getCardNeedUrl(id), UrlConstructor.getCardTradeUrl(id)];
-        const [need, trade] = await Promise.all(urls.map(async url => {
-            return await getUsersList(url, { limit: 10000, pageLimit: 30 });
-        }));
-        return { need: need, trade: trade };
-    }
-
-    createUsersData() {
-        this.usersList = new UsersList();
-        for (const id in this.data) {
-            for (const user of this.data[id].need) {
-                const { userUrl: url, username: name } = user;
-                this.usersList.need({ name, url, id });
-            }
-            for (const user of this.data[id].trade) {
-                const { userUrl: url, username: name } = user;
-                this.usersList.trade({ name, url, id });
-            }
-        }
-    }
-    buildAdjList() {
-        for (let user in this.usersList.users) {
-            const {name, need, trade} = this.usersList.users[user];
-            for (const needID of need) {
-                if (!this.adjList[needID]) {
-                    this.adjList[needID] = { 
-                        cards: {}, 
-                        popularity: this.data[needID].need.length, 
-                        availability: this.data[needID].trade.length, 
-                        src: this.data[needID].src 
-                    };
-                }
-                for (const tradeID of trade) {
-                    if (!this.adjList[needID].cards[tradeID]) {
-                        this.adjList[needID].cards[tradeID] = [];
-                    }
-                    this.adjList[needID].cards[tradeID].push(name);
-                }
-            }
-        }
-    }
-}
-
 class UsersList {
     constructor() {
         this.users = {};
@@ -173,12 +101,4 @@ class UsersList {
             this.users[name] = { name, url, need: new Set(), trade: new Set() };
         }
     }
-}
-async function getCardsGraphInfo(rank) {
-    const graph = new GraphInfo(rank);
-    await graph.getData();
-    graph.createUsersData();
-    graph.buildAdjList();
-
-    return graph.adjList;
 }
