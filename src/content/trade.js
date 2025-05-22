@@ -19,11 +19,16 @@ async function showCards({ input }) {
 async function init() {
     const { searchCards, anotherUserMode} = await ExtensionConfig.getConfig("functionConfig");
 
+    let querySelector = ".ncard__offer-send-btn";
+    let container = document.querySelector(querySelector);
+    if (!container) {
+        querySelector = ".ncard__tabs";
+    }
 
     const box = new Box({
         display: searchCards,
         displayType:"flex",
-        placeAfter: ".ncard__offer-send-btn",
+        placeAfter: querySelector,
         className: "extension__box",
         center: true,
     })

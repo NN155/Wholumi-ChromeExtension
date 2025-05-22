@@ -20,14 +20,10 @@ class Link extends Element {
             display: true,
             className: "",
         }) {
-        console.log("Link", { text, href, place, placeAfter, placeBefore, disable, onClick, display, className })
         super("a", "flex")
-        this.onClick = onClick
         this.element.textContent = text
         this.element.href = href
-        this.element.className = className
-        this._style()
-        this.element.onclick = this._onClick.bind(this)
+        this.element.className = `wholumi ${className}`.trim();
         disable && this.disable()
         this.display(display);
         place && this.place(place)
@@ -35,20 +31,10 @@ class Link extends Element {
         placeBefore && this.placeBefore(placeBefore)
     }
 
-    _style() {
-        this.element.style.backgroundColor = "#772ce8"
-        this.element.style.alignItems = "center"
-        this.element.style.cursor = "pointer"
-        this.element.style.userSelect = "none"
-    }
-
     disable() {
 
         this._originalOnClick = this.element.onclick;
         this.element.onclick = null;
-
-        this.element.style.backgroundColor = "#4a2c8f"
-        this.element.style.cursor = "default"
 
         this._href = this.element.getAttribute('href')
         this.element.removeAttribute('href')
@@ -65,7 +51,6 @@ class Link extends Element {
             this.element.setAttribute('href', this._href);
         }
 
-        this._style()
         this.element.setAttribute('href', this.href)
         this.element.setAttribute('aria-disabled', 'false')
     }
