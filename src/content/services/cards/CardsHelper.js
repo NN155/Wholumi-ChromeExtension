@@ -60,7 +60,7 @@ function changeCards(cards) {
             }
             
             const link = new Link({
-                disabled,
+                disable: disabled,
                 text,
                 className: "all-owners",
                 href: disabled ? "" : UrlConstructor.tradeLink(card.id, card.tradeCard.id, isLocked),

@@ -1,6 +1,6 @@
 class Link extends Element {
     constructor({
-        text="",
+        text = "",
         href = "",
         place = null,
         placeAfter = null,
@@ -10,16 +10,17 @@ class Link extends Element {
         display = true,
         className = "",
     } = {
-        text: "",
-        href: "",
-        place: null,
-        placeAfter: null,
-        placeBefore: null,
-        disable: false,
-        onClick: null,
-        display: true,
-        className: "",
-    }) {
+            text: "",
+            href: "",
+            place: null,
+            placeAfter: null,
+            placeBefore: null,
+            disable: false,
+            onClick: null,
+            display: true,
+            className: "",
+        }) {
+        console.log("Link", { text, href, place, placeAfter, placeBefore, disable, onClick, display, className })
         super("a", "flex")
         this.onClick = onClick
         this.element.textContent = text
@@ -36,19 +37,37 @@ class Link extends Element {
 
     _style() {
         this.element.style.backgroundColor = "#772ce8"
-        this.element.style.color = "#fff"
         this.element.style.alignItems = "center"
+        this.element.style.cursor = "pointer"
+        this.element.style.userSelect = "none"
     }
 
     disable() {
+
+        this._originalOnClick = this.element.onclick;
+        this.element.onclick = null;
+
+        this.element.style.backgroundColor = "#4a2c8f"
         this.element.style.cursor = "default"
-        this.element.onClick = () => { }
-        this.element.style.color = "#4a2c8f"
+
+        this._href = this.element.getAttribute('href')
+        this.element.removeAttribute('href')
+        this.element.setAttribute('aria-disabled', 'true')
     }
 
     enable() {
+
+        if (this._originalOnClick) {
+            this.element.onclick = this._originalOnClick;
+        }
+
+        if (this._href) {
+            this.element.setAttribute('href', this._href);
+        }
+
         this._style()
-        this.element.onClick = this.funk
+        this.element.setAttribute('href', this.href)
+        this.element.setAttribute('aria-disabled', 'false')
     }
 
     async _onClick() {
