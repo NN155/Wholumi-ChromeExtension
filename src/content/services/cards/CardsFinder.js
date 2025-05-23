@@ -128,10 +128,12 @@ class CardsFinder {
                 break;
         }
 
+        const ranks = ["a", "b", "c", "d", "e"];
+
         const usersList = await getUsersList(url, {
             limit: this.limit,
             pageLimit: this.pageLimit,
-            filterLock: filter,
+            filterLock: ranks.includes(this.card.rank) ? true : this.filter,
             filterOnline: online,
         });
 

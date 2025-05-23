@@ -4,7 +4,7 @@ async function showCards({ input }) {
     let username = input.getValue() || UrlConstructor.getMyName();
     let id = UrlConstructor.getCardId(window.location.href);
 
-    const cardsFinder = new CardsFinder({ username,  id, limit: 200, pageLimit: 7});
+    const cardsFinder = new CardsFinder({ username,  id, limit: 500, pageLimit: 10});
     const cards = await cardsFinder.users();
     if (cards.error) {
         ShowBar.text(cards.error);
