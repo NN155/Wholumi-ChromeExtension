@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "AnimeStars Alpha",
-  "version": "1.3.11",
+  "version": "2.0.0",
   "author": "MrKoMi",
   "description": "Press INSERT to open the menu",
   "permissions": [
@@ -23,6 +23,16 @@
   "background": {
     "service_worker": "background/worker.js"
   },
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "assets/wholumi-logo.png"
+      ],
+      "matches": [
+        "<all_urls>"
+      ]
+    }
+  ],
   "content_scripts": [
     {
       "matches": [
@@ -33,15 +43,7 @@
       ],
       "js": [
         "content/services/config.js",
-        "menu/style/menu.js",
-        "menu/components.js",
-        "menu/tab.js",
-        "menu/tabs/misc.js",
-        "menu/tabs/fun.js",
-        "menu/tabs/global.js",
-        "menu/tabs/visuals.js",
-        "menu/menu.js",
-        "menu/content.js"
+        "menu/menu.js"
       ]
     },
     {
@@ -61,24 +63,18 @@
         "content/external/jQuery.js",
         "content/external/jQueryUI.js",
         "content/external/AnimeStarsjQuery.js",
-
         "content/theme/globalColors.js",
-
         "content/services/getUserHash.js",
         "content/services/localStorage.js",
         "content/services/SaveFetch.js",
-
         "content/services/fetch/FetchService.js",
         "content/services/fetch/ProtectedFetchService.js",
-
         "content/models/card/Card.js",
         "content/models/card/CardsArray.js",
         "content/models/card/CardsHash.js",
         "content/models/user/User.js",
         "content/models/user/UsersArray.js",
-
         "content/services/container.js",
-
         "content/components/ui/Element.js",
         "content/components/ui/Button.js",
         "content/components/ui/ShowBar.js",
@@ -87,7 +83,6 @@
         "content/components/ui/Li.js",
         "content/components/ui/Box.js",
         "content/components/ui/Link.js",
-        
         "content/services/urls/UrlService.js",
         "content/services/urls/AnimeUrlService.js",
         "content/services/urls/CardUrlService.js",
@@ -95,19 +90,15 @@
         "content/services/urls/UserUrlService.js",
         "content/services/urls/InventoryUrlService.js",
         "content/services/urls/UrlConstructor.js",
-
         "content/services/cache/CacheService.js",
         "content/services/cards/GetCards.js",
         "content/services/cards/CardsHelper.js",
         "content/services/cards/CardsFinder.js",
-
         "content/services/trades/TradeHelper.js",
         "content/services/trades/TradeMonitor.js",
         "content/services/trades/TradeHistory.js",
-
         "content/DataConfig.js",
         "content/ReceiveCard.js",
-
         "content/AutoLogin.js"
       ]
     },
@@ -231,13 +222,13 @@
       "matches": [
         "https://animestars.org/aniserials/videos/*/*",
         "https://asstars.tv/aniserials/videos/*/*",
-        "https://as1.astars.club/aniserials/videos/*/*",  
+        "https://as1.astars.club/aniserials/videos/*/*",
         "https://asstars1.astars.club/aniserials/videos/*/*"
       ],
       "js": [
         "content/Deck.js"
       ]
-    }, 
+    },
     {
       "matches": [
         "https://animestars.org/user/*/cards_progress/*",

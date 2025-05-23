@@ -1,29 +1,42 @@
 import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react-swc'
+import react from '@vitejs/plugin-react'
+import { resolve } from 'path'
 import { viteStaticCopy } from 'vite-plugin-static-copy'
 
 // https://vite.dev/config/
 export default defineConfig({
-    plugins: [
-      react(),
-      viteStaticCopy({
-        targets: [
-          {
-            src: 'src/content/*', 
-            dest: 'content',
-          },
-          {
-            src: 'src/menu/*',
-            dest: 'menu',
-          },
-          {
-            src: 'src/background/*',
-            dest: 'background',
+  plugins: [
+    react(),
+    viteStaticCopy({
+      targets: [
+        {
+          src: 'src/content/*',
+          dest: 'content',
+        },
+        {
+          src: 'src/background/*',
+          dest: 'background',
+        }
+      ],
+    }),
+  ],
+  build: {
+    rollupOptions: {
+      input: {
+        menu: resolve(__dirname, 'src/new-menu/index.jsx'),
+      },
+      output: {
+        entryFileNames: 'menu/[name].js',
+        chunkFileNames: '[name].js',
+        assetFileNames: '[name].[ext]',
+        manualChunks: (id) => {
+          // Don't split the content script into chunks
+          if (id.includes('menu')) {
+            return 'menu';
           }
-        ],
-      }),
-    ],
-    build : {
-      outDir: 'dist/alpha',
+        }
+      },
     },
+    outDir: 'dist/menu',
+  },
 });
