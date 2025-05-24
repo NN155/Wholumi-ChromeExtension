@@ -11,10 +11,11 @@ class Event {
     }
 
     static async sendEvent({ key, event, data, id, ...rest }) {
+        id = id || Date.now();
         const e = new CustomEvent(event, {
             detail: {
                 key: key,
-                id: Date.now(),
+                id: id,
                 data: data,
                 event: "button-task-completed",
                 ...rest,
@@ -24,5 +25,7 @@ class Event {
         await new Promise(resolve => this.promises[id] = resolve);
     }
 }
+
+Event.addEventListener();
 
 export default Event;

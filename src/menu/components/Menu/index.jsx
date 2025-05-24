@@ -1,5 +1,6 @@
 import { Box, keyframes } from '@chakra-ui/react';
 import { useState, useEffect } from 'react';
+import { useScrollLock } from '../../container/hooks/useScrollLock';
 
 const fadeInAnimation = keyframes`
   0% {
@@ -29,7 +30,7 @@ const fadeOutAnimation = keyframes`
 
 const Menu = ({ children }) => {
     const [isVisible, setIsVisible] = useState(false);
-
+    useScrollLock(isVisible);
     useEffect(() => {
         const handleKeyDown = (event) => {
             if (event.key === 'Insert') {

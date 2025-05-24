@@ -54,6 +54,7 @@
         "https://asstars1.astars.club/*"
       ],
       "css": [
+        "css/page.css",
         "css/button.css",
         "css/switcher.css",
         "css/cards.css",

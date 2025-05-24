@@ -357,8 +357,12 @@ class BindingPack {
         this.ids = []
     }
 
-    init() {
+    async init() {
         if (this.initialized) return;
+
+        const { packsKeyBinds } = await ExtensionConfig.getConfig("functionConfig");
+        if (!packsKeyBinds) return;
+
         this.initialized = true;
         document.addEventListener('keydown', (event) => this.handleKeyPress(event));
     }
@@ -549,7 +553,7 @@ class PacksChangerInititializer {
 
     async _action() {
         await this.inject.inject();
-        bindingPack.init();
+        await bindingPack.init();
     }
 }
 

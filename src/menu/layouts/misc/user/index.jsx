@@ -9,11 +9,10 @@ const User = () => {
     const [password, setPassword] = useState("");
     const { miscConfig, setUserConfig } = useConfig();
 
-    const [placeholders, setPlaceholders] = useState(miscConfig?.user || {});
-
+    const [placeholders, setPlaceholders] = useState(miscConfig?.userConfig || {});
 
     useEffect(() => {
-        const configValue = miscConfig?.user;
+        const configValue = miscConfig?.userConfig;
         if (configValue) {
             setPlaceholders(configValue);
         }
@@ -26,7 +25,6 @@ const User = () => {
         });
         setUsername("");
         setPassword("");
-        console.log("Saved username and password");
     }
 
     return (
@@ -48,7 +46,6 @@ const User = () => {
                         <Box display="flex" flexDirection="column" gap="10px" width="100%" maxWidth="300px">
                             <Input
                                 placeholder={`Username${placeholders?.username ? ` (${placeholders.username})` : ""}`}
-                                onChangeEnd={(value) => console.log("Username:", value)}
                                 value={username}
                                 onChange={(e) => {
                                     setUsername(e.target.value)

@@ -3,7 +3,6 @@ import { Navbar } from "../../components";
 
 const NavbarLayout = ({ tabs, panels, defaultIndex = 0 }) => {
     const showLogo = useBreakpointValue({ base: false, md: true });
-    console.log("showLogo", showLogo);
     
     return (
         <Tabs defaultIndex={defaultIndex}>

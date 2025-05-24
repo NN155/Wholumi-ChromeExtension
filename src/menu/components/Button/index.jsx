@@ -1,11 +1,16 @@
 import { Button as ChakraButton, useTheme } from '@chakra-ui/react';
 import { darken } from '@chakra-ui/theme-tools';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { PointsLoading } from '..';
 
 const Button = ({ label, onClick, children, disabled = false, loading = false, ...rest }) => {
     const [isActive, setIsActive] = useState(disabled);
     const [isLoading, setIsLoading] = useState(false);
+
+    useEffect(() => {
+        setIsActive(disabled);
+    }, [disabled]);
+
     const theme = useTheme();
 
     const hover = darken('primary.dark', 10)(theme);

@@ -18,6 +18,7 @@ chrome.runtime.onInstalled.addListener(() => {
             offersResolver: false,
             propose: true,
             autoLogin: false,
+            packsKeyBinds: false,
         }
         if (config) {
             defaultConfig = { ...defaultConfig, ...config };

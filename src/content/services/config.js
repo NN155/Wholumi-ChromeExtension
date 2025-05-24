@@ -58,7 +58,7 @@ class Config {
         chrome.runtime.onMessage.addListener((message) => {
             if (message.action === "update-config" && message.key) {
                 this.configCache[message.key] = message.config;
-                const event = new CustomEvent(`config-updated`, { detail: { key: message.key , tabSender: message.tabSender } });
+                const event = new CustomEvent(`config-updated`, { detail: { key: message.key , tabSender: message.tabSender, config: message.config } });
                 window.dispatchEvent(event);
             }
         });

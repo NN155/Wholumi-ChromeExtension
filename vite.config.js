@@ -23,7 +23,7 @@ export default defineConfig({
   build: {
     rollupOptions: {
       input: {
-        menu: resolve(__dirname, 'src/new-menu/index.jsx'),
+        menu: resolve(__dirname, 'src/menu/index.jsx'),
       },
       output: {
         entryFileNames: 'menu/[name].js',

@@ -1,9 +1,36 @@
 import { Container, EventButton, ConfigUpdateButton, ConfigSlider, ContainerLayout, ConfigCheckbox, ConfigCollapse, ConfigInput } from "../../../components";
 import { Text, Box } from "@chakra-ui/react";
+import { useConfig } from "../../../container/ConfigProvider";
+import { useState, useEffect } from "react";
 
 const Packs = () => {
+  const [text, setText] = useState("Inject");
+  const [active, setActive] = useState(true);
 
-  const isValidPage = window.location.href.includes("/cards/pack/");
+  const { lastUpdate } = useConfig();
+
+  handleTextChange = (newText = "Inject") => {
+    const isValidPage = window.location.href.includes("/cards/pack/");
+    if (!isValidPage) {
+      setText("Visit a pack page");
+      setActive(false);
+    } else {
+      const { packInventory, siteInventory } = lastUpdate;
+
+      if (packInventory && siteInventory) {
+        setText(newText);
+        setActive(true);
+      } else {
+        setText("Update data");
+        setActive(false);
+      }
+    }
+      console.log("text", text, "active", active);
+  }
+
+  useEffect(() => {
+    handleTextChange();
+  }, [lastUpdate]);
 
   return (
     <>
@@ -17,7 +44,7 @@ const Packs = () => {
                   <ConfigUpdateButton configKey="packInventory" label="Open cards" />
                   <ConfigUpdateButton configKey="siteInventory" label="Site data" />
                 </ContainerLayout>
-                <EventButton eventKey="inject" event="packs" label="Inject" disabled={!isValidPage} />
+                <EventButton eventKey="inject" event="packs" label={text} disabled={!active} />
               </Box>
             </Container>
             <Container padding="10px">
@@ -125,15 +152,15 @@ const Packs = () => {
                   <Text>Z, X, C, V, B, A, S, D, F - Bind specific card ID to the next pack</Text>
                   <Text>ESC, 0, BACKSPACE - Clear all settings</Text>
                   <Box display="flex" flexDirection={"column"} gap="10px" mt="10px">
-                  <ConfigInput placeholder="Bind KeyZ card ID" isNumber configKey="packs" dataKey="card1"/>
-                  <ConfigInput placeholder="Bind KeyX card ID" isNumber configKey="packs" dataKey="card2"/>
-                  <ConfigInput placeholder="Bind KeyC card ID" isNumber configKey="packs" dataKey="card3"/>
-                  <ConfigInput placeholder="Bind KeyV card ID" isNumber configKey="packs" dataKey="card4"/>
-                  <ConfigInput placeholder="Bind KeyB card ID" isNumber configKey="packs" dataKey="card5"/>
-                  <ConfigInput placeholder="Bind KeyA card ID" isNumber configKey="packs" dataKey="card6"/>
-                  <ConfigInput placeholder="Bind KeyS card ID" isNumber configKey="packs" dataKey="card7"/>
-                  <ConfigInput placeholder="Bind KeyD card ID" isNumber configKey="packs" dataKey="card8"/>
-                  <ConfigInput placeholder="Bind KeyF card ID" isNumber configKey="packs" dataKey="card9"/>
+                    <ConfigInput placeholder="Bind KeyZ card ID" isNumber configKey="packs" dataKey="card1" />
+                    <ConfigInput placeholder="Bind KeyX card ID" isNumber configKey="packs" dataKey="card2" />
+                    <ConfigInput placeholder="Bind KeyC card ID" isNumber configKey="packs" dataKey="card3" />
+                    <ConfigInput placeholder="Bind KeyV card ID" isNumber configKey="packs" dataKey="card4" />
+                    <ConfigInput placeholder="Bind KeyB card ID" isNumber configKey="packs" dataKey="card5" />
+                    <ConfigInput placeholder="Bind KeyA card ID" isNumber configKey="packs" dataKey="card6" />
+                    <ConfigInput placeholder="Bind KeyS card ID" isNumber configKey="packs" dataKey="card7" />
+                    <ConfigInput placeholder="Bind KeyD card ID" isNumber configKey="packs" dataKey="card8" />
+                    <ConfigInput placeholder="Bind KeyF card ID" isNumber configKey="packs" dataKey="card9" />
                   </Box>
                 </ConfigCollapse>
               </Box>

@@ -47,7 +47,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse, tab) => {
                             chrome.storage.local.get("lastUpdate", (data) => {
                                 const lastUpdate = data.lastUpdate;
                                 for (const key in messageConfig) {
-                                    lastUpdate[key] = new Date().toLocaleString();
+                                    lastUpdate[key] = Date.now();
                                 }
                                 chrome.storage.local.set({ lastUpdate: lastUpdate }, (data) => {
                                     notifyTabsAboutConfig({ key: "lastUpdate", config: lastUpdate });
@@ -62,13 +62,13 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse, tab) => {
                             config = { ...config, ...message.config };
                             sendResponse({ config: config });
                             chrome.storage.local.set({ [message.key]: config }, (data) => {
-                                notifyTabsAboutConfig({ key: message.key, config });
+                                notifyTabsAboutConfig({ key: message.key, config, senderTabId: sender.tab.id });
                             });
                         });
                         return true;
 
                     case "userConfig":
-                        const { username, password } = message.config.userConfig;
+                        const { username, password } = message.config;
                         const secretKey = generateSecretKey(1024);
                         const encryptedPassword = CryptoJS.AES.encrypt(password, secretKey).toString();
 
