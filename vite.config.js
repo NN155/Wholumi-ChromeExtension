@@ -37,6 +37,6 @@ export default defineConfig({
         }
       },
     },
-    outDir: 'dist/menu',
+    outDir: 'dist/alpha',
   },
 });
