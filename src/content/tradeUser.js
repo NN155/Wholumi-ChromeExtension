@@ -70,4 +70,5 @@ async function init() {
     tradePageManager.scroll();
 }
 
-init()
+// Not working
+// init()

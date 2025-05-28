@@ -14,6 +14,7 @@ targetDomains = [
     "https://asstars.tv/",
     "https://as1.astars.club/",
     "https://asstars1.astars.club/",
+    "asstars.club/",
 ]
 
 isTargetDomain = (url) => {

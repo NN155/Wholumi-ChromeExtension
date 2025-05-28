@@ -18,7 +18,8 @@
     "https://animestars.org/*",
     "https://asstars.tv/*",
     "https://as1.astars.club/*",
-    "https://asstars1.astars.club/*"
+    "https://asstars1.astars.club/*",
+    "https://asstars.club/*"
   ],
   "background": {
     "service_worker": "background/worker.js"
@@ -39,7 +40,8 @@
         "https://animestars.org/*",
         "https://asstars.tv/*",
         "https://as1.astars.club/*",
-        "https://asstars1.astars.club/*"
+        "https://asstars1.astars.club/*",
+        "https://asstars.club/*"
       ],
       "js": [
         "content/services/config.js",
@@ -51,7 +53,8 @@
         "https://animestars.org/*",
         "https://asstars.tv/*",
         "https://as1.astars.club/*",
-        "https://asstars1.astars.club/*"
+        "https://asstars1.astars.club/*",
+        "https://asstars.club/*"
       ],
       "css": [
         "css/page.css",
@@ -107,7 +110,8 @@
         "https://animestars.org/cards/*/users/need/",
         "https://asstars.tv/cards/*/users/need/",
         "https://as1.astars.club/cards/*/users/need/",
-        "https://asstars1.astars.club/cards/*/users/need/"
+        "https://asstars1.astars.club/cards/*/users/need/",
+        "https://asstars.club/cards/*/users/need/"
       ],
       "js": [
         "content/Need.js"
@@ -118,7 +122,8 @@
         "https://animestars.org/cards/*/users/trade/",
         "https://asstars.tv/cards/*/users/trade/",
         "https://as1.astars.club/cards/*/users/trade/",
-        "https://asstars1.astars.club/cards/*/users/trade/"
+        "https://asstars1.astars.club/cards/*/users/trade/",
+        "https://asstars.club/cards/*/users/trade/"
       ],
       "js": [
         "content/Trade.js"
@@ -129,7 +134,8 @@
         "https://animestars.org/cards/*/users/",
         "https://asstars.tv/cards/*/users/",
         "https://as1.astars.club/cards/*/users/",
-        "https://asstars1.astars.club/cards/*/users/"
+        "https://asstars1.astars.club/cards/*/users/",
+        "https://asstars.club/cards/*/users/"
       ],
       "js": [
         "content/Users.js"
@@ -140,7 +146,8 @@
         "https://animestars.org/cards_remelt/*",
         "https://asstars.tv/cards_remelt/*",
         "https://as1.astars.club/cards_remelt/*",
-        "https://asstars1.astars.club/cards_remelt/*"
+        "https://asstars1.astars.club/cards_remelt/*",
+        "https://asstars.club/cards_remelt/*"
       ],
       "js": [
         "content/Remelt.js"
@@ -151,7 +158,8 @@
         "https://animestars.org/cards/*/trade?mycard=*",
         "https://asstars.tv/cards/*/trade?mycard=*",
         "https://as1.astars.club/cards/*/trade?mycard=*",
-        "https://asstars1.astars.club/cards/*/trade?mycard=*"
+        "https://asstars1.astars.club/cards/*/trade?mycard=*",
+        "https://asstars.club/cards/*/trade?mycard=*"
       ],
       "js": [
         "content/TradeUser.js"
@@ -162,7 +170,8 @@
         "https://animestars.org/clubs/*/boost/*",
         "https://asstars.tv/clubs/*/boost/*",
         "https://as1.astars.club/clubs/*/boost/*",
-        "https://asstars1.astars.club/clubs/*/boost/*"
+        "https://asstars1.astars.club/clubs/*/boost/*",
+        "https://asstars.club/clubs/*/boost/*"
       ],
       "js": [
         "content/external/socketIo.js",
@@ -175,7 +184,8 @@
         "https://animestars.org/user/*/cards/trade/*",
         "https://asstars.tv/user/*/cards/trade/*",
         "https://as1.astars.club/user/*/cards/trade/*",
-        "https://asstars1.astars.club/user/*/cards/trade/*"
+        "https://asstars1.astars.club/user/*/cards/trade/*",
+        "https://asstars.club/user/*/cards/trade/*"
       ],
       "js": [
         "content/Propose.js"
@@ -186,7 +196,8 @@
         "https://animestars.org/trades/",
         "https://asstars.tv/trades/",
         "https://as1.astars.club/trades/",
-        "https://asstars1.astars.club/trades/"
+        "https://asstars1.astars.club/trades/",
+        "https://asstars.club/trades/"
       ],
       "js": [
         "content/ConfirmTrade.js"
@@ -197,7 +208,8 @@
         "https://animestars.org/cards/pack/",
         "https://asstars.tv/cards/pack/",
         "https://as1.astars.club/cards/pack/",
-        "https://asstars1.astars.club/cards/pack/"
+        "https://asstars1.astars.club/cards/pack/",
+        "https://asstars.club/cards/pack/"
       ],
       "js": [
         "content/external/jQueryHTML.js",
@@ -212,7 +224,8 @@
         "https://animestars.org/user/*/",
         "https://asstars.tv/user/*/",
         "https://as1.astars.club/user/*/",
-        "https://asstars1.astars.club/user/*/"
+        "https://asstars1.astars.club/user/*/",
+        "https://asstars.club/user/*/"
       ],
       "js": [
         "content/Profile.js"
@@ -223,7 +236,8 @@
         "https://animestars.org/aniserials/videos/*/*",
         "https://asstars.tv/aniserials/videos/*/*",
         "https://as1.astars.club/aniserials/videos/*/*",
-        "https://asstars1.astars.club/aniserials/videos/*/*"
+        "https://asstars1.astars.club/aniserials/videos/*/*",
+        "https://asstars.club/aniserials/videos/*/*"
       ],
       "js": [
         "content/Deck.js"
@@ -234,7 +248,8 @@
         "https://animestars.org/user/*/cards_progress/*",
         "https://asstars.tv/user/*/cards_progress/*",
         "https://as1.astars.club/user/*/cards_progress/*",
-        "https://asstars1.astars.club/user/*/cards_progress/*"
+        "https://asstars1.astars.club/user/*/cards_progress/*",
+        "https://asstars.club/user/*/cards_progress/*"
       ],
       "js": [
         "content/external/exel.js",
