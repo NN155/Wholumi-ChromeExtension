@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "AnimeStars Alpha",
-  "version": "2.0.0",
+  "version": "2.0.4",
   "author": "MrKoMi",
   "description": "Press INSERT to open the menu",
   "permissions": [
@@ -67,7 +67,7 @@
         "content/theme/globalColors.js",
         "content/services/getUserHash.js",
         "content/services/localStorage.js",
-        "content/services/SaveFetch.js",
+        "content/services/fetch/SaveFetch.js",
         "content/services/fetch/FetchService.js",
         "content/services/fetch/ProtectedFetchService.js",
         "content/models/card/Card.js",
@@ -93,7 +93,6 @@
         "content/services/urls/UrlConstructor.js",
         "content/services/cache/CacheService.js",
         "content/services/cards/GetCards.js",
-        "content/services/cards/CardsHelper.js",
         "content/services/cards/CardsFinder.js",
         "content/services/trades/TradeHelper.js",
         "content/services/trades/TradeMonitor.js",

@@ -1,22 +1,29 @@
-async function showCards({ input }) {
+async function showCards({ input, testMode }) {
     ShowBar.createShowBar();
     
+    isAnotherUser = !!input.getValue();
     let username = input.getValue() || UrlConstructor.getMyName();
     let id = UrlConstructor.getCardId(window.location.href);
 
-    const cardsFinder = new CardsFinder({ username,  id, limit: 500, pageLimit: 10});
-    const cards = await cardsFinder.users();
-    if (cards.error) {
-        ShowBar.text(cards.error);
-        return;
+    const cardsFinder = new CardsFinderService({ testMode });
+    try {
+        const { userCardsMap, usersCardsMap } = await cardsFinder.users({username, id, verifyUser: isAnotherUser, limit: 200 });
+        
+        const cardsBuilder = new CardsBuilder({ userCardsMap, usersCardsMap, testMode});
+        const cardsRender = new CardsRender({ cardsBuilder, testMode });
+        cardsRender.render();
+    } catch (error) {
+        if (error instanceof CardsFinderError) {
+            ShowBar.text(error.message);
+            return;
+        }
+        console.error(error);
+        ShowBar.text("ERROR");
     }
-
-    changeCards(cards);
-    ShowBar.addElementsToBar(cards.getCardsArray());
 }
 
 async function init() {
-    const { searchCards, anotherUserMode} = await ExtensionConfig.getConfig("functionConfig");
+    const { searchCards, anotherUserMode, testMode} = await ExtensionConfig.getConfig("functionConfig");
     
     const text = `Compare Cards`;
 
@@ -36,7 +43,7 @@ async function init() {
 
     const button = new Button({
         text: text,
-        onClick: () => showCards({ input }),
+        onClick: () => showCards({ input, testMode }),
         place: ".extension__box",
     });
 

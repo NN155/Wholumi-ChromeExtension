@@ -11,8 +11,14 @@ const TimeText = ({
   useEffect(() => {
     const calculateTimeAgo = () => {
       if (!time) {
-        setTimeAgo(defaultText);
         return { text: defaultText, interval: null };
+      }
+
+      if (typeof time === 'string') {
+        const date = new Date(time);
+        if (isNaN(date.getTime())) {
+          return { text: "Sometime", interval: null };
+        }
       }
       
       const timeMs = typeof time === 'string' ? new Date(time).getTime() : Number(time);

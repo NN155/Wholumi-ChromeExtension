@@ -27,7 +27,7 @@ const Cards = () => {
                             configKey="anotherUserMode"
                         />
                         <ConfigCheckbox 
-                            label="Trade Helper" 
+                            label="Trade Helper (Not woriking)" 
                             configKey="tradeHelper"
                         />
                     </Box>

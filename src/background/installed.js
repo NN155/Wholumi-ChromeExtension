@@ -19,6 +19,7 @@ chrome.runtime.onInstalled.addListener(() => {
             propose: true,
             autoLogin: false,
             packsKeyBinds: false,
+            testMode: false,
         }
         if (config) {
             defaultConfig = { ...defaultConfig, ...config };
@@ -46,6 +47,7 @@ chrome.runtime.onInstalled.addListener(() => {
                 customBoostTime: 700,
                 customBoostDelay: 25,
                 multiply: 1,
+                requestLimit: 150,
             },
             packs: {
                 balance: 10000,
@@ -69,19 +71,13 @@ chrome.runtime.onInstalled.addListener(() => {
                 card8: "289",
                 card9: "7195",
             },
-            menuColors: {
-                mainColor: "#8a1ec9",
-                bgColor: "#34495e",
-                secondBgColor: "#2c3e50",
-                thirdBgColor: "#2c3e50",
-                textColor: "#ecf0f1",
-                secondaryTextColor: "#ecf0f1",
-                thirdTextColor: "#000000",
-            },
             userConfig: {
                 username: "",
                 password: "",
-            },  
+            },
+            theme: {
+                selectedTheme: "purpleDark",
+            }
         }
         if (config) {
             for (const key in defaultConfig) {

@@ -4,7 +4,7 @@ class FetchService {
         let response;
         let count = 0;
         while (count < 3) {
-            response = await saveFetch(url);
+            response = await SaveFetchService.fetch(url);
             if (response.status !== 403) {
                 break;
             }
@@ -18,7 +18,7 @@ class FetchService {
 
     // unlock card by id
     static async unlockCard(id) {
-        await saveFetch('/engine/ajax/controller.php?mod=cards_ajax', {
+        await SaveFetchService.fetch('/engine/ajax/controller.php?mod=cards_ajax', {
             method: 'POST',
             headers: {
                 'Content-Type': "application/x-www-form-urlencoded; charset=UTF-8",
@@ -33,7 +33,7 @@ class FetchService {
 
     // recieve card from server
     static async receiveCard() {
-        const response = await saveFetch('/engine/ajax/controller.php?mod=reward_card', {
+        const response = await SaveFetchService.fetch('/engine/ajax/controller.php?mod=reward_card', {
             method: 'POST',
             headers: {
                 "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
@@ -50,7 +50,7 @@ class FetchService {
 
     // report card viewed
     static async reportCardViewed(owner_id) {
-        const response = await saveFetch('/engine/ajax/controller.php?mod=cards_ajax', {
+        const response = await SaveFetchService.fetch('/engine/ajax/controller.php?mod=cards_ajax', {
             method: 'POST',
             headers: {
                 "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
@@ -68,7 +68,7 @@ class FetchService {
 
     // check if card can be taken
     static async checkTakeCard() {
-        const response = await saveFetch("/engine/ajax/controller.php?mod=cards_ajax", {
+        const response = await SaveFetchService.fetch("/engine/ajax/controller.php?mod=cards_ajax", {
             method: "POST",
             headers: {
                 "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
@@ -100,7 +100,7 @@ class FetchService {
             body.append("creator_ids[]", id);
         });
 
-        const response = await saveFetch(url, {
+        const response = await SaveFetchService.fetch(url, {
             method: "POST",
             headers: {
                 "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
@@ -114,7 +114,7 @@ class FetchService {
     static async cancelTrade(id, kind) { // kind = "sended" or "recieved"
         const url = "/engine/ajax/controller.php?mod=trade_ajax";
 
-        const response = await saveFetch(url, {
+        const response = await SaveFetchService.fetch(url, {
             method: "POST",
             headers: {
                 "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
@@ -141,7 +141,7 @@ class FetchService {
     static async boostCard(cardId, clubId) {
         const url = `/clubs/${clubId}/boost/`;
 
-        const response = await saveFetch(url, {
+        const response = await SaveFetchService.fetch(url, {
             method: "POST",
             headers: {
                 "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
@@ -158,7 +158,7 @@ class FetchService {
     static async updateCardInfo(cardId) {
         const url = `/engine/ajax/controller.php?mod=clubs_ajax`;
 
-        const response = await saveFetch(url, {
+        const response = await SaveFetchService.fetch(url, {
             method: "POST",
             headers: {
                 "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
@@ -189,7 +189,7 @@ class FetchService {
             "kodik_data[translation][title]": translationTitle,
         }).toString();
 
-        await saveFetch(`/engine/ajax/controller.php?${queryParams}`)
+        await SaveFetchService.fetch(`/engine/ajax/controller.php?${queryParams}`)
     }
 
     static async rateComment({ go_rate = "plus", c_id = -1, skin = "New" } = {}) {
@@ -202,7 +202,7 @@ class FetchService {
 
         }).toString();
 
-        await saveFetch(`/engine/ajax/controller.php?${queryParams}`)
+        await SaveFetchService.fetch(`/engine/ajax/controller.php?${queryParams}`)
     }
 
     static async remeltCard(cardIds) {
@@ -215,7 +215,7 @@ class FetchService {
             body.append("card_ids[]", id);
         });
 
-        await saveFetch('/engine/ajax/controller.php?mod=cards_ajax', {
+        await SaveFetchService.fetch('/engine/ajax/controller.php?mod=cards_ajax', {
             method: 'POST',
             headers: {
                 'Content-Type': "application/x-www-form-urlencoded; charset=UTF-8",
@@ -231,7 +231,7 @@ class FetchService {
             card_id: cardId,
         });
 
-        const response = await saveFetch('/engine/ajax/controller.php?mod=trade_ajax', {
+        const response = await SaveFetchService.fetch('/engine/ajax/controller.php?mod=trade_ajax', {
             method: 'POST',
             headers: {
                 'Content-Type': "application/x-www-form-urlencoded; charset=UTF-8",
@@ -248,7 +248,7 @@ class FetchService {
             id: id,
         });
 
-        await saveFetch('/engine/ajax/controller.php?mod=trade_ajax', {
+        await SaveFetchService.fetch('/engine/ajax/controller.php?mod=trade_ajax', {
             method: 'POST',
             headers: {
                 'Content-Type': "application/x-www-form-urlencoded; charset=UTF-8",
@@ -258,7 +258,7 @@ class FetchService {
     }
 
     static async giftCode(code) {
-        const response = await saveFetch("/engine/ajax/controller.php?mod=gift_code_game", {
+        const response = await SaveFetchService.fetch("/engine/ajax/controller.php?mod=gift_code_game", {
             method: "POST",
             headers: {
                 "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
@@ -272,7 +272,7 @@ class FetchService {
     }
 
     static async getDeck(news_id) {
-        const response = await saveFetch("/engine/ajax/controller.php?mod=cards_ajax", {
+        const response = await SaveFetchService.fetch("/engine/ajax/controller.php?mod=cards_ajax", {
             method: "POST",
             headers: {
                 "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
@@ -287,7 +287,7 @@ class FetchService {
     }
 
     static async showcase({ rank = "", locked = "", search = "" }) {
-        const response = await saveFetch("/engine/ajax/controller.php?mod=cards_ajax", {
+        const response = await SaveFetchService.fetch("/engine/ajax/controller.php?mod=cards_ajax", {
             method: "POST",
             headers: {
                 "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",

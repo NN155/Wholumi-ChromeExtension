@@ -48,9 +48,7 @@ class GetCards {
             pagesCards.forEach(cards => cardsList.push(...cards));
         }
         cardsList.forEach(card => {
-            card.username = this.user.username;
-            card.url = this.user.userUrl;
-            card.online = this.user.online;
+            card.user = this.user;
         });
         return cardsList;
     }
@@ -63,20 +61,21 @@ class GetCards {
         }
 
         // Check if the user is me
-        if (UrlConstructor.getMyUrl() === this.user.userUrl) {
-            try {
-                const cards = await GetCards.getMyCards({ rank: this.rank, unlock });
+        // if (UrlConstructor.getMyUrl() === this.user.userUrl) {
+        //     try {
+        //         const cards = await GetCards.getMyCards({ rank: this.rank, unlock });
 
-                // cache results
-                cache && (GetCards.cacheService.save({ method: "getInventory", rank: this.rank, username: this.user.username, cards }));
+        //         // cache results
+        //         cache && (GetCards.cacheService.save({ method: "getInventory", rank: this.rank, username: this.user.username, cards }));
 
-                return cards;
-            } catch (error) { 
-                if (!(error instanceof InvalidRankError)) {
-                    console.error(error); 
-                }
-            }
-        }
+        //         return cards;
+        //     } catch (error) { 
+        //         if (!(error instanceof InvalidRankError)) {
+        //             console.error(error); 
+        //         }
+        //     }
+        // }
+        
         let cardUrl = this.UrlConstructor.inventory();
         cardUrl = this.UrlConstructor.unlock(cardUrl, unlock);
         const cards = await this.getAllCards(cardUrl)

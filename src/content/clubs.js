@@ -188,7 +188,14 @@ async function setConfig() {
     clubData.openCardsBoostOnly = openCards;
 }
 
+async function setRateLimit() {
+    const { clubBoost } = await ExtensionConfig.getConfig("miscConfig", ["clubBoost"]);
+    const { requestLimit } = clubBoost;
+    saveFetchConfig.requestLimit.max = requestLimit;
+}
+
 async function init() {
+    await setRateLimit();
     await setConfig();
     await setOpenedCards();
 }
@@ -250,8 +257,11 @@ window.addEventListener('config-updated', async (event) => {
         case "lastUpdate":
             await setOpenedCards();
             break;
+        case "miscConfig":
+            await setRateLimit();
+            break;
     }
-});    
+});
 
 window.addEventListener('boost-success', () => {
     clubData.countBoost++

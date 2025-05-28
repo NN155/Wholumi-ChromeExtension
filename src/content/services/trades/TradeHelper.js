@@ -13,4 +13,12 @@ async function tradeHelper(wantedCardId, tradedCardsIds) {
         console.log(error);
         return { error: "Error in trade", success: false };
     }
-} 
+}
+
+class TradeHelperService {
+    static async trade(card) {
+        const wantedCardId = card.id;
+        const tradedCardsIds = [card.tradeCard.id];
+        return await tradeHelper(wantedCardId, tradedCardsIds);
+    }
+}

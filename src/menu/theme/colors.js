@@ -1,8 +1,8 @@
 export const purpleNormalColors = { // Renamed from purpleColors
   primary: {
-    main: '#9b6dff',
-    light: '#b28cff',
-    dark: '#6a4ec1'
+    main: '#a67aff',
+    light: '#be99ff',
+    dark: '#7758d6'
   },
   darkMode: {
     bg: '#121212',

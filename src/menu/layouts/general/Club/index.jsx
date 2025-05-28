@@ -66,6 +66,13 @@ const Club = () => {
                 configKey="clubBoost"
                 dataKey="autoBoostDelay"
               />
+              <ConfigSlider
+                label="Rate Limit (requests/minute):"
+                min={60}
+                max={300}
+                configKey="clubBoost"
+                dataKey="requestLimit"
+              />
             </Box>
             <ConfigCollapse
               configKey="clubBoost"

@@ -58,9 +58,11 @@ function getUsers(dom) {
     return usersList;
 }
 
-async function getUsersList(url, { filterLock, filterOnline, limit = 200, pageLimit = 5 } = {}) {
+async function getUsersList(url, { filterLock, filterOnline, limit = 200 } = {}) {
     const dom = await FetchService.parseFetch(url);
     let usersList = getUsers(dom);
+    const usersPageCount = usersList.length;
+    const pageLimit = Math.ceil(limit / usersPageCount);
     let pageUrls = findPanel(dom)
     if (pageUrls) {
         pageUrls = pageUrls.slice(0, pageLimit);
@@ -72,6 +74,7 @@ async function getUsersList(url, { filterLock, filterOnline, limit = 200, pageLi
         );
         usersLists.forEach(users => usersList.push(...users));
     }
+    
     if (usersList.length >= limit) {
         filterLock = true;
     }

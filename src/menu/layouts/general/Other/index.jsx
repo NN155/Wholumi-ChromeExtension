@@ -5,7 +5,7 @@ const Other = () => {
     return (
         <>
             <Container>
-                <Text as="h2">Remelt</Text>
+                <Text as="h2">Remelt (Not Working)</Text>
                 <ConfigCheckbox
                     label="Show dubles in remelt"
                     configKey="remeltDubles"

@@ -1,4 +1,5 @@
 import User from './user';
+import Other from './other';
 import { SidebarLayout } from "..";
 
 const MiscLayout = () => {
@@ -6,9 +7,11 @@ const MiscLayout = () => {
         <SidebarLayout
             tabs={[
                 { label: "User" },
+                { label: "Other"}
             ]}
             panels={[
                 { content: <User /> },
+                { content: <Other />}
             ]}
         />
     );

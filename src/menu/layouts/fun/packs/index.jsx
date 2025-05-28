@@ -25,7 +25,6 @@ const Packs = () => {
         setActive(false);
       }
     }
-      console.log("text", text, "active", active);
   }
 
   useEffect(() => {

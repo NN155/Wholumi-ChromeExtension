@@ -48,7 +48,7 @@ class ServerBoostCard {
         this.isWorking = false;
     }
 
-    async boosting(, clubId) {
+    async boosting(cardId, clubId) {
         if (this.isWorking) return;
         this.isWorking = true;
 

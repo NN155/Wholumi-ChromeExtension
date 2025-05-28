@@ -2,9 +2,8 @@ class Card {
     constructor(card = null) {
         this.card = card;
         this.cardInfo
-        this.url;
+        this.user;
         this.src;
-        this.username;
         this.lock;
         this.rate = 0;
         this.id;
@@ -20,16 +19,11 @@ class Card {
         this.animeName;
         this.needCount;
         this.online;
-        this._tradeCard;
+        this.tradeCard;
         this._htmlType;
         this.starCount;
     }
-    
-    get tradeCard() {
-        if (this._tradeCard) return this._tradeCard;
-        this._tradeCard = new Card();
-        return this._tradeCard;
-    }
+
 
     get htmlType() {
         if (this._htmlType) return this._htmlType;
@@ -116,14 +110,18 @@ class Card {
     }
 
     addLink() {
-        if (!this.username || !this.url) {
+        if (!this.user) {
             return;
         }
         const linkElement = document.createElement('a');
-        linkElement.href = this.url;
-        linkElement.textContent = this.username;
-        linkElement.style.display = 'block';
+        linkElement.href = this.user.userUrl;
+        linkElement.textContent = this.user.username;
+        linkElement.style.display = 'flex';
+        linkElement.style.justifyContent = 'center';
+        linkElement.style.alignItems = 'center';
         linkElement.style.textAlign = 'center';
+        linkElement.style.fontSize = '16px';
+        linkElement.style.overflow = 'hidden';
         this.card.querySelector('.anime-cards__item').appendChild(linkElement);
     }
 
@@ -161,12 +159,8 @@ class Card {
             return;
         }
         const div = document.createElement('div');
-        if (this.rate < 0) {
-            div.classList.add('lock-card-btn');
-        }
-        else {
-            div.classList.add('lock-trade-btn');
-        }
+
+        div.classList.add('lock-trade-btn');
         div.style.display = 'block';
         const i = document.createElement('i');
         switch (lock) {
@@ -182,9 +176,11 @@ class Card {
             default:
                 i.classList.add('fal', 'fa-lock');
         }
-        if (this.rate < 0) {
-            i.style.color = 'red';
-            i.fontSize = '20px';
+
+        if (this.rate >= 0) {
+            i.style.color = "white";
+        } else {
+            i.style.color = globalColors.lightRed;
         }
 
         div.appendChild(i);
@@ -341,8 +337,14 @@ class Card {
     }
 
     clone() {
-        const newCard = new Card(this.card.cloneNode(true));
+        const newCard = new Card();
+
         Object.assign(newCard, this);
+
+        if (this.card instanceof HTMLElement) {
+            newCard.card = this.card.cloneNode(true);
+        }
+
         return newCard;
     }
 
@@ -371,17 +373,42 @@ class Card {
     }
 
     addClass(className) {
-        if (!this.card.classList.contains(className)) {
-            this.card.classList.add(className);
+        switch (this.htmlType) {
+            case 'normal':
+                const card = this.card.querySelector('.anime-cards__item');
+                if (!card.classList.contains(className)) {
+                    card.classList.add(className);
+                }
+                break;
+            default:
+                if (!this.card.classList.contains(className)) {
+                    this.card.classList.add(className);
+                }
         }
     }
+
     removeClass(className) {
-        if (this.card.classList.contains(className)) {
-            this.card.classList.remove(className);
+        switch (this.htmlType) {
+            case 'normal':
+                const card = this.card.querySelector('.anime-cards__item');
+                if (card.classList.contains(className)) {
+                    card.classList.remove(className);
+                }
+                break;
+            default:
+                if (this.card.classList.contains(className)) {
+                    this.card.classList.remove(className);
+                }
         }
     }
     hasClass(className) {
-        return this.card.classList.contains(className);
+        switch (this.htmlType) {
+            case 'normal':
+                const card = this.card.querySelector('.anime-cards__item');
+                return card.classList.contains(className);
+            default:
+                return this.card.classList.contains(className);
+        }
     }
 
     compare(card) {
@@ -407,6 +434,27 @@ class Card {
         }
 
         return false;
+    }
+
+    setTradeId(id) {
+        switch (this.htmlType) {
+            case 'normal':
+                const card = this.card.querySelector('.anime-cards__item');
+                card.setAttribute('data-owner-id', id);
+                card.setAttribute('data-can-trade', 1);
+                break;
+        }
+    }
+
+    clearAttributes() {
+        switch (this.htmlType) {
+            case 'normal':
+                const card = this.card.querySelector('.anime-cards__item');
+                card.removeAttribute('data-stars');
+                card.removeAttribute('data-favourite');
+                this.removeClass('show-trade_button');
+                break;
+        }
     }
 
     _extractCardPattern(src) {

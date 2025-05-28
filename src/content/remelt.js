@@ -136,7 +136,7 @@ async function init() {
     remelt.colorCards(dubles, 'red');
     remelt.colorCards(firstDuble, 'green');
 
-    const lockedCards = dubles.getLockedCards();
+    const lockedCards = dubles.getCardsByLock("lock");
     const text = `Unlock ${lockedCards.length} Cards`;
 
     new Button({
@@ -147,4 +147,5 @@ async function init() {
     });
 }
 
-init()
+// Not working
+// init()

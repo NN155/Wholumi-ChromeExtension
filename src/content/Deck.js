@@ -1,12 +1,10 @@
 class DeckService {
-    constructor(config = {}) {
-        this.config = {
-            ...config
-        };
+    constructor({ testMode = false } = { testMode: false }) {
+        this.testMode = testMode;
     }
 
     async getCardsList() {
-        const container = document.querySelector("#cards-carousel");
+        const container = document.querySelector(".cards-carousel");
         const nodesContainer = container.querySelector(".anime-cards");
 
         if (!nodesContainer) {
@@ -17,7 +15,7 @@ class DeckService {
     }
 
     async setDesk() {
-        const container = document.querySelector("#cards-carousel");
+        const container = document.querySelector(".sect__content");
         const html = await this._getHtmlDesk();
 
         if (html) {
@@ -40,7 +38,7 @@ class DeckService {
     _extractCardsFromDOM(container) {
         const nodes = container.querySelectorAll(".anime-cards__item-wrapper");
 
-        return new CardsArray(...Array.from(nodes).map(node => {
+        const cards = new CardsArray(...Array.from(nodes).map(node => {
             const card = new Card(node);
             card.setSrc();
             card.fixImage();
@@ -49,17 +47,19 @@ class DeckService {
             card.setRank();
             return card;
         }));
+        this.testMode && console.log("Deck cards:", cards);
+        return cards;
     }
 }
 
 // TradeService.js - Handles card trading
 class TradeService {
-    constructor(config = {}) {
+    constructor({ testMode = false } = { testMode: false }) {
         this.config = {
             cardsRanks: ['a', 'b', 'c', 'd', 'e'],
-            ...config
         };
-        this.cardSearchService = new CardSearchService(config);
+        this.testMode = testMode;
+        this.cardSearchService = new CardSearchService({ testMode });
     }
 
     async buildDeck(deckCards) {
@@ -77,7 +77,6 @@ class TradeService {
         for (let i = 0; i < deckCards.length; i++) {
             const deckCard = deckCards[i];
             deckCard.pulsing(true);
-
             try {
                 const cardForTrade = await this.cardSearchService.searchCard(deckCard);
 
@@ -108,9 +107,9 @@ class TradeService {
     }
 
     async _executeTradeTransaction(card, deckCard) {
-        console.log(`Trading card: rank: ${deckCard.rank}, cardId: ${card.cardId}${card.needCount ? `, popularity: ${card.needCount}` : ""}`);
+        this.testMode && console.log(`Trading card: rank: ${deckCard.rank}, cardId: ${card.cardId}${card.needCount ? `, popularity: ${card.needCount}` : ""}`);
 
-        const response = await tradeHelper(card.id, card.tradeCard.id);
+        const response = await TradeHelperService.trade(card);
 
         if (response.success) {
             // Update cache
@@ -134,10 +133,11 @@ class TradeService {
 }
 
 class CardLockService {
-    constructor() {
+    constructor({ testMode = false } = { testMode: false }) {
         this.lockedCount = 0;
-        this.deckService = new DeckService();
+        this.deckService = new DeckService({ testMode });
         this.ranks = ["a", "b", "c", "d", "e"];
+        this.testMode = testMode;
     }
 
     async lockCards() {
@@ -178,7 +178,7 @@ class CardLockService {
 
         // Count successful locks
         const lockedCount = results.filter(Boolean).length;
-        console.log(`Successfully locked ${lockedCount} cards of rank ${rank}`);
+        this.testMode && console.log(`Successfully locked ${lockedCount} cards of rank ${rank}`);
     }
 
     async _lockCard(cards, deckCard) {
@@ -201,15 +201,16 @@ class CardLockService {
 
 // CardSearchService.js - Handles card searching
 class CardSearchService {
-    constructor(config = {}) {
+    constructor({ testMode = false } = { testMode: false }) {
         this.config = {
             popularityMargin: 15,
             specialRanks: ['a', 'b'],
-            ...config
         };
+        this.testMode = testMode;
     }
 
     async searchCard(card) {
+        this.testMode && console.log(`Searching for card: ${card.cardId}, rank: ${card.rank}`);
         // Determine if this card needs special popularity margin
         const needCountDiff = this.config.specialRanks.includes(card.rank)
             ? this.config.popularityMargin
@@ -233,7 +234,7 @@ class CardSearchService {
                 needCountDiff
             });
 
-            console.log(`Cards Array (${online ? 'Online ' : ''}${method})`, cardForTrade);
+            this.testMode && console.log(`Cards Array (${online ? 'Online ' : ''}${method})`, cardForTrade);
 
             if (cardForTrade) return cardForTrade;
         }
@@ -243,6 +244,8 @@ class CardSearchService {
 
     async _searchCardForTrade({ id, method, online, needCountDiff }) {
         const cards = await this._getCards({ id, method, online, needCountDiff });
+        
+        this.testMode && console.log(`Cards found (${method}, online: ${online}):`, cards);
 
         while (true) {
             const card = this._resolve({ cards, needCountDiff });
@@ -262,21 +265,25 @@ class CardSearchService {
     }
 
     async _getCards({ id, method, online, needCountDiff }) {
-        const cardsFinder = new CardsFinder({
-            id,
-            username: UrlConstructor.getMyName()
+        const cardsFinder = new CardsFinderService({
+            testMode: this.testMode
         });
-
-        let cards = await cardsFinder[method]({
-            filter: true,
-            cache: true,
-            online,
-            needCount: !!needCountDiff,
-            limit: 200,
-            page: 7
-        });
-
-        if (cards.error) cards = new CardsArray();
+        let cards;
+        try {
+            let data = await cardsFinder[method]({
+                filter: true,
+                cache: true,
+                online,
+                limit: 200,
+                id,
+                username: UrlConstructor.getMyName(),
+            });
+            const cardsBuilder = new CardsBuilder({ ...data, cache: true, testMode: this.testMode });
+            cards = cardsBuilder.buildCards();
+            !!needCountDiff && await CardsFinderProcessHelper.setNeedCount({ cards, cache: true })
+        } catch (error) {
+            cards = new CardsArray();
+        }
         return cards;
     }
 
@@ -286,8 +293,8 @@ class CardSearchService {
         if (needCountDiff) {
             // Return card with minimum popularity within acceptable range
             return cards
-                .filter(card => card.needCount - cards.info.needCount < this.config.popularityMargin)
-                .min("needCount");
+                .filter(card => card.tradeCard.needCount - card.needCount < this.config.popularityMargin)
+                .minTradeCard("needCount");
         } else {
             // Get random card if popularity doesn't matter
             return cards.random();
@@ -391,7 +398,7 @@ class WishListService {
         await this._addCache(cards);
 
         await this._proposeAll(cards, false);
-        
+
         this._clearCache()
     }
 
@@ -420,7 +427,7 @@ class WishListService {
 
     async _clearCache() {
         this.ranks.forEach(rank => {
-            GetCards.cacheService.delete({ method: "getNeed", rank, username: UrlConstructor.getMyName()})
+            GetCards.cacheService.delete({ method: "getNeed", rank, username: UrlConstructor.getMyName() })
         });
     }
 
@@ -444,7 +451,7 @@ class ButtonManager {
     }
 
     async initialize() {
-        if (!document.querySelector("#cards-carousel")) return;
+        if (!document.querySelector(".cards-carousel")) return;
 
         this._createBox();
         this._createButtons();
@@ -458,8 +465,9 @@ class ButtonManager {
         const buildDeckButton = new Button({
             text: "Build Deck",
             onClick: () => this._handleButtonClick(async () => {
-                const deckService = new DeckService();
-                const tradeService = new TradeService();
+                const { testMode } = await ExtensionConfig.getConfig("functionConfig");
+                const deckService = new DeckService({ testMode });
+                const tradeService = new TradeService({ testMode });
 
                 const cards = await deckService.getCardsList();
                 await tradeService.buildDeck(cards);
@@ -471,7 +479,8 @@ class ButtonManager {
         const lockDeckButton = new Button({
             text: "Lock Deck",
             onClick: () => this._handleButtonClick(async () => {
-                const lockService = new CardLockService();
+                const { testMode } = await ExtensionConfig.getConfig("functionConfig");
+                const lockService = new CardLockService({ testMode });
                 await lockService.lockCards();
             }),
             place: ".extension__box2",
@@ -481,7 +490,8 @@ class ButtonManager {
         const cancelTradesButton = new Button({
             text: "Cancel Trades",
             onClick: () => this._handleButtonClick(async () => {
-                const deckService = new DeckService();
+                const { testMode } = await ExtensionConfig.getConfig("functionConfig");
+                const deckService = new DeckService({ testMode });
                 const tradeSearchService = new TradeSearchService();
                 const tradeRejectionService = new TradeRejectionService();
 
@@ -501,7 +511,8 @@ class ButtonManager {
         const updateDeckButton = new Button({
             text: "Update deck info",
             onClick: () => this._handleButtonClick(async () => {
-                const deckService = new DeckService();
+                const { testMode } = await ExtensionConfig.getConfig("functionConfig");
+                const deckService = new DeckService({ testMode });
                 const tradeSearchService = new TradeSearchService();
                 const deckUpdateService = new DeckUpdateService();
 
@@ -521,7 +532,8 @@ class ButtonManager {
         const addToWishlistButton = new Button({
             text: "Add to wishlist",
             onClick: () => this._handleButtonClick(async () => {
-                const deckService = new DeckService();
+                const { testMode } = await ExtensionConfig.getConfig("functionConfig");
+                const deckService = new DeckService({ testMode });
                 const cards = await deckService.getCardsList();
 
                 const wishListService = new WishListService();
@@ -535,12 +547,13 @@ class ButtonManager {
         const removeFromWishlistButton = new Button({
             text: "Remove from wishlist",
             onClick: () => this._handleButtonClick(async () => {
-                const deckService = new DeckService();
+                const { testMode } = await ExtensionConfig.getConfig("functionConfig");
+                const deckService = new DeckService({ testMode });
                 const cards = await deckService.getCardsList();
 
                 const wishListService = new WishListService();
                 await wishListService.remove(cards);
-                
+
                 DLEPush.info(`${wishListService.count} cards have been removed from wishlist`);
             }),
             place: ".extension__box2",

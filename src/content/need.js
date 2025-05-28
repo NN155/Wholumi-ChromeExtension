@@ -1,19 +1,22 @@
-async function showCards({ input }) {
+async function showCards({ input, testMode = false }) {
     ShowBar.createShowBar();
 
+    isAnotherUser = !!input.getValue()
     let username = input.getValue() || UrlConstructor.getMyName();
     let id = UrlConstructor.getCardId(window.location.href);
-    
-    const cardsFinder = new CardsFinder({ username,  id});
-    const cards = await cardsFinder.need();
-    if (cards.error) {
-        ShowBar.text(cards.error);
-        return;
+
+    const cardsFinder = new CardsFinderService({ testMode });
+    try {
+        const cards = await cardsFinder.need({username, id, verifyUser: isAnotherUser });
+        ShowBar.addElementsToBar(cards.getCardsArray());
+    } catch (error) {
+        if (error instanceof CardsFinderError) {
+            ShowBar.text(error.message);
+            return;
+        }
+        console.error(error);
+        ShowBar.text("ERROR");
     }
-
-    changeCards(cards);
-
-    ShowBar.addElementsToBar(cards.getCardsArray());
 }
 
 async function init() {

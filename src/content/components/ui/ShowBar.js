@@ -35,6 +35,13 @@ class ShowBar {
         }
     }
 
+    static replaceElementsInBar(elements) {
+        while (this.showBar.firstChild) {
+            this.showBar.removeChild(this.showBar.firstChild);
+        }
+        this.addElementsToBar(elements);
+    }
+
     static text(text) {
         this.showBar.textContent = text;
     }
