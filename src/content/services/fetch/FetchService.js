@@ -138,8 +138,8 @@ class FetchService {
     }
 
     //boost club card by id
-    static async boostCard(cardId, clubId) {
-        const url = `/clubs/${clubId}/boost/`;
+    static async boostCard(cardId) {
+        const url = `/club_actions/`;
 
         const response = await SaveFetchService.fetch(url, {
             method: "POST",
@@ -156,7 +156,7 @@ class FetchService {
     }
 
     static async updateCardInfo(cardId) {
-        const url = `/engine/ajax/controller.php?mod=clubs_ajax`;
+        const url = `/club_actions/`;
 
         const response = await SaveFetchService.fetch(url, {
             method: "POST",

@@ -15,7 +15,7 @@ class DeckService {
     }
 
     async setDesk() {
-        const container = document.querySelector(".sect__content");
+        const container = document.querySelector(".sect__content.owl-carousel");
         const html = await this._getHtmlDesk();
 
         if (html) {

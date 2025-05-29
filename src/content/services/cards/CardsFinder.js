@@ -634,10 +634,10 @@ class CardsRender {
     _statusCheck(card, status) {
         if (status.success) {
             this.cardsBuilder.successTrade(card);
-            DLEPush.info(`Trade successful with ${card.tradeCard.username}`);
+            DLEPush.info(`Trade successful with ${card.user.username}`);
         } else {
             this.cardsBuilder.unSuccessTrade(card, status);
-            DLEPush.warning(`Trade failed with ${card.tradeCard.username}`);
+            DLEPush.warning(`Trade failed with ${card.user.username}`);
         }
 
     }

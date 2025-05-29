@@ -167,11 +167,11 @@
     },
     {
       "matches": [
-        "https://animestars.org/clubs/*/boost/*",
-        "https://asstars.tv/clubs/*/boost/*",
-        "https://as1.astars.club/clubs/*/boost/*",
-        "https://asstars1.astars.club/clubs/*/boost/*",
-        "https://asstars.club/clubs/*/boost/*"
+        "https://animestars.org/clubs/boost/*",
+        "https://asstars.tv/clubs/boost/*",
+        "https://as1.astars.club/clubs/boost/*",
+        "https://asstars1.astars.club/clubs/boost/*",
+        "https://asstars.club/clubs/boost/*"
       ],
       "js": [
         "content/external/socketIo.js",

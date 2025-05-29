@@ -76,7 +76,7 @@ chrome.runtime.onInstalled.addListener(() => {
                 password: "",
             },
             theme: {
-                selectedTheme: "purpleDark",
+                selectedTheme: "pinkNormalColors",
             }
         }
         if (config) {

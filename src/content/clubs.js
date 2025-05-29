@@ -54,11 +54,13 @@ async function updateCardInfo() {
 function updatePageInfo(html, boostCount = null, top = null) {
     const container = document.querySelector(".club-boost--content")
     container.innerHTML = html;
-    if (boostCount && top) {
-        const nav = document.querySelector(".tabs")
+    if (boostCount) {
         const boostLimit = document.querySelector(".boost-limit")
-        nav.innerHTML = top;
         boostLimit.innerHTML = boostCount;
+    }
+    if (top) {
+        const nav = document.querySelector(".tabs")
+        nav.innerHTML = top;
     }
 }
 
