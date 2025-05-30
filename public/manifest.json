@@ -138,7 +138,7 @@
         "https://asstars.club/cards/*/users/"
       ],
       "js": [
-        "content/Users.js"
+        "content/Trade.js"
       ]
     },
     {

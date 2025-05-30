@@ -20,6 +20,7 @@ chrome.runtime.onInstalled.addListener(() => {
             autoLogin: false,
             packsKeyBinds: false,
             testMode: false,
+            onlineOnly: false,
         }
         if (config) {
             defaultConfig = { ...defaultConfig, ...config };
@@ -77,7 +78,10 @@ chrome.runtime.onInstalled.addListener(() => {
             },
             theme: {
                 selectedTheme: "pinkNormalColors",
-            }
+            },
+            searchCards: {
+                usersLimit: 200,
+            },
         }
         if (config) {
             for (const key in defaultConfig) {

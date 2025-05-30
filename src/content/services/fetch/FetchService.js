@@ -33,13 +33,12 @@ class FetchService {
 
     // recieve card from server
     static async receiveCard() {
-        const response = await SaveFetchService.fetch('/engine/ajax/controller.php?mod=reward_card', {
+        const response = await SaveFetchService.fetch('/ajax/card_for_watch/', {
             method: 'POST',
             headers: {
                 "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
             },
             body: new URLSearchParams({
-                action: 'check_reward',
                 user_hash: dle_login_hash
             })
         });

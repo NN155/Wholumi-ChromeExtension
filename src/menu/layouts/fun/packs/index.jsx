@@ -9,7 +9,7 @@ const Packs = () => {
 
   const { lastUpdate } = useConfig();
 
-  handleTextChange = (newText = "Inject") => {
+  const handleTextChange = (newText = "Inject") => {
     const isValidPage = window.location.href.includes("/cards/pack/");
     if (!isValidPage) {
       setText("Visit a pack page");

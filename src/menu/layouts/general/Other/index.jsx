@@ -12,7 +12,7 @@ const Other = () => {
                 />
             </Container>
             <Container>
-                <Text as="h2">Offer</Text>
+                <Text as="h2">Offer (Old function)</Text>
                 <ConfigCheckbox
                     label="Resolve offers"
                     configKey="offersResolver"

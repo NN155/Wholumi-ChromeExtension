@@ -53,25 +53,25 @@ const Club = () => {
             <Box display="flex" flexDirection={"column"} gap="10px">
               <Text as="h2" textAlign={"center"}>Options</Text>
               <ConfigSlider
-                label="Auto update delay (ms):"
+                label="Rate Limit (requests/minute):"
+                min={60}
+                max={300}
+                configKey="clubBoost"
+                dataKey="requestLimit"
+              />
+              <ConfigSlider
+                label="Update delay (ms):"
                 min={0}
                 max={2000}
                 configKey="clubBoost"
                 dataKey="autoUpdateDelay"
               />
               <ConfigSlider
-                label="Auto boost delay (ms):"
+                label="Boost delay (ms):"
                 min={0}
                 max={1000}
                 configKey="clubBoost"
                 dataKey="autoBoostDelay"
-              />
-              <ConfigSlider
-                label="Rate Limit (requests/minute):"
-                min={60}
-                max={300}
-                configKey="clubBoost"
-                dataKey="requestLimit"
               />
             </Box>
             <ConfigCollapse
@@ -82,14 +82,14 @@ const Club = () => {
               >
                 <Box display="flex" flexDirection={"column"} gap="10px">
                   <ConfigSlider
-                    label="Custom delay trigger (ms):"
+                    label="Trigger point (ms):"
                     min={0}
                     max={1000}
                     configKey="clubBoost"
                     dataKey="customBoostTime"
                   />
                   <ConfigSlider
-                    label="Custom boost delay (ms):"
+                    label="Boost delay after trigger (ms):"
                     min={0}
                     max={1000}
                     configKey="clubBoost"

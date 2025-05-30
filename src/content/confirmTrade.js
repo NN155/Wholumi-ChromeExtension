@@ -200,4 +200,6 @@ async function init() {
     await buttonManager.initialize();
 }
 
-init()
+
+// old code
+// init()
