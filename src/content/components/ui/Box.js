@@ -7,7 +7,7 @@ class Box extends Element {
         displayType = "block",
         className = "box-extension",
         center = false,
-        gap = null,
+        ...styleOptions
     } = {
         place: null,
         placeAfter: null,
@@ -16,14 +16,14 @@ class Box extends Element {
         displayType: "block",
         className: "box-extension",
         center: false,
+        styleOptions: {},
         }) {
         super("div", displayType);
         this.element.className = className;
         this._style();
+        this.style(styleOptions);
 
         center && this.styleCenterItems();
-        gap && this.gap(gap);
-        
         this.display(display);
         place && this.place(place);
         placeAfter && this.placeAfter(placeAfter);
@@ -47,9 +47,5 @@ class Box extends Element {
             this.element.style.flexDirection = "column";
             this.element.style.margin = "0.5em";
         }
-    }
-
-    gap(value) {
-        this.element.style.gap = value;
     }
 }

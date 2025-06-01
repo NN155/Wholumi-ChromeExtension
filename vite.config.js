@@ -2,6 +2,7 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import { resolve } from 'path'
 import { viteStaticCopy } from 'vite-plugin-static-copy'
+import { vitePluginManifestDomainExpander } from './tools/vitePluginManifestDomainExpander.js'
 
 // https://vite.dev/config/
 export default defineConfig({
@@ -18,6 +19,10 @@ export default defineConfig({
           dest: 'background',
         }
       ],
+    }),
+    vitePluginManifestDomainExpander({
+      manifestPath: 'public/manifest.json',
+      outputDir: 'dist/alpha',
     }),
   ],
   build: {

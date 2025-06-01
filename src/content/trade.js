@@ -39,10 +39,8 @@ class TradeProcessor {
 
     _setMode() {
         const url = window.location.href;
-        if (url.endsWith("/trade/")) {
+        if (url.includes("/trade/")) {
             return "trade";
-        } else if (url.endsWith("/users/")) {
-            return "users";
         } else {
             return "users";
         }

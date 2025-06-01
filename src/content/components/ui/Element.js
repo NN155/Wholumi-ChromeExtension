@@ -68,4 +68,10 @@ class Element {
             }, intervalTime);
         });
     }
+
+    style(styles) {
+        Object.keys(styles).forEach(key => {
+            this.element.style[key] = styles[key];
+        });
+    }
 }

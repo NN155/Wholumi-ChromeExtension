@@ -107,11 +107,19 @@ class ButtonManager {
     }
 
     _createBox() {
-        this.box = new Box({
+        new Box({
             place: ".tabs.tabs--center",
+            display: true,
+            className: "extension__box-wrapper",
+            center: true,
+        });
+
+        this.box = new Box({
+            place: ".extension__box-wrapper",
             display: false,
             className: "extension__box",
             gap: "0.5em",
+            width: "fit-content",
         });
     }
 }

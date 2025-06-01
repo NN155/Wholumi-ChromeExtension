@@ -8,9 +8,12 @@ class CardUrlService {
      * @param {boolean} unlocked - Get unlocked version
      * @returns {string} - Card URL
      */
-    static getCardUrl(cardId, unlocked = false) {
-        return UrlService.buildUrl(`/cards/${cardId}/users/`,
-            unlocked ? { unlocked: 1 } : {});
+    static getCardUrl(cardId, unlocked) {
+        const params = { id: cardId };
+        if (unlocked) {
+            params.unlocked = 1;
+        }
+        return UrlService.buildUrl(`/cards/users/`, params);
     }
 
     /**
@@ -19,7 +22,7 @@ class CardUrlService {
      * @returns {string} - Card need URL
      */
     static getCardNeedUrl(cardId) {
-        return `/cards/${cardId}/users/need/`;
+        return `/cards/users/need/?id=${cardId}`;
     }
 
     /**
@@ -28,7 +31,7 @@ class CardUrlService {
      * @returns {string} - Card trade URL
      */
     static getCardTradeUrl(cardId) {
-        return `/cards/${cardId}/users/trade/`;
+        return `/cards/users/trade/?id=${cardId}`;
     }
 
     /**
@@ -37,6 +40,14 @@ class CardUrlService {
      * @returns {string|null} - Card ID
      */
     static getCardId(url) {
+        // Search new format with query parameter
+        const urlObj = new URL(url);
+        const queryId = urlObj.searchParams.get('id');
+        if (queryId) {
+            return queryId;
+        }
+
+        // Search old format with path parameter
         return UrlService.extractParam(url, /\/cards\/(\d+)\//);
     }
 
