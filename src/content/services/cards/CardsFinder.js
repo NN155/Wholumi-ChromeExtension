@@ -172,7 +172,7 @@ class CardsFinderSearching {
 
     static async findCards({ card }) {
         const getCards = new GetCards();
-        const urlConstructor = new UrlConstructor({ rank: card.rank, userUrl: card.user.userUrl });
+        const urlConstructor = new UrlConstructor({ rank: card.rank, user: card.user });
 
         const searchLink = urlConstructor.search(card.name);
         const cards = await getCards.getAllCards(searchLink);

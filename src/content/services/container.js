@@ -108,17 +108,23 @@ function findPanel(dom) {
         let pageUrls = Array.from(panel.querySelectorAll(':scope > a')).map(element => element.href);
         if (pageUrls.length >= 10) {
             const lastUrl = pageUrls[pageUrls.length - 1];
-            const regex = /(.*\/page\/)\d+(\/?.*)/;
+            
+            const regex = /(.*\?[^&]*(?:&[^&]*)*?)(?:&page=\d+)?(.*)/;
             const match = lastUrl.match(regex);
-            const baseBefore = match[1];
-            const baseAfter = match[2];
-            const countPage = parseInt(lastUrl.match(/\/page\/(\d+)\//)[1]);
+            
+            if (match) {
+                const baseBefore = match[1];
+                const baseAfter = match[2];
+                
+                const pageMatch = lastUrl.match(/[?&]page=(\d+)/);
+                const countPage = pageMatch ? parseInt(pageMatch[1]) : 1;
 
-            let newPageUrls = [];
-            for (let i = 2; i <= countPage; i++) {
-                newPageUrls.push(`${baseBefore}${i}${baseAfter}`);
+                let newPageUrls = [];
+                for (let i = 2; i <= countPage; i++) {
+                    newPageUrls.push(`${baseBefore}&page=${i}${baseAfter}`);
+                }
+                pageUrls = newPageUrls;
             }
-            pageUrls = newPageUrls;
         }
         return pageUrls;
     }

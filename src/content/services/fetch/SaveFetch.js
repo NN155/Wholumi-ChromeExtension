@@ -4,16 +4,14 @@ let saveFetchConfig = {
     },
     requestLimit: {
         max: 300,
-        average: 250,
-        preMin: 50,
-        min: 0,
+        getUrlLimit: 20,
     },
     threadCount: {
-        max: 30,
-        preMax: 10,
+        max: 10,
         preMin: 4,
         min: 1,
     }
+
 }
 
 class Semaphore {
@@ -77,14 +75,12 @@ class DynimicSemaphore extends Semaphore {
     async controllMax() {
         const requestCount = LocalStorageService.getRequestCount();
 
-        if (requestCount >= saveFetchConfig.requestLimit.max - 5) { // 300
+        if (requestCount >= saveFetchConfig.requestLimit.max - saveFetchConfig.threadCount.preMin - 1) { // 300
             this.setMax(saveFetchConfig.threadCount.min); // 1
-        } else if (requestCount >= saveFetchConfig.requestLimit.max - 15) {
+        } else if (requestCount >= saveFetchConfig.requestLimit.max - saveFetchConfig.threadCount.preMin - saveFetchConfig.threadCount.max - 1) {
             this.setMax(saveFetchConfig.threadCount.preMin); // 4
-        } else if (requestCount >= saveFetchConfig.requestLimit.preMin) { // 50
-            this.setMax(saveFetchConfig.threadCount.preMax); // 10
         } else {
-            this.setMax(saveFetchConfig.threadCount.max); // 30
+            this.setMax(saveFetchConfig.threadCount.max); // 10
         }
         if (requestCount % 5 === 0) {
             console.log(`Request count: ${requestCount}, max: ${this.max}`);
@@ -113,13 +109,15 @@ class DynimicSemaphore extends Semaphore {
 const dynimicSemaphore = new DynimicSemaphore(3);
 
 class SaveFetchService {
-    static isClubBoostPage = /\/clubs\/[^/]+\/boost/.test(window.location.pathname);
     static showError = true;
     static errorTimeout = 5000;
     static errorTimer = null;
 
     static async fetch(url, options = {}) {
         await this._beforeFetch();
+        if (this._isGetRequest(options)) {
+            await this._getRequestProcess(url);
+        }
         try {
             const response = await fetch(url, options);
             this.showError && this._checkStatus(response);
@@ -159,6 +157,20 @@ class SaveFetchService {
         }
         await new Promise(resolve => setTimeout(resolve, saveFetchConfig.delay.min)); // 75
     }
+
+    static _isGetRequest(options) {
+        return options.method ? options.method.toUpperCase() === 'GET' : true;
+    }
+
+    static async _getRequestProcess(url) {
+        GetRequestStorageService.save(url);
+        const data = GetRequestStorageService.load(url);
+        if (data.length >= saveFetchConfig.requestLimit.getUrlLimit) { // 25
+            const delay = GetRequestStorageService.calculateDelay(saveFetchConfig.requestLimit.getUrlLimit, data);
+            await new Promise(resolve => setTimeout(resolve, delay));
+        }
+    }
+
 
     static async _beforeFetch() {
         await dynimicSemaphore.acquire();

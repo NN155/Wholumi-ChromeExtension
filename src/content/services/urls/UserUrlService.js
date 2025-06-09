@@ -2,32 +2,23 @@
  * Service for user-related URLs
  */
 class UserUrlService {
-    static myUrl = null;
-    static myName = null;
+    static user = new User();
     
     /**
      * Get current user URL
      * @returns {string|null} - User URL
      */
     static getMyUrl() {
-        if (this.myUrl) {
-            return this.myUrl;
+        if (this.user?.userUrl) {
+            return this.user.userUrl;
         }
         
-        const menu = document.querySelector(".lgn__inner");
-        if (!menu) return null;
+        const link = document.querySelector(".lgn__btn-profile");
+        if (!link) return null;
+    
+        this.user.userUrl = link.getAttribute("href");
         
-        const urls = menu.querySelectorAll("a");
-        const urlsArray = Array.from(urls);
-        
-        for (const element of urlsArray) {
-            if (element.href.endsWith("/cards/")) {
-                this.myUrl = element.getAttribute("href").replace("cards/", "");
-                return this.myUrl;
-            }
-        }
-        
-        return null;
+        return this.user.userUrl;
     }
     
     /**
@@ -35,14 +26,11 @@ class UserUrlService {
      * @returns {string|null} - Username
      */
     static getMyName() {
-        if (this.myName) {
-            return this.myName;
-        }
-        
-        const myUrl = this.getMyUrl();
-        this.myName = this.getUsername(myUrl);
-        
-        return this.myName;
+        if (this.user?.username) return this.user.username;
+
+        this.getMyUrl();
+
+        return this.user.username;
     }
     
     /**

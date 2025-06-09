@@ -13,6 +13,7 @@ class UrlConstructor extends InventoryUrlService {
     static isMyPage = UserUrlService.isMyPage;
     static getClubId = UserUrlService.getClubId;
     static validateUser = UserUrlService.validateUser;
+    static user = UserUrlService.user;
     
     // static methods from CardUrlService
     static getCardUrl = CardUrlService.getCardUrl;

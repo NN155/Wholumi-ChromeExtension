@@ -3,19 +3,23 @@ class InventoryUrlService {
      * Create a URL constructor for specific user and rank
      * @param {Object} options - Constructor options
      * @param {string} options.rank - Card rank
-     * @param {string} options.userUrl - User URL
+     * @param {string} options.user - User
      */
-    constructor({ rank, userUrl }) {
-        this.userUrl = userUrl;
-        this.rank = rank ? `?rank=${rank}` : '';
+    constructor({ rank, user }) {
+        this.user = user;
+        this.rank = rank;
     }
     
     /**
      * Get inventory URL
      * @returns {string} - Inventory URL
      */
-    inventory() {
-        return this.userUrl + '/cards/' + this.rank;
+    inventory(url = null) {
+        if (url) {
+            return UrlService.buildUrl(url, { rank: this.rank });
+        } else {
+            return UrlService.buildUrl(`/user/cards/`, { rank: this.rank, name: this.user.username });
+        }
     }
     
     /**
@@ -23,7 +27,7 @@ class InventoryUrlService {
      * @returns {string} - Need list URL
      */
     need() {
-        return this.userUrl + '/cards/need/' + this.rank;
+        return UrlService.buildUrl(`/user/cards/need/`, { name: this.user.username, rank: this.rank });
     }
     
     /**
@@ -31,7 +35,7 @@ class InventoryUrlService {
      * @returns {string} - Trade list URL
      */
     trade() {
-        return this.userUrl + '/cards/trade/' + this.rank;
+        return UrlService.buildUrl(`/user/cards/trade/`, { name: this.user.username, rank: this.rank });
     }
     
     /**
@@ -40,7 +44,7 @@ class InventoryUrlService {
      * @returns {string} - Search URL
      */
     search(name) {
-        return this.userUrl + "/cards/" + this.rank + "&search=" + encodeURIComponent(name);
+        return this.inventory() + "&search=" + encodeURIComponent(name);
     }
     
     /**

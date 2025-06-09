@@ -5,7 +5,7 @@ class GetCards {
     constructor({ rank = null, user = new User() } = { rank: null, user: new User() }) {
         this.rank = rank;
         this.user = user;
-        this.UrlConstructor = new UrlConstructor({ rank: this.rank, userUrl: this.user.userUrl });
+        this.UrlConstructor = new UrlConstructor({ rank: rank, user: user });
     }
 
     static cacheService = new CacheService();
@@ -53,7 +53,7 @@ class GetCards {
         return cardsList;
     }
 
-    async getInventory({ unlock = null, cache = false } = { unlock: null, cache: false }) {
+    async getInventory({ unlock = null, cache = false, url = null } = { unlock: null, cache: false, url: null }) {
         // Check if the cards are in cache
         if (cache) {
             const cards = GetCards.cacheService.get({ method: "getInventory", rank: this.rank, username: this.user.username });
@@ -76,8 +76,7 @@ class GetCards {
         //     }
         // }
         
-        let cardUrl = this.UrlConstructor.inventory();
-        cardUrl = this.UrlConstructor.unlock(cardUrl, unlock);
+        let cardUrl = this.UrlConstructor.inventory(url);
         const cards = await this.getAllCards(cardUrl)
 
         // cache results
@@ -92,7 +91,6 @@ class GetCards {
             const cards = GetCards.cacheService.get({ method: "getNeed", rank: this.rank, username: this.user.username });
             if (cards) return cards;
         }
-
         const needCardUrl = this.UrlConstructor.need();
         const cards = await this.getAllCards(needCardUrl);
 
