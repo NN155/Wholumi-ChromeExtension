@@ -17,38 +17,96 @@ saveFetchConfig = {
 }
 
 async function autoUpdatePageInfo() {
-    if (clubData.stopUpdating) return;
+    if (clubData.stopUpdating) {
+        //console.log('[Wholumi] AutoUpdate: stopped');
+        return;
+    }
+    if (clubData._autoUpdateRunning) {
+        //console.log('[Wholumi] AutoUpdate: already running');
+        return;
+    }
+    clubData._autoUpdateRunning = true;
+    //console.log('[Wholumi] AutoUpdate: started');
+    // Получаем актуальные задержки из ExtensionConfig
+    const miscConfig = await ExtensionConfig.getConfig("miscConfig");
+    const boostDelay = miscConfig.clubBoost?.autoBoostDelay ?? saveFetchConfig.delay.min;
+    const updateDelay = miscConfig.clubBoost?.autoUpdateDelay ?? 15000;
+    const replaceDelay = miscConfig.clubBoost?.replaceDelay ?? 10000;
+
     while (!clubData.stopUpdating) {
         try {
-            const { res, badData } = await updateCardInfo();
-            if (res.boost_html) {
-                clubData.firstBoost = false;
-                clubData.newDay = !badData;
-                updatePageInfo(res.boost_html, res.boost_count, res.top_html)
+            let res = {}, badData = true, delay = updateDelay;
+            const boostBtn = document.querySelector('.club__boost-btn');
+            const refreshBtn = document.querySelector('.club__boost__refresh-btn');
+            const replaceBtn = document.querySelector('.club-boost__replace-btn');
 
+            if (boostBtn && switcherAutoBoost.checked) {
+                //console.log('[Wholumi] Boost request');
+                const cardId = boostBtn.getAttribute('data-card-id');
+                const clubId = boostBtn.getAttribute('data-club-id');
+                res = await SaveFetchService.fetch('/club_actions/', {
+                    method: 'GET',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' },
+                    body: new URLSearchParams({
+                        action: 'boost',
+                        card_id: cardId,
+                        skip: 0,
+                        user_hash: dle_login_hash
+                    })
+                }).then(r => r.json());
+                badData = false;
+                delay = boostDelay;
+            } else if (refreshBtn && switcherUpdatePage.checked) {
+                //console.log('[Wholumi] Refresh request');
+                const cardId = refreshBtn.getAttribute('data-card-id');
+                const clubId = refreshBtn.getAttribute('data-club-id');
+                res = await SaveFetchService.fetch('/club_refresh/', {
+                    method: 'GET',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' },
+                    body: new URLSearchParams({
+                        action: 'boost_refresh',
+                        card_id: cardId,
+                        user_hash: dle_login_hash
+                    })
+                }).then(r => r.json());
+                badData = false;
+                delay = updateDelay;
+            } else if (replaceBtn) {
+                //console.log('[Wholumi] Replace request');
+                const clubId = replaceBtn.getAttribute('data-club-id');
+                res = await SaveFetchService.fetch('/club_skip/', {
+                    method: 'GET',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' },
+                    body: new URLSearchParams({
+                        action: 'boost_change',
+                        user_hash: dle_login_hash
+                    })
+                }).then(r => r.json());
+                badData = false;
+                delay = replaceDelay;
+            } else {
+                //console.log('[Wholumi] No action, waiting...');
+            }
+
+            if (res.boost_html) {
+                updatePageInfo(res.boost_html, res.boost_count, res.top_html);
                 const event = new CustomEvent('update-page-info', { detail: { html: res.boost_html, count: res.boost_count, top: res.top_html } });
                 window.dispatchEvent(event);
+            } else if (res.boost_html_reloaded) {
+                updatePageInfo(res.boost_html_reloaded, res.boost_count, res.top_html);
+            } else if (res.boost_html_changed) {
+                updatePageInfo(res.boost_html_changed, res.boost_count, res.top_html);
+            }
 
-                await boostCard.boosting()
-            }
-            else if (clubData.firstBoost) {
-                clubData.firstBoost = false;
-                await boostCard.boosting()
-            }
             checkAutoOff(res.boost_count, res.top_html);
         } catch (error) {
-            console.error("Error during page update:", error);
-        }
-        finally {
-            await new Promise(async resolve => setTimeout(resolve, (await ExtensionConfig.getConfig("miscConfig")).clubBoost.autoUpdateDelay));
+            console.error('[Wholumi] Error during page update:', error);
+        } finally {
+            await new Promise(resolve => setTimeout(resolve, delay));
         }
     }
-}
-
-async function updateCardInfo() {
-    const clubRefreshBtn = document.querySelector(".club__boost__refresh-btn")
-    const cardId = clubRefreshBtn ? clubRefreshBtn.getAttribute("data-card-id") : 0;
-    return { res: await FetchService.updateCardInfo(cardId), badData: !clubRefreshBtn };
+    clubData._autoUpdateRunning = false;
+    console.log('[Wholumi] AutoUpdate: finished');
 }
 
 function updatePageInfo(html, boostCount = null, top = null) {
@@ -170,7 +228,7 @@ class BoostCard {
 }
 
 function checkAutoOff(countBoost, topBoost) {
-    if (clubData.newDay && countBoost >= 300) {
+    if (clubData.newDay && countBoost >= 600) {
         clubData.stopUpdating = true;
         switcherUpdatePage.turnOff()
     }
