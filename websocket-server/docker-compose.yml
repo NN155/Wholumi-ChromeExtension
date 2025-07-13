@@ -1,0 +1,27 @@
+version: '3.8'
+
+services:
+  wholumi-websocket:
+    build: .
+    ports:
+      - "8080:8080"  # HTTP API
+      - "8081:8081"  # WebSocket
+    environment:
+      - NODE_ENV=production
+      - PORT=8080
+      - WS_PORT=8081
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    volumes:
+      - ./logs:/app/logs
+    networks:
+      - wholumi-network
+
+networks:
+  wholumi-network:
+    driver: bridge

@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wholumi WebSocket Server Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 1rem 2rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .header h1 {
+            color: white;
+            text-align: center;
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .header .status {
+            text-align: center;
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 1.1rem;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .stat-card h3 {
+            color: #667eea;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .stat-card .value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 300px;
+            gap: 2rem;
+        }
+
+        .logs-section {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            height: 500px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .logs-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .logs-header h2 {
+            color: #667eea;
+            font-size: 1.2rem;
+        }
+
+        .logs-controls {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5a6fd8;
+        }
+
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        .btn-secondary:hover {
+            background: #e0e0e0;
+        }
+
+        .logs-container {
+            flex: 1;
+            background: #1a1a1a;
+            border-radius: 8px;
+            padding: 1rem;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85rem;
+            line-height: 1.5;
+        }
+
+        .log-entry {
+            margin-bottom: 0.25rem;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+
+        .log-info {
+            color: #4fc3f7;
+        }
+
+        .log-warn {
+            color: #ffb74d;
+        }
+
+        .log-error {
+            color: #e57373;
+        }
+
+        .log-success {
+            color: #81c784;
+        }
+
+        .log-debug {
+            color: #9e9e9e;
+        }
+
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .clients-section, .rooms-section, .controls-section {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .section-title {
+            color: #667eea;
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+            border-bottom: 2px solid #f0f0f0;
+            padding-bottom: 0.5rem;
+        }
+
+        .client-item, .room-item {
+            padding: 0.75rem;
+            margin-bottom: 0.5rem;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+
+        .user-item {
+            padding: 0.75rem;
+            margin-bottom: 0.5rem;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid #4caf50;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .user-item:hover {
+            background: #e8f5e8;
+            transform: translateY(-2px);
+        }
+
+        .user-item.offline {
+            border-left-color: #9e9e9e;
+            opacity: 0.7;
+        }
+
+        .user-name {
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 0.25rem;
+        }
+
+        .user-status {
+            font-size: 0.75rem;
+            color: #666;
+        }
+
+        .user-events {
+            font-size: 0.7rem;
+            color: #4caf50;
+            margin-top: 0.25rem;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 10000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 2% auto;
+            padding: 2rem;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 800px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .modal-title {
+            font-size: 1.5rem;
+            color: #667eea;
+            margin: 0;
+        }
+
+        .close {
+            color: #aaa;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            border: none;
+            background: none;
+        }
+
+        .close:hover {
+            color: #000;
+        }
+
+        .user-details {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .detail-card {
+            background: #f8f9fa;
+            padding: 1rem;
+            border-radius: 8px;
+        }
+
+        .detail-label {
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 0.5rem;
+        }
+
+        .detail-value {
+            color: #333;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+        }
+
+        .events-container {
+            background: #1a1a1a;
+            border-radius: 8px;
+            padding: 1rem;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .event-item {
+            padding: 0.5rem;
+            margin-bottom: 0.5rem;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.8rem;
+            color: #fff;
+        }
+
+        .event-type {
+            color: #4fc3f7;
+            font-weight: bold;
+        }
+
+        .event-timestamp {
+            color: #9e9e9e;
+            float: right;
+        }
+
+        .event-data {
+            color: #81c784;
+            margin-top: 0.25rem;
+        }
+
+        .client-id {
+            font-family: 'Courier New', monospace;
+            font-size: 0.8rem;
+            color: #666;
+        }
+
+        .client-meta {
+            font-size: 0.75rem;
+            color: #999;
+            margin-top: 0.25rem;
+        }
+
+        .room-name {
+            font-weight: bold;
+            color: #333;
+        }
+
+        .room-count {
+            color: #667eea;
+            font-size: 0.9rem;
+        }
+
+        .controls-section input[type="text"] {
+            width: 100%;
+            padding: 0.75rem;
+            margin-bottom: 0.5rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 0.9rem;
+        }
+
+        .controls-section input[type="text"]:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .controls-section textarea {
+            width: 100%;
+            padding: 0.75rem;
+            margin-bottom: 0.5rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            min-height: 80px;
+            resize: vertical;
+        }
+
+        .controls-section textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .auto-scroll {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+        }
+
+        .auto-scroll input[type="checkbox"] {
+            transform: scale(1.2);
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .stats-grid {
+                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            }
+        }
+
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+            color: #666;
+        }
+
+        .spinner {
+            width: 30px;
+            height: 30px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 1rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🚀 Wholumi WebSocket Server</h1>
+        <div class="status" id="serverStatus">Connecting...</div>
+    </div>
+
+    <div class="container">
+        <div class="stats-grid">
+            <div class="stat-card">
+                <h3>Connected Clients</h3>
+                <div class="value" id="clientCount">0</div>
+            </div>
+            <div class="stat-card">
+                <h3>Active Rooms</h3>
+                <div class="value" id="roomCount">0</div>
+            </div>
+            <div class="stat-card">
+                <h3>Server Uptime</h3>
+                <div class="value" id="uptime">0s</div>
+            </div>
+            <div class="stat-card">
+                <h3>Messages/Min</h3>
+                <div class="value" id="messageRate">0</div>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div class="logs-section">
+                <div class="logs-header">
+                    <h2>📋 Server Logs</h2>
+                    <div class="logs-controls">
+                        <button class="btn btn-secondary" onclick="clearLogs()">Clear</button>
+                        <button class="btn btn-primary" onclick="downloadLogs()">Download</button>
+                    </div>
+                </div>
+                <div class="auto-scroll">
+                    <input type="checkbox" id="autoScroll" checked>
+                    <label for="autoScroll">Auto-scroll to bottom</label>
+                </div>
+                <div class="logs-container" id="logsContainer">
+                    <div class="loading">
+                        <div class="spinner"></div>
+                        Loading server logs...
+                    </div>
+                </div>
+            </div>
+
+            <div class="sidebar">
+                <div class="users-section">
+                    <h3 class="section-title">👤 Online Users</h3>
+                    <div id="usersList">
+                        <div class="loading">Loading users...</div>
+                    </div>
+                </div>
+
+                <div class="clients-section">
+                    <h3 class="section-title">� Active Connections</h3>
+                    <div id="clientsList">
+                        <div class="loading">Loading clients...</div>
+                    </div>
+                </div>
+
+                <div class="rooms-section">
+                    <h3 class="section-title">🏠 Active Rooms</h3>
+                    <div id="roomsList">
+                        <div class="loading">Loading rooms...</div>
+                    </div>
+                </div>
+
+                <div class="controls-section">
+                    <h3 class="section-title">🚀 Execute Request</h3>
+                    
+                    <!-- Preset selector -->
+                    <div style="margin-bottom: 10px;">
+                        <select id="requestPreset" style="width: 70%; padding: 8px; border-radius: 6px; border: 1px solid #ddd; margin-right: 5px;">
+                            <option value="">Select preset...</option>
+                        </select>
+                        <button onclick="loadPreset()" style="width: 28%; padding: 8px; border-radius: 6px; border: 1px solid #007bff; background: #007bff; color: white; cursor: pointer;">Load</button>
+                    </div>
+                    
+                    <select id="targetUser" style="margin-bottom: 10px; width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #ddd;">
+                        <option value="">Select target user...</option>
+                    </select>
+                    <select id="requestMethod" style="margin-bottom: 10px; width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #ddd;">
+                        <option value="GET">GET</option>
+                        <option value="POST">POST</option>
+                        <option value="PUT">PUT</option>
+                        <option value="DELETE">DELETE</option>
+                        <option value="PATCH">PATCH</option>
+                    </select>
+                    <input type="text" id="requestUrl" placeholder="URL (e.g., /api/endpoint)" style="margin-bottom: 10px; width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #ddd;">
+                    <textarea id="requestHeaders" placeholder="Headers (JSON format, optional)" style="margin-bottom: 10px; height: 60px; width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #ddd; resize: vertical;"></textarea>
+                    <textarea id="requestBody" placeholder="Body (JSON format, optional)" style="margin-bottom: 10px; height: 80px; width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #ddd; resize: vertical;"></textarea>
+                    <button class="btn btn-primary" onclick="executeRequest()" style="width: 100%; margin-bottom: 10px;">Execute Request</button>
+                    <div id="requestResult" style="margin-top: 10px; padding: 10px; border-radius: 6px; background: #f8f9fa; font-family: monospace; font-size: 12px; max-height: 200px; overflow-y: auto; display: none;"></div>
+                </div>
+
+                <div class="controls-section">
+                    <h3 class="section-title">📡 Broadcast Message</h3>
+                    <input type="text" id="broadcastRoom" placeholder="Room name (e.g., general)" value="general">
+                    <textarea id="broadcastMessage" placeholder="Enter your message here..."></textarea>
+                    <button class="btn btn-primary" onclick="sendBroadcast()" style="width: 100%;">Send Broadcast</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- User Details Modal -->
+    <div id="userModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title" id="modalUserName">User Details</h2>
+                <button class="close" onclick="closeUserModal()">&times;</button>
+            </div>
+            
+            <div class="user-details" id="userDetails">
+                <!-- User details will be loaded here -->
+            </div>
+            
+            <div>
+                <h3 class="section-title">📊 Recent Activity</h3>
+                <div class="events-container" id="userEvents">
+                    <div class="loading">Loading events...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="dashboard.js"></script>
+</body>
+</html>

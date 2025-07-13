@@ -27,7 +27,10 @@
   "web_accessible_resources": [
     {
       "resources": [
-        "assets/wholumi-logo.png"
+        "assets/wholumi-logo.png",
+        "content/services/websocket/WebSocketConfig.js",
+        "content/services/websocket/WebSocketClient.js",
+        "content/services/websocket/WebSocketIntegrationService.js"
       ],
       "matches": [
         "<all_urls>"
@@ -35,6 +38,15 @@
     }
   ],
   "content_scripts": [
+    {
+      "matches": [
+        "DOMAIN/*"
+      ],
+      "js": [
+        "content/websocket-loader.js"
+      ],
+      "run_at": "document_start"
+    },
     {
       "matches": [
         "DOMAIN/*"
@@ -135,7 +147,7 @@
       ],
       "js": [
         "content/external/socketIo.js",
-        "content/Clubs.js",
+        "content/clubs.js",
         "content/ClubsBoostServer.js"
       ]
     },

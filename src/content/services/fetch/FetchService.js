@@ -136,22 +136,9 @@ class FetchService {
         return this.cancelTrade(id, "recieved");
     }
 
-    //boost club card by id
+    //boost club card by id (legacy method - use boostClubCard instead)
     static async boostCard(cardId) {
-        const url = `/club_actions/`;
-
-        const response = await SaveFetchService.fetch(url, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
-            },
-            body: new URLSearchParams({
-                user_hash: dle_login_hash,
-                action: "boost",
-                card_id: cardId,
-            }),
-        });
-        return response.json();
+        return this.boostClubCard(cardId);
     }
 
     static async updateCardInfo(cardId) {
@@ -285,21 +272,44 @@ class FetchService {
         return await response.json();
     }
 
-    static async showcase({ rank = "", locked = "", search = "" }) {
-        const response = await SaveFetchService.fetch("/engine/ajax/controller.php?mod=cards_ajax", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
-            },
+    // Club boost methods
+    static async boostClubCard(cardId, clubId, skip = 0) {
+        const response = await SaveFetchService.fetch('/club_actions/', {
+            method: 'GET',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' },
             body: new URLSearchParams({
-                user_hash: dle_login_hash,
-                action: "search",
-                rank: rank,
-                locked: locked,
-                search: search,
-            }),
+                action: 'boost',
+                card_id: cardId,
+                skip: skip,
+                user_hash: dle_login_hash
+            })
         });
-        return await response.text();
+        return await response.json();
+    }
+
+    static async refreshClubCard(cardId, clubId) {
+        const response = await SaveFetchService.fetch('/club_refresh/', {
+            method: 'GET',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' },
+            body: new URLSearchParams({
+                action: 'boost_refresh',
+                card_id: cardId,
+                user_hash: dle_login_hash
+            })
+        });
+        return await response.json();
+    }
+
+    static async replaceClubCard(clubId) {
+        const response = await SaveFetchService.fetch('/club_skip/', {
+            method: 'GET',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' },
+            body: new URLSearchParams({
+                action: 'boost_change',
+                user_hash: dle_login_hash
+            })
+        });
+        return await response.json();
     }
 
     static async login({username, password}) {

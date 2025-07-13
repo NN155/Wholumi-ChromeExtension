@@ -1,0 +1,43 @@
+[
+	{
+		"name": "Logout",
+		"method": "POST",
+		"url": "https://animestars.org/index.php",
+		"headers": {
+			"Content-Type": "application/x-www-form-urlencoded"
+		},
+		"body": "action=logout"
+	},
+	{
+		"name": "Get Profile",
+		"method": "GET",
+		"url": "/profile",
+		"headers": {},
+		"body": ""
+	},
+	{
+		"name": "Boost Card",
+		"method": "POST",
+		"url": "/clubs/boost",
+		"headers": {
+			"Content-Type": "application/json"
+		},
+		"body": "{\"cardId\": 123, \"action\": \"boost\"}"
+	},
+	{
+		"name": "Get User Info",
+		"method": "GET",
+		"url": "https://animestars.org/user.php",
+		"headers": {},
+		"body": ""
+	},
+	{
+		"name": "Trade Request",
+		"method": "POST",
+		"url": "/trade/create",
+		"headers": {
+			"Content-Type": "application/json"
+		},
+		"body": "{\"targetUserId\": 456, \"cardIds\": [123, 456]}"
+	}
+]

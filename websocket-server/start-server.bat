@@ -1,0 +1,9 @@
+@echo off
+echo Starting Wholumi WebSocket Server...
+cd /d "%~dp0"
+if not exist node_modules (
+    echo Installing dependencies...
+    npm install
+)
+echo Starting server...
+npm start

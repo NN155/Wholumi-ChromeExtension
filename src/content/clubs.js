@@ -44,44 +44,20 @@ async function autoUpdatePageInfo() {
                 //console.log('[Wholumi] Boost request');
                 const cardId = boostBtn.getAttribute('data-card-id');
                 const clubId = boostBtn.getAttribute('data-club-id');
-                res = await SaveFetchService.fetch('/club_actions/', {
-                    method: 'GET',
-                    headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' },
-                    body: new URLSearchParams({
-                        action: 'boost',
-                        card_id: cardId,
-                        skip: 0,
-                        user_hash: dle_login_hash
-                    })
-                }).then(r => r.json());
+                res = await FetchService.boostClubCard(cardId, clubId);
                 badData = false;
                 delay = boostDelay;
             } else if (refreshBtn && switcherUpdatePage.checked) {
                 //console.log('[Wholumi] Refresh request');
                 const cardId = refreshBtn.getAttribute('data-card-id');
                 const clubId = refreshBtn.getAttribute('data-club-id');
-                res = await SaveFetchService.fetch('/club_refresh/', {
-                    method: 'GET',
-                    headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' },
-                    body: new URLSearchParams({
-                        action: 'boost_refresh',
-                        card_id: cardId,
-                        user_hash: dle_login_hash
-                    })
-                }).then(r => r.json());
+                res = await FetchService.refreshClubCard(cardId, clubId);
                 badData = false;
                 delay = updateDelay;
             } else if (replaceBtn) {
                 //console.log('[Wholumi] Replace request');
                 const clubId = replaceBtn.getAttribute('data-club-id');
-                res = await SaveFetchService.fetch('/club_skip/', {
-                    method: 'GET',
-                    headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' },
-                    body: new URLSearchParams({
-                        action: 'boost_change',
-                        user_hash: dle_login_hash
-                    })
-                }).then(r => r.json());
+                res = await FetchService.replaceClubCard(clubId);
                 badData = false;
                 delay = replaceDelay;
             } else {
@@ -160,7 +136,7 @@ class BoostCard {
             const event = new CustomEvent('boost-card', { detail: { cardId: this.cardId, clubId: this.clubId } });
             window.dispatchEvent(event);
             
-            const res = await FetchService.boostCard(this.cardId, this.clubId)
+            const res = await FetchService.boostClubCard(this.cardId, this.clubId)
             return await this._responceController(res)
         }
     }
@@ -308,6 +284,37 @@ const switcherAutoBoost = new Switcher(
 
 const boostCard = new BoostCard();
 init();
+
+// WebSocket Integration
+let wsIntegrated = false;
+function integrateWebSocket() {
+    if (wsIntegrated || !window.WholiumiWebSocket) return;
+    
+    wsIntegrated = true;
+    console.log('[Wholumi Clubs] Integrating with WebSocket');
+    
+    // Join boost room
+    window.WholiumiWebSocket.joinRoom('boost');
+    
+    // Listen for boost events from other tabs
+    window.WholiumiWebSocket.on('room_broadcast_boost', (message) => {
+        const data = message.data;
+        if (data.action === 'boost_success' && data.page !== 'clubs') {
+            // Update boost count from other tabs
+            console.log('[Wholumi Clubs] Boost success from another tab');
+        }
+    });
+}
+
+// Try to integrate immediately if WebSocket is ready
+if (window.WholiumiWebSocket) {
+    integrateWebSocket();
+} else {
+    // Wait for WebSocket to be ready
+    window.addEventListener('wholumi-websocket-ready', () => {
+        integrateWebSocket();
+    });
+}
 
 window.addEventListener('config-updated', async (event) => {
     switch (event.detail.key) {
