@@ -14,12 +14,8 @@ class InventoryUrlService {
      * Get inventory URL
      * @returns {string} - Inventory URL
      */
-    inventory(url = null) {
-        if (url) {
-            return UrlService.buildUrl(url, { rank: this.rank });
-        } else {
-            return UrlService.buildUrl(`/user/cards/`, { rank: this.rank, name: this.user.username });
-        }
+    inventory() {
+        return UrlService.buildUrl(`/user/cards/`, { rank: this.rank, name: this.user.username });
     }
     
     /**
